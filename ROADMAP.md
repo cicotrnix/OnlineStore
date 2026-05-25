@@ -276,8 +276,17 @@ Plugin `online-store-toolkit` con:
 
 ## 10. Próximo paso inmediato
 
-Brainstorming detallado de **Fase 0 — Fundación**: monorepo, design system base, `store.config.ts`, auth, DB, CI/CD, observabilidad. Al cerrarse, se escribe el spec `docs/specs/2026-XX-XX-fase-0-fundacion.md` y se pasa a `writing-plans`.
+Fase 0 con código completo (15 commits locales, 24/24 tests verdes). Pendiente para cerrar 100%:
+
+1. `git push -u origin main` para subir los commits a GitHub.
+2. Provisión del VPS en Hetzner (CX22 Ashburn) e instalación de Coolify, siguiendo `docs/plans/2026-05-25-fase-0-fundacion-plan.md` Parte 9 (tasks 29-35).
+3. Conectar el repo a Coolify y verificar primer deploy.
+4. Configurar dominio y SSL.
+5. Activar backups automáticos de Postgres.
+6. Tag de release: `v0.1.0`.
+
+Una vez cerrado: brainstorming de **Fase 1 — Commerce core B2B** en sesión Cowork.
 
 ---
 
-*Última actualización: 2026-05-25 · Próxima revisión: al cerrar Fase 0*
+*Última actualización: 2026-05-25 fin de día · Próxima revisión: al provisionar VPS y cerrar Fase 0*

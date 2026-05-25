@@ -58,7 +58,7 @@ Plan paso a paso en `docs/plans/2026-05-25-fase-0-fundacion-plan.md` — 40 task
 - `rm -f _tmp_* next.config.ts.bak` (artefactos de la sesión Cowork por permisos de sandbox).
 - `pnpm install` para instalar deps.
 - `cp .env.example .env.local` y rellenar con valores reales.
-- Configurar git remote: `git remote add origin https://github.com/pipowerweb/OnlineStore.git`.
+- Configurar git remote: `git remote add origin git@github.com:cicotrnix/OnlineStore.git`.
 
 ## Decisiones de stack (no abrir sin ADR nuevo)
 

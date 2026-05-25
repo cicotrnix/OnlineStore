@@ -11,7 +11,7 @@ Next.js 14 · TypeScript · Tailwind + shadcn/ui · Auth.js v5 · Prisma · Post
 Prerrequisitos: Node 20+, pnpm 9+, Docker Desktop, Git.
 
 ```bash
-git clone https://github.com/pipowerweb/OnlineStore.git
+git clone git@github.com:cicotrnix/OnlineStore.git
 cd OnlineStore
 pnpm install
 cp .env.example .env.local
