@@ -40,9 +40,7 @@ describe('storeConfigSchema', () => {
   })
 
   it('rejects invalid currency code', () => {
-    expect(() =>
-      storeConfigSchema.parse({ ...validStore, currency: { base: 'XYZ' } })
-    ).toThrow()
+    expect(() => storeConfigSchema.parse({ ...validStore, currency: { base: 'XYZ' } })).toThrow()
   })
 
   it('rejects unsupported defaultView', () => {
@@ -98,8 +96,6 @@ describe('themeConfigSchema', () => {
   })
 
   it('rejects unsupported density', () => {
-    expect(() =>
-      themeConfigSchema.parse({ ...validTheme, density: 'huge' })
-    ).toThrow()
+    expect(() => themeConfigSchema.parse({ ...validTheme, density: 'huge' })).toThrow()
   })
 })
