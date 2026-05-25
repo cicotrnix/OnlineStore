@@ -264,7 +264,7 @@ Plugin `online-store-toolkit` con:
 
 | Fase | Estado | Spec | Plan | Implementación |
 |------|--------|------|------|----------------|
-| 0 — Fundación | En diseño | (pendiente) | — | — |
+| 0 — Fundación | Completada (código) · pendiente provisión VPS | [`docs/specs/2026-05-25-fase-0-fundacion.md`](docs/specs/2026-05-25-fase-0-fundacion.md) | [`docs/plans/2026-05-25-fase-0-fundacion-plan.md`](docs/plans/2026-05-25-fase-0-fundacion-plan.md) | ✅ código · ⏳ VPS |
 | 1 — Commerce core | Pendiente | — | — | — |
 | 2 — Especialización B2B | Pendiente | — | — | — |
 | 3 — Búsqueda | Pendiente | — | — | — |
