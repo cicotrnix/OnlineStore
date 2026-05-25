@@ -15,7 +15,9 @@ git clone https://github.com/pipowerweb/OnlineStore.git
 cd OnlineStore
 pnpm install
 cp .env.example .env.local
-# Editar .env.local con tus credenciales
+# Editar .env.local — generar NEXTAUTH_SECRET con: openssl rand -base64 32
+docker compose up -d        # Postgres + pgvector en :5435
+pnpm exec prisma migrate dev
 pnpm dev
 ```
 
