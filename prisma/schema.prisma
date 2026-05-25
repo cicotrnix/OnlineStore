@@ -22,7 +22,7 @@ model User {
 
   accounts    Account[]
   sessions    Session[]
-  memberships Member[]
+  memberships OrganizationMember[]
 }
 
 model Account {
@@ -31,18 +31,17 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@index([userId])
 }
 
 model Session {
@@ -52,8 +51,6 @@ model Session {
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model VerificationToken {
@@ -66,10 +63,11 @@ model VerificationToken {
 
 // ===== B2B =====
 
-enum MemberRole {
+enum OrgRole {
   OWNER
   ADMIN
   BUYER
+  VIEWER
 }
 
 model Organization {
@@ -79,33 +77,33 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members     Member[]
+  members     OrganizationMember[]
   invitations Invitation[]
 }
 
-model Member {
-  id             String     @id @default(cuid())
-  userId         String
+model OrganizationMember {
+  id             String   @id @default(cuid())
   organizationId String
-  role           MemberRole @default(BUYER)
-  createdAt      DateTime   @default(now())
+  userId         String
+  role           OrgRole  @default(BUYER)
+  createdAt      DateTime @default(now())
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, organizationId])
-  @@index([organizationId])
+  @@unique([organizationId, userId])
+  @@index([userId])
 }
 
 model Invitation {
-  id             String     @id @default(cuid())
+  id             String    @id @default(cuid())
   organizationId String
   email          String
-  role           MemberRole @default(BUYER)
-  token          String     @unique
+  role           OrgRole   @default(BUYER)
+  token          String    @unique
   expiresAt      DateTime
   acceptedAt     DateTime?
-  createdAt      DateTime   @default(now())
+  createdAt      DateTime  @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
