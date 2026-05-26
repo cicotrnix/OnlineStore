@@ -61,6 +61,7 @@ export default async function AdminInvoicesPage() {
                       <input
                         name="paidNote"
                         placeholder="Referencia"
+                        aria-label={`Referencia de pago para factura ${inv.number}`}
                         required
                         className="w-32 rounded border border-gray-200 px-2 py-1 text-xs"
                       />

@@ -84,6 +84,7 @@ export default async function AdminQuoteDetailPage({ params }: Props) {
                       <td className="py-2 text-right">
                         <Input
                           name={`price[${l.id}]`}
+                          aria-label={`Precio cotizado para ${l.sku}`}
                           type="number"
                           step="0.01"
                           min="0.01"

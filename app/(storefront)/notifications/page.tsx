@@ -25,7 +25,7 @@ export default async function NotificationsPage({ searchParams }: Props) {
           </Button>
         </form>
       </div>
-      <nav className="mt-3 flex gap-2 text-xs">
+      <nav aria-label="Filtros de notificaciones" className="mt-3 flex gap-2 text-xs">
         <Link
           href="/notifications"
           className={`rounded-full border px-3 py-1 ${unread !== '1' ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200'}`}
