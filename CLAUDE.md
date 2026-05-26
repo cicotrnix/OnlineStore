@@ -24,11 +24,7 @@ Antes de tocar código, leer en este orden:
 
 ## Estado actual del proyecto
 
-**Fase 0 cerrada (v0.1.0). Fase 1 — Commerce core B2B · En implementación.**
-Spec: `docs/specs/2026-05-26-fase-1-commerce-core.md` (rev. 2 APPROVED).
-Plan: `docs/plans/2026-05-26-fase-1-commerce-core-plan.md` (33 tasks).
-
-Branch de trabajo: `feature/fase-1-commerce-core` (worktree). Merge a `main` sólo al cierre con tag `v1.0.0`.
+**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0, 2026-05-26).**
 
 **Fase 0 entregado (v0.1.0, 2026-05-25):**
 - Next.js 14 + TypeScript estricto + Tailwind + Biome + Vitest + Playwright.
@@ -40,6 +36,20 @@ Branch de trabajo: `feature/fase-1-commerce-core` (worktree). Merge a `main` só
 - CI GitHub Actions (lint + typecheck + tests + build + e2e).
 - 4 runbooks + 3 ADRs (0001-0003).
 - Desplegado en Hetzner VPS via Coolify (sslip.io).
+
+**Fase 1 entregado (v1.0.0, 2026-05-26):**
+- Schema extendido: `OrganizationAddress`, `Category`, `Product`, `CustomerPrice`, `Cart`/`CartItem`, `Order`/`OrderLine`, `ImpersonationLog`, `Session.{activeOrgId,impersonatingOrgId,lastSeenAt}`, `User.{isPlatformAdmin,preferredCatalogView}`.
+- 5 módulos nuevos con TDD: `catalog`, `pricing` (con `validFrom/validUntil`), `cart` (snapshot pricing), `orders` (Postgres sequence per year + advisory lock, FOR UPDATE + atomic stock + cart clear), `checkout` (review + confirm con issue detection).
+- `lib/money.ts` con helpers Decimal(12,2) + ADR 0008.
+- Storefront: `/catalog` (toggle cards/lista persistente), `/products/[slug]`, `/cart`, `/checkout` wizard 4 pasos, `/orders`, `/orders/[id]`, `/select-org`.
+- Admin: `/admin/products`, `/admin/categories`, `/admin/orders` (transiciones + cancel restaura stock), `/admin/customers`, `/admin/customers/[id]/prices`, impersonation entry.
+- Auth middleware: `lastSeenAt` + auto-expira impersonation tras 30min. Server actions `switchActiveOrg` (limpia carrito) + `impersonationStart/Stop`.
+- tRPC v10 server-side (catalog, pricing, orders) + `/api/trpc/[trpc]`. RSC + server actions como patrón principal (ADR 0007).
+- Vitest: 71/71. Playwright E2E: 8/8. Coverage en módulos críticos > 80%.
+- ADRs 0004-0009 (product model, pricing, impersonation, tRPC/server-actions coexistence, money, orderNumber).
+- Runbooks: order-state-management, customer-pricing, impersonation.
+- Seed `prisma/seed.ts`: admin@example.com + Acme Wholesale org + 6 productos + 2 CustomerPrice overrides.
+- CI extendido: e2e job con Postgres+seed.
 
 ## Decisiones de stack (no abrir sin ADR nuevo)
 

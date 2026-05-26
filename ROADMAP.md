@@ -265,7 +265,7 @@ Plugin `online-store-toolkit` con:
 | Fase | Estado | Spec | Plan | Implementación |
 |------|--------|------|------|----------------|
 | 0 — Fundación | ✅ Cerrada (desplegada en prod) | [`docs/specs/2026-05-25-fase-0-fundacion.md`](docs/specs/2026-05-25-fase-0-fundacion.md) | [`docs/plans/2026-05-25-fase-0-fundacion-plan.md`](docs/plans/2026-05-25-fase-0-fundacion-plan.md) | App viva en sslip.io · Coolify + Postgres + pgvector en Hetzner |
-| 1 — Commerce core | Pendiente | — | — | — |
+| 1 — Commerce core | ✅ Cerrada (v1.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-1-commerce-core.md`](docs/specs/2026-05-26-fase-1-commerce-core.md) | [`docs/plans/2026-05-26-fase-1-commerce-core-plan.md`](docs/plans/2026-05-26-fase-1-commerce-core-plan.md) | Catalog, pricing, cart, checkout, orders, impersonation desplegados |
 | 2 — Especialización B2B | Pendiente | — | — | — |
 | 3 — Búsqueda | Pendiente | — | — | — |
 | 4 — IA aplicada | Pendiente | — | — | — |
