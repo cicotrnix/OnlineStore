@@ -9,6 +9,8 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     globals: true,
     exclude: ['node_modules', '.next', 'tests/e2e/**'],
+    // Modules share one Postgres DB; run files serially to avoid cross-test races.
+    fileParallelism: false,
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules', '.next', 'tests', '**/*.config.*'],
