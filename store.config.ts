@@ -20,6 +20,7 @@ export default defineStoreConfig({
     credit: false,
     privateCatalogs: false,
     approvals: false,
+    volumeDiscounts: false,
     semanticSearch: false,
     aiChat: false,
   },

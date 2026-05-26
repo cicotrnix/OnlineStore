@@ -9,6 +9,7 @@ async function seed() {
   await prisma.cartItem.deleteMany()
   await prisma.cart.deleteMany()
   await prisma.customerPrice.deleteMany()
+  await prisma.order.deleteMany()
   await prisma.orderLine.deleteMany()
   await prisma.product.deleteMany()
   await prisma.category.deleteMany()

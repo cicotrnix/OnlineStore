@@ -4,6 +4,7 @@ import { catalogService } from './service'
 
 beforeEach(async () => {
   await prisma.cartItem.deleteMany()
+  await prisma.order.deleteMany()
   await prisma.orderLine.deleteMany()
   await prisma.customerPrice.deleteMany()
   await prisma.product.deleteMany()
