@@ -12,6 +12,9 @@ describe.skipIf(!runIntegration)('customersService (integration)', () => {
   beforeEach(async () => {
     await prisma.orderLine.deleteMany()
     await prisma.notification.deleteMany()
+    await prisma.quoteAuditLog.deleteMany()
+    await prisma.quoteLine.deleteMany()
+    await prisma.quote.deleteMany()
     await prisma.invoice.deleteMany()
     await prisma.approvalRequest.deleteMany()
     await prisma.order.deleteMany()
@@ -105,6 +108,9 @@ describe.skipIf(!runIntegration)('customersService.addresses', () => {
   beforeEach(async () => {
     await prisma.orderLine.deleteMany()
     await prisma.notification.deleteMany()
+    await prisma.quoteAuditLog.deleteMany()
+    await prisma.quoteLine.deleteMany()
+    await prisma.quote.deleteMany()
     await prisma.invoice.deleteMany()
     await prisma.approvalRequest.deleteMany()
     await prisma.order.deleteMany()
