@@ -11,6 +11,8 @@ async function createTestUser(email: string) {
 describe.skipIf(!runIntegration)('customersService (integration)', () => {
   beforeEach(async () => {
     await prisma.orderLine.deleteMany()
+    await prisma.notification.deleteMany()
+    await prisma.approvalRequest.deleteMany()
     await prisma.order.deleteMany()
     await prisma.cartItem.deleteMany()
     await prisma.cart.deleteMany()
@@ -100,6 +102,13 @@ describe.skipIf(!runIntegration)('customersService (integration)', () => {
 
 describe.skipIf(!runIntegration)('customersService.addresses', () => {
   beforeEach(async () => {
+    await prisma.orderLine.deleteMany()
+    await prisma.notification.deleteMany()
+    await prisma.approvalRequest.deleteMany()
+    await prisma.order.deleteMany()
+    await prisma.cartItem.deleteMany()
+    await prisma.cart.deleteMany()
+    await prisma.customerPrice.deleteMany()
     await prisma.organizationAddress.deleteMany()
     await prisma.invitation.deleteMany()
     await prisma.organizationMember.deleteMany()

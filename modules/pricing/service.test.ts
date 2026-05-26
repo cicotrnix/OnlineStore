@@ -6,6 +6,8 @@ import { pricingService } from './service'
 async function seed() {
   await prisma.customerPrice.deleteMany()
   await prisma.cartItem.deleteMany()
+  await prisma.notification.deleteMany()
+  await prisma.approvalRequest.deleteMany()
   await prisma.order.deleteMany()
   await prisma.orderLine.deleteMany()
   await prisma.product.deleteMany()
