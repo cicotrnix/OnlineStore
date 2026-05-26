@@ -19,9 +19,9 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   return next({ ctx: { ...ctx, session: ctx.session, user: ctx.session.user } })
 })
 
-export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (!ctx.user.isPlatformAdmin) throw new TRPCError({ code: 'FORBIDDEN' })
-  return next()
+export const adminProcedure = protectedProcedure.use((opts) => {
+  if (!opts.ctx.user.isPlatformAdmin) throw new TRPCError({ code: 'FORBIDDEN' })
+  return opts.next()
 })
 
 export function effectiveOrgId(ctx: Context): string | null {
