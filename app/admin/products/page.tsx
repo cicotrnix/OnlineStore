@@ -1,9 +1,12 @@
 import { createProductAction, toggleProductActiveAction } from '@/app/admin/_actions'
+import { toggleProductPrivateAction, upsertProductTierAction } from '@/app/admin/_actions-fase2'
 import { StockBadge } from '@/components/commerce/StockBadge'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { prisma } from '@/lib/db/client'
+import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
 import { catalogService } from '@/modules/catalog'
 import storeConfig from '@/store.config'
@@ -14,6 +17,22 @@ export default async function AdminProductsPage() {
     take: 100,
   })
   const categories = await catalogService.listCategories(false)
+  const showPrivate = isFeatureEnabled('privateCatalogs')
+  const showTiers = isFeatureEnabled('volumeDiscounts')
+  const allTiers = showTiers
+    ? await prisma.productPriceTier.findMany({ orderBy: [{ productId: 'asc' }, { minQty: 'asc' }] })
+    : []
+  const tiersByProduct = new Map<string, typeof allTiers>()
+  for (const t of allTiers) {
+    const arr = tiersByProduct.get(t.productId) ?? []
+    arr.push(t)
+    tiersByProduct.set(t.productId, arr)
+  }
+  const productPrivateMap = new Map<string, boolean>()
+  if (showPrivate) {
+    const rows = await prisma.product.findMany({ select: { id: true, isPrivate: true } })
+    for (const r of rows) productPrivateMap.set(r.id, r.isPrivate)
+  }
 
   return (
     <div className="space-y-8">
@@ -134,6 +153,7 @@ export default async function AdminProductsPage() {
                 <th className="text-left px-5 py-3 font-medium">Precio</th>
                 <th className="text-left px-5 py-3 font-medium">Stock</th>
                 <th className="text-left px-5 py-3 font-medium">Estado</th>
+                {showPrivate && <th className="text-left px-5 py-3 font-medium">Privado</th>}
                 <th className="text-right px-5 py-3 font-medium">Acción</th>
               </tr>
             </thead>
@@ -156,6 +176,21 @@ export default async function AdminProductsPage() {
                       <Badge variant="default">Inactivo</Badge>
                     )}
                   </td>
+                  {showPrivate && (
+                    <td className="px-5 py-3">
+                      <form action={toggleProductPrivateAction}>
+                        <input type="hidden" name="id" value={p.id} />
+                        <input
+                          type="hidden"
+                          name="isPrivate"
+                          value={productPrivateMap.get(p.id) ? 'true' : 'false'}
+                        />
+                        <Button type="submit" variant="ghost" size="sm">
+                          {productPrivateMap.get(p.id) ? 'Sí' : 'No'}
+                        </Button>
+                      </form>
+                    </td>
+                  )}
                   <td className="px-5 py-3 text-right">
                     <form action={toggleProductActiveAction}>
                       <input type="hidden" name="id" value={p.id} />
@@ -171,6 +206,90 @@ export default async function AdminProductsPage() {
           </table>
         </div>
       </Card>
+
+      {showTiers && (
+        <Card>
+          <CardHeader>
+            <h2 className="font-medium">Descuentos por volumen</h2>
+            <p className="mt-1 text-xs text-gray-500">
+              Define tramos por cantidad. El precio del tramo aplica cuando la cantidad pedida es ≥
+              minQty.
+            </p>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            {products.map((p) => {
+              const tiers = tiersByProduct.get(p.id) ?? []
+              return (
+                <div key={p.id} className="rounded-lg border border-gray-100 p-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium">{p.name}</div>
+                      <div className="text-xs text-gray-500 font-mono">{p.sku}</div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Base {formatMoney(p.basePrice, storeConfig.currency.base)}
+                    </div>
+                  </div>
+                  {tiers.length > 0 && (
+                    <ul className="mt-2 text-xs text-gray-600 space-y-1">
+                      {tiers.map((t) => (
+                        <li key={t.id} className="flex justify-between">
+                          <span>≥ {t.minQty} uds</span>
+                          <span className="tabular-nums">
+                            {formatMoney(t.unitPrice, storeConfig.currency.base)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <form
+                    action={upsertProductTierAction}
+                    className="mt-2 flex flex-wrap items-end gap-2"
+                  >
+                    <input type="hidden" name="productId" value={p.id} />
+                    <div>
+                      <label
+                        htmlFor={`minQty-${p.id}`}
+                        className="text-[10px] uppercase tracking-wide text-gray-500"
+                      >
+                        Cantidad mínima
+                      </label>
+                      <Input
+                        id={`minQty-${p.id}`}
+                        name="minQty"
+                        type="number"
+                        min="2"
+                        required
+                        className="mt-1 w-32"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`unitPrice-${p.id}`}
+                        className="text-[10px] uppercase tracking-wide text-gray-500"
+                      >
+                        Precio unitario
+                      </label>
+                      <Input
+                        id={`unitPrice-${p.id}`}
+                        name="unitPrice"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        required
+                        className="mt-1 w-32"
+                      />
+                    </div>
+                    <Button type="submit" size="sm" variant="secondary">
+                      Guardar tramo
+                    </Button>
+                  </form>
+                </div>
+              )
+            })}
+          </CardBody>
+        </Card>
+      )}
     </div>
   )
 }

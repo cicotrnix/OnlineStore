@@ -9,6 +9,9 @@ const navItems = [
   { href: '/admin/products', label: 'Productos' },
   { href: '/admin/categories', label: 'Categorías' },
   { href: '/admin/orders', label: 'Órdenes' },
+  { href: '/admin/quotes', label: 'Cotizaciones' },
+  { href: '/admin/invoices', label: 'Facturas' },
+  { href: '/admin/approvals', label: 'Aprobaciones' },
   { href: '/admin/customers', label: 'Clientes' },
   { href: '/admin/settings', label: 'Settings' },
 ]
