@@ -266,7 +266,7 @@ Plugin `online-store-toolkit` con:
 |------|--------|------|------|----------------|
 | 0 — Fundación | ✅ Cerrada (desplegada en prod) | [`docs/specs/2026-05-25-fase-0-fundacion.md`](docs/specs/2026-05-25-fase-0-fundacion.md) | [`docs/plans/2026-05-25-fase-0-fundacion-plan.md`](docs/plans/2026-05-25-fase-0-fundacion-plan.md) | App viva en sslip.io · Coolify + Postgres + pgvector en Hetzner |
 | 1 — Commerce core | ✅ Cerrada (v1.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-1-commerce-core.md`](docs/specs/2026-05-26-fase-1-commerce-core.md) | [`docs/plans/2026-05-26-fase-1-commerce-core-plan.md`](docs/plans/2026-05-26-fase-1-commerce-core-plan.md) | Catalog, pricing, cart, checkout, orders, impersonation desplegados |
-| 2 — Especialización B2B | Pendiente | — | — | — |
+| 2 — Especialización B2B | ✅ Cerrada (v2.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-2-especializacion-b2b.md`](docs/specs/2026-05-26-fase-2-especializacion-b2b.md) | [`docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md`](docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md) | RFQ, crédito, aprobaciones, catálogos privados, descuentos por volumen, notifications |
 | 3 — Búsqueda | Pendiente | — | — | — |
 | 4 — IA aplicada | Pendiente | — | — | — |
 | 5 — Integraciones | Pendiente | — | — | — |
@@ -276,17 +276,10 @@ Plugin `online-store-toolkit` con:
 
 ## 10. Próximo paso inmediato
 
-Fase 0 con código completo (15 commits locales, 24/24 tests verdes). Pendiente para cerrar 100%:
+Fase 2 cerrada (v2.0.0, 2026-05-26): 119 unit tests verdes, 7 e2e Fase 2 verdes, lint + typecheck + build limpios. Cambios mergeados a `main`, tag `v2.0.0` publicado, Coolify deploy en verde.
 
-1. `git push -u origin main` para subir los commits a GitHub.
-2. Provisión del VPS en Hetzner (CX22 Ashburn) e instalación de Coolify, siguiendo `docs/plans/2026-05-25-fase-0-fundacion-plan.md` Parte 9 (tasks 29-35).
-3. Conectar el repo a Coolify y verificar primer deploy.
-4. Configurar dominio y SSL.
-5. Activar backups automáticos de Postgres.
-6. Tag de release: `v0.1.0`.
-
-Una vez cerrado: brainstorming de **Fase 1 — Commerce core B2B** en sesión Cowork.
+Próximo: brainstorming de **Fase 3 — Búsqueda semántica** en sesión Cowork (embeddings con pgvector, filtros, sinónimos, ranking por similaridad).
 
 ---
 
-*Última actualización: 2026-05-25 fin de día · Próxima revisión: al provisionar VPS y cerrar Fase 0*
+*Última actualización: 2026-05-26 cierre Fase 2 · Próxima revisión: arranque Fase 3*
