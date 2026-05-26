@@ -1,6 +1,3 @@
-import type { Prisma, QuoteStatus } from '@prisma/client'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody } from '@/components/ui/Card'
 import { auth } from '@/lib/auth/config'
@@ -8,6 +5,9 @@ import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
 import storeConfig from '@/store.config'
+import type { Prisma, QuoteStatus } from '@prisma/client'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 

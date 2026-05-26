@@ -1,9 +1,13 @@
 import { AddToCartButton } from '@/components/commerce/AddToCartButton'
+import { AddToQuoteButton } from '@/components/commerce/AddToQuoteButton'
 import { PriceTag } from '@/components/commerce/PriceTag'
+import { PriceTierTable } from '@/components/commerce/PriceTierTable'
 import { StockBadge } from '@/components/commerce/StockBadge'
+import { Badge } from '@/components/ui/Badge'
 import { auth } from '@/lib/auth/config'
+import { isFeatureEnabled } from '@/lib/features'
 import { catalogService } from '@/modules/catalog'
-import { pricingService } from '@/modules/pricing'
+import { listTiersForProduct, pricingService } from '@/modules/pricing'
 import storeConfig from '@/store.config'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -22,6 +26,9 @@ export default async function ProductPage({ params }: Props) {
   const isImpersonating = !!session?.impersonatingOrgId
   const customerPrice = orgId ? await pricingService.resolveForOrg(orgId, product.id) : null
   const showOverride = customerPrice && !customerPrice.equals(product.basePrice)
+  const tiers = isFeatureEnabled('volumeDiscounts') ? await listTiersForProduct(product.id) : []
+  const showRfq = isFeatureEnabled('rfq') && !!session?.user && !isImpersonating
+  const showPrivateBadge = isFeatureEnabled('privateCatalogs') && product.isPrivate
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 grid gap-10 md:grid-cols-2">
@@ -76,7 +83,22 @@ export default async function ProductPage({ params }: Props) {
                     : undefined
             }
           />
+          {showRfq && (
+            <div className="mt-3">
+              <AddToQuoteButton productId={product.id} />
+            </div>
+          )}
+          {showPrivateBadge && (
+            <div className="mt-3">
+              <Badge variant="info">Producto privado para tu organización</Badge>
+            </div>
+          )}
         </div>
+        {tiers.length > 0 && (
+          <div className="md:col-span-2">
+            <PriceTierTable tiers={tiers} currency={storeConfig.currency.base} />
+          </div>
+        )}
       </div>
     </div>
   )

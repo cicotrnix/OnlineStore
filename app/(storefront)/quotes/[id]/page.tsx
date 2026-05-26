@@ -113,10 +113,10 @@ export default async function QuoteDetailPage({ params }: Props) {
           <CardBody>
             <form action={acceptQuoteAction} className="grid gap-3 sm:grid-cols-2">
               <input type="hidden" name="quoteId" value={q.id} />
-              <div className="sm:col-span-2">
-                <label className="text-xs uppercase tracking-wide text-gray-500">
+              <fieldset className="sm:col-span-2">
+                <legend className="text-xs uppercase tracking-wide text-gray-500">
                   Método de pago
-                </label>
+                </legend>
                 <div className="mt-1 flex gap-3 text-sm">
                   <label className="flex items-center gap-2">
                     <input type="radio" name="paymentMethod" value="PREPAID" defaultChecked />
@@ -129,7 +129,7 @@ export default async function QuoteDetailPage({ params }: Props) {
                     </label>
                   )}
                 </div>
-              </div>
+              </fieldset>
               <div>
                 <label htmlFor="bill" className="text-xs uppercase tracking-wide text-gray-500">
                   Facturación
