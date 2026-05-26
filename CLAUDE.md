@@ -24,7 +24,7 @@ Antes de tocar código, leer en este orden:
 
 ## Estado actual del proyecto
 
-**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0, 2026-05-26).**
+**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0). Fase 2 cerrada (v2.0.0, 2026-05-26).**
 
 **Fase 0 entregado (v0.1.0, 2026-05-25):**
 - Next.js 14 + TypeScript estricto + Tailwind + Biome + Vitest + Playwright.
@@ -50,6 +50,17 @@ Antes de tocar código, leer en este orden:
 - Runbooks: order-state-management, customer-pricing, impersonation.
 - Seed `prisma/seed.ts`: admin@example.com + Acme Wholesale org + 6 productos + 2 CustomerPrice overrides.
 - CI extendido: e2e job con Postgres+seed.
+
+**Fase 2 entregado (v2.0.0, 2026-05-26):**
+- Schema extendido: `Quote`, `QuoteLine`, `QuoteAuditLog`, `Invoice`, `ApprovalRequest`, `Notification`, `OrganizationCatalogAccess`, `ProductPriceTier` + Org/User/Product/Category extensions (creditLimit, paymentTerms, approvalThreshold, isPrivate, etc.) + 8 nuevos enums.
+- Per-year Postgres sequences `quote_seq_YYYY`/`invoice_seq_YYYY` con advisory lock + auto-creación.
+- Módulos nuevos con TDD: `notifications` (dispatch + retry), `approvals` (request/decide con subscribe-registry), `accounts` (invoices + creditCheck), `quotes` (numbers + service + conversion + expire). Extensiones: `catalog.visibility`, `pricing.tiers`, `orders.approval-hook`.
+- Email: `react-email` v1 templates + Resend SDK v6 con noop fallback (sin RESEND_API_KEY no se rompe).
+- Feature flags activos: `rfq`, `credit`, `privateCatalogs`, `approvals`, `volumeDiscounts` (defaults ON en `store.config.ts`).
+- Storefront: `/quotes` (inbox + draft + detail), `/invoices`, `/approvals`, `/notifications` + `NotificationBadge` en header. Producto: tier table + RFQ button + private badge.
+- Admin: `/admin/quotes`, `/admin/invoices` (markPaid), `/admin/approvals` (read-only history), `/admin/customers/[id]/credit` (creditLimit + paymentTerms + threshold + catalog access). Productos: private toggle + per-product tier mgmt. Dashboard: widgets gated.
+- Vitest: 119/119 passing (+ 6 skipped). Playwright E2E: 7/7 fase2.spec.ts.
+- ADRs 0010-0014, 5 runbooks (quotes, approvals, credit, private-catalogs, notifications).
 
 ## Decisiones de stack (no abrir sin ADR nuevo)
 

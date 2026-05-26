@@ -11,3 +11,5 @@ export type {
   UpdateCategoryInput,
   UpdateProductInput,
 } from './schemas'
+export { filterForOrg, grantAccess, revokeAccess } from './visibility'
+export type { GrantAccessInput } from './visibility'

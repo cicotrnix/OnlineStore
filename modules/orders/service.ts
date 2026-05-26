@@ -153,6 +153,20 @@ export const ordersService = {
     })
   },
 
+  async restoreStock(orderId: string, tx?: import('@prisma/client').Prisma.TransactionClient) {
+    const client = tx ?? prisma
+    const order = await client.order.findUniqueOrThrow({
+      where: { id: orderId },
+      include: { lines: true },
+    })
+    for (const line of order.lines) {
+      await client.product.update({
+        where: { id: line.productId },
+        data: { stockQuantity: { increment: line.quantity } },
+      })
+    }
+  },
+
   async listForOrg(orgId: string) {
     return prisma.order.findMany({
       where: { organizationId: orgId },

@@ -1,3 +1,6 @@
 export { pricingService } from './service'
+export type { ResolvedPrice } from './service'
 export { setCustomerPriceSchema } from './schemas'
 export type { SetCustomerPriceInput } from './schemas'
+export { deleteTier, listTiersForProduct, upsertTier } from './tiers'
+export type { TierInput } from './tiers'

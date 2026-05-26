@@ -10,6 +10,7 @@ const validStore = {
     credit: false,
     privateCatalogs: false,
     approvals: false,
+    volumeDiscounts: false,
     semanticSearch: false,
     aiChat: false,
   },

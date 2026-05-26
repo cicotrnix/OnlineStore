@@ -31,7 +31,7 @@ export default async function CatalogPage({ searchParams }: Props) {
   const activeCat = params.category
     ? await catalogService.findCategoryBySlug(params.category)
     : null
-  const products = await catalogService.listProducts({
+  const products = await catalogService.listProductsVisible(orgId, {
     categoryId: activeCat?.id,
     activeOnly: true,
     take: 50,

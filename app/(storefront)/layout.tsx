@@ -1,6 +1,8 @@
 import { ImpersonationBanner } from '@/components/commerce/ImpersonationBanner'
+import { NotificationBadge } from '@/components/commerce/NotificationBadge'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
+import { isFeatureEnabled } from '@/lib/features'
 import { cartService } from '@/modules/cart'
 import storeConfig from '@/store.config'
 import Link from 'next/link'
@@ -26,6 +28,10 @@ export default async function StorefrontLayout({
     impersonatingName = org?.name ?? null
   }
 
+  const showQuotes = isFeatureEnabled('rfq') && Boolean(userId)
+  const showInvoices = isFeatureEnabled('credit') && Boolean(userId)
+  const showApprovals = isFeatureEnabled('approvals') && Boolean(userId)
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {impersonatingName && <ImpersonationBanner orgName={impersonatingName} />}
@@ -34,10 +40,15 @@ export default async function StorefrontLayout({
           <Link href="/" className="font-semibold tracking-tight">
             {storeConfig.identity.name}
           </Link>
-          <nav className="flex items-center gap-6 text-sm">
+          <nav className="flex items-center gap-5 text-sm">
             <Link href="/catalog" className="text-gray-700 hover:text-gray-900">
               Catálogo
             </Link>
+            {showQuotes && (
+              <Link href="/quotes" className="text-gray-700 hover:text-gray-900">
+                Cotizaciones
+              </Link>
+            )}
             <Link href="/cart" className="text-gray-700 hover:text-gray-900 relative">
               Carrito
               {cartCount > 0 && (
@@ -49,10 +60,23 @@ export default async function StorefrontLayout({
                 </span>
               )}
             </Link>
-            {userId ? (
+            {userId && (
               <Link href="/orders" className="text-gray-700 hover:text-gray-900">
                 Órdenes
               </Link>
+            )}
+            {showInvoices && (
+              <Link href="/invoices" className="text-gray-700 hover:text-gray-900">
+                Facturas
+              </Link>
+            )}
+            {showApprovals && (
+              <Link href="/approvals" className="text-gray-700 hover:text-gray-900">
+                Aprobaciones
+              </Link>
+            )}
+            {userId ? (
+              <NotificationBadge />
             ) : (
               <Link href="/sign-in" className="text-gray-700 hover:text-gray-900">
                 Entrar

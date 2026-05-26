@@ -20,6 +20,7 @@ export const storeConfigSchema = z.object({
     credit: z.boolean(),
     privateCatalogs: z.boolean(),
     approvals: z.boolean(),
+    volumeDiscounts: z.boolean(),
     semanticSearch: z.boolean(),
     aiChat: z.boolean(),
   }),
