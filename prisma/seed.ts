@@ -7,6 +7,14 @@ async function main() {
   console.log('seeding...')
 
   // Clean (order matters for FKs)
+  await prisma.notification.deleteMany()
+  await prisma.approvalRequest.deleteMany()
+  await prisma.invoice.deleteMany()
+  await prisma.quoteAuditLog.deleteMany()
+  await prisma.quoteLine.deleteMany()
+  await prisma.quote.deleteMany()
+  await prisma.productPriceTier.deleteMany()
+  await prisma.organizationCatalogAccess.deleteMany()
   await prisma.orderLine.deleteMany()
   await prisma.order.deleteMany()
   await prisma.cartItem.deleteMany()
@@ -45,6 +53,9 @@ async function main() {
     data: {
       name: 'Acme Wholesale',
       slug: 'acme-wholesale',
+      creditLimit: new Decimal('5000.00'),
+      paymentTerms: 'NET_30',
+      approvalThreshold: new Decimal('1000.00'),
       members: {
         create: [
           { userId: buyer1.id, role: 'OWNER' },
@@ -183,6 +194,163 @@ async function main() {
       productId: products[5]?.id ?? '',
       price: new Decimal('15.50'),
     },
+  })
+
+  // Fase 2: volume discount tiers
+  if (products[1]) {
+    await prisma.productPriceTier.createMany({
+      data: [
+        { productId: products[1].id, minQty: 12, unitPrice: new Decimal('20.00') },
+        { productId: products[1].id, minQty: 48, unitPrice: new Decimal('18.50') },
+      ],
+    })
+  }
+  if (products[4]) {
+    await prisma.productPriceTier.createMany({
+      data: [
+        { productId: products[4].id, minQty: 24, unitPrice: new Decimal('4.75') },
+        { productId: products[4].id, minQty: 120, unitPrice: new Decimal('4.25') },
+      ],
+    })
+  }
+
+  // Fase 2: private product (catalog access example)
+  if (products[2]) {
+    await prisma.product.update({
+      where: { id: products[2].id },
+      data: { isPrivate: true },
+    })
+    await prisma.organizationCatalogAccess.create({
+      data: {
+        organizationId: acme.id,
+        productId: products[2].id,
+        grantedById: admin.id,
+      },
+    })
+  }
+
+  // Fase 2: demo Quote (QUOTED, ready to accept)
+  const quote = await prisma.quote.create({
+    data: {
+      number: 'Q-2026-00001',
+      organizationId: acme.id,
+      requestedById: buyer1.id,
+      status: 'QUOTED',
+      submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      quotedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      quotedById: admin.id,
+      validUntil: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      currency: 'USD',
+      adminNotes: 'Confirmado stock para envío inmediato.',
+    },
+  })
+  if (products[0] && products[3]) {
+    await prisma.quoteLine.createMany({
+      data: [
+        {
+          quoteId: quote.id,
+          productId: products[0].id,
+          sku: products[0].sku,
+          name: products[0].name,
+          qty: 24,
+          unitPriceBase: products[0].basePrice,
+          unitPriceQuoted: new Decimal('11.50'),
+          lineTotal: new Decimal('276.00'),
+          order: 0,
+        },
+        {
+          quoteId: quote.id,
+          productId: products[3].id,
+          sku: products[3].sku,
+          name: products[3].name,
+          qty: 12,
+          unitPriceBase: products[3].basePrice,
+          unitPriceQuoted: new Decimal('9.00'),
+          lineTotal: new Decimal('108.00'),
+          order: 1,
+        },
+      ],
+    })
+    const subtotal = new Decimal('384.00')
+    await prisma.quote.update({
+      where: { id: quote.id },
+      data: { subtotal, total: subtotal },
+    })
+  }
+
+  // Fase 2: demo open invoice (requires a synthetic Order)
+  const acmeAddress = await prisma.organizationAddress.findFirst({
+    where: { organizationId: acme.id, isDefaultBilling: true },
+  })
+  if (!acmeAddress) throw new Error('Acme default address missing')
+  const demoOrder = await prisma.order.create({
+    data: {
+      orderNumber: 'ORD-DEMO-INV-001',
+      organizationId: acme.id,
+      placedByUserId: buyer1.id,
+      status: 'CONFIRMED',
+      paymentMethod: 'NET_TERMS',
+      billingAddressId: acmeAddress.id,
+      shippingAddressId: acmeAddress.id,
+      currency: 'USD',
+      subtotal: new Decimal('500.00'),
+      total: new Decimal('500.00'),
+      confirmedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+    },
+  })
+  const invoice = await prisma.invoice.create({
+    data: {
+      number: 'INV-2026-00001',
+      organizationId: acme.id,
+      orderId: demoOrder.id,
+      status: 'PENDING',
+      amount: new Decimal('500.00'),
+      currency: 'USD',
+      issuedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      dueDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
+    },
+  })
+  await prisma.organization.update({
+    where: { id: acme.id },
+    data: { creditUsed: new Decimal('500.00') },
+  })
+
+  // Fase 2: demo pending approval (above threshold $1000)
+  await prisma.approvalRequest.create({
+    data: {
+      subjectType: 'ORDER',
+      subjectId: demoOrder.id,
+      organizationId: acme.id,
+      requestedById: buyer1.id,
+      status: 'PENDING',
+      reason: 'Order total exceeds organization approval threshold',
+      threshold: new Decimal('1000.00'),
+      amount: new Decimal('1450.00'),
+    },
+  })
+
+  // Fase 2: demo notifications
+  await prisma.notification.createMany({
+    data: [
+      {
+        userId: buyer1.id,
+        type: 'QUOTE_QUOTED',
+        subjectType: 'QUOTE',
+        subjectId: quote.id,
+        title: 'Tu cotización está lista',
+        body: `${quote.number} fue cotizada por el equipo. Revísala y acepta.`,
+        link: `/quotes/${quote.id}`,
+      },
+      {
+        userId: buyer1.id,
+        type: 'INVOICE_DUE_SOON',
+        subjectType: 'INVOICE',
+        subjectId: invoice.id,
+        title: 'Factura próxima a vencer',
+        body: `${invoice.number} por $500.00 USD. Vence en 20 días.`,
+        link: `/invoices/${invoice.id}`,
+      },
+    ],
   })
 
   console.log('seed complete:')
