@@ -91,3 +91,54 @@ describe.skipIf(!runIntegration)('customersService (integration)', () => {
     ).rejects.toThrow(/expired/i)
   })
 })
+
+describe.skipIf(!runIntegration)('customersService.addresses', () => {
+  beforeEach(async () => {
+    await prisma.organizationAddress.deleteMany()
+    await prisma.invitation.deleteMany()
+    await prisma.organizationMember.deleteMany()
+    await prisma.organization.deleteMany()
+    await prisma.user.deleteMany()
+  })
+
+  it('creates address', async () => {
+    const user = await prisma.user.create({ data: { email: 'a@b.com' } })
+    const org = await customersService.createOrganization({
+      name: 'O Org',
+      slug: 'o-org',
+      ownerUserId: user.id,
+    })
+    const addr = await customersService.createAddress({
+      organizationId: org.id,
+      label: 'Bodega',
+      recipient: 'Acme Receiving',
+      line1: '123 Main',
+      city: 'Miami',
+      postalCode: '33101',
+      country: 'US',
+      isDefaultBilling: true,
+      isDefaultShipping: true,
+    })
+    expect(addr.id).toBeTruthy()
+  })
+
+  it('lists addresses for org', async () => {
+    const user = await prisma.user.create({ data: { email: 'b@c.com' } })
+    const org = await customersService.createOrganization({
+      name: 'O Org',
+      slug: 'o-org',
+      ownerUserId: user.id,
+    })
+    await customersService.createAddress({
+      organizationId: org.id,
+      label: 'A',
+      recipient: 'X',
+      line1: 'L',
+      city: 'C',
+      postalCode: 'PP',
+      country: 'US',
+    })
+    const list = await customersService.listAddresses(org.id)
+    expect(list).toHaveLength(1)
+  })
+})
