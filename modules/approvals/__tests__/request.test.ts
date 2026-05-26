@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/client'
+import { cleanDb } from '@/tests/helpers/cleanDb'
 import { Decimal } from '@prisma/client/runtime/library'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { request } from '../service'
@@ -7,16 +8,7 @@ vi.mock('@/lib/email/resend', () => ({
   sendEmail: vi.fn().mockResolvedValue({ id: 'mock' }),
 }))
 
-beforeEach(async () => {
-  await prisma.notification.deleteMany()
-  await prisma.approvalRequest.deleteMany()
-  await prisma.organizationMember.deleteMany()
-  await prisma.invitation.deleteMany()
-  await prisma.organization.deleteMany()
-  await prisma.session.deleteMany()
-  await prisma.account.deleteMany()
-  await prisma.user.deleteMany()
-})
+beforeEach(cleanDb)
 
 describe('approvals.request', () => {
   it('returns null if org has no threshold', async () => {

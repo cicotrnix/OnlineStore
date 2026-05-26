@@ -1,0 +1,31 @@
+import { prisma } from '@/lib/db/client'
+
+/**
+ * Wipes all mutable data from the test DB in FK-safe order. Use in beforeEach
+ * for any integration test that depends on a clean slate. Idempotent.
+ */
+export async function cleanDb(): Promise<void> {
+  await prisma.notification.deleteMany()
+  await prisma.approvalRequest.deleteMany()
+  await prisma.invoice.deleteMany()
+  await prisma.orderLine.deleteMany()
+  await prisma.order.deleteMany()
+  await prisma.cartItem.deleteMany()
+  await prisma.cart.deleteMany()
+  await prisma.customerPrice.deleteMany()
+  await prisma.productPriceTier.deleteMany()
+  await prisma.organizationCatalogAccess.deleteMany()
+  await prisma.quoteAuditLog.deleteMany()
+  await prisma.quoteLine.deleteMany()
+  await prisma.quote.deleteMany()
+  await prisma.impersonationLog.deleteMany()
+  await prisma.organizationAddress.deleteMany()
+  await prisma.product.deleteMany()
+  await prisma.category.deleteMany()
+  await prisma.organizationMember.deleteMany()
+  await prisma.invitation.deleteMany()
+  await prisma.organization.deleteMany()
+  await prisma.session.deleteMany()
+  await prisma.account.deleteMany()
+  await prisma.user.deleteMany()
+}

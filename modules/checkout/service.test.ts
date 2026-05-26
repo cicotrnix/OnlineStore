@@ -10,6 +10,7 @@ import { checkoutService } from './service'
 async function seed() {
   await prisma.orderLine.deleteMany()
   await prisma.notification.deleteMany()
+  await prisma.invoice.deleteMany()
   await prisma.approvalRequest.deleteMany()
   await prisma.order.deleteMany()
   await prisma.cartItem.deleteMany()

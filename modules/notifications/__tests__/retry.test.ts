@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/client'
+import { cleanDb } from '@/tests/helpers/cleanDb'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { retryFailedEmails } from '../service'
 
@@ -6,12 +7,7 @@ vi.mock('@/lib/email/resend', () => ({
   sendEmail: vi.fn().mockResolvedValue({ id: 'email-id-mock' }),
 }))
 
-beforeEach(async () => {
-  await prisma.notification.deleteMany()
-  await prisma.session.deleteMany()
-  await prisma.account.deleteMany()
-  await prisma.user.deleteMany()
-})
+beforeEach(cleanDb)
 
 describe('notifications.retryFailedEmails', () => {
   it('retries emails with emailSentAt null and retryCount < 5', async () => {

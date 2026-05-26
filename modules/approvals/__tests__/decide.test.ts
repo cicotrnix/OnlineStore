@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/client'
 import { ApprovalAlreadyDecidedError } from '@/lib/errors'
+import { cleanDb } from '@/tests/helpers/cleanDb'
 import { Decimal } from '@prisma/client/runtime/library'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { decide, request } from '../service'
@@ -8,16 +9,7 @@ vi.mock('@/lib/email/resend', () => ({
   sendEmail: vi.fn().mockResolvedValue({ id: 'mock' }),
 }))
 
-beforeEach(async () => {
-  await prisma.notification.deleteMany()
-  await prisma.approvalRequest.deleteMany()
-  await prisma.organizationMember.deleteMany()
-  await prisma.invitation.deleteMany()
-  await prisma.organization.deleteMany()
-  await prisma.session.deleteMany()
-  await prisma.account.deleteMany()
-  await prisma.user.deleteMany()
-})
+beforeEach(cleanDb)
 
 async function makeOrgWithApproval(slug: string) {
   const org = await prisma.organization.create({
@@ -86,6 +78,7 @@ describe('approvals.decide', () => {
     })
 
     await prisma.notification.deleteMany()
+    await prisma.invoice.deleteMany()
 
     await decide({
       requestId: req?.id ?? '',
