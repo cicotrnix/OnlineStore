@@ -1,6 +1,12 @@
 import { randomBytes } from 'node:crypto'
 import { customersRepository } from './repository'
-import { type OrgRole, createOrganizationSchema, inviteMemberSchema } from './schemas'
+import {
+  type CreateAddressInput,
+  type OrgRole,
+  createAddressSchema,
+  createOrganizationSchema,
+  inviteMemberSchema,
+} from './schemas'
 
 const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -40,5 +46,26 @@ export const customersService = {
 
   async listForUser(userId: string) {
     return customersRepository.findOrganizationsForUser(userId)
+  },
+
+  async createAddress(input: CreateAddressInput) {
+    const parsed = createAddressSchema.parse(input)
+    return customersRepository.createAddress(parsed)
+  },
+
+  async listAddresses(orgId: string) {
+    return customersRepository.listAddresses(orgId)
+  },
+
+  async findAddressById(id: string) {
+    return customersRepository.findAddressById(id)
+  },
+
+  async findDefaultBilling(orgId: string) {
+    return customersRepository.findDefaultBilling(orgId)
+  },
+
+  async findDefaultShipping(orgId: string) {
+    return customersRepository.findDefaultShipping(orgId)
   },
 }

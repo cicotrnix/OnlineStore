@@ -22,6 +22,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { isPlatformAdmin: true },
+        })
+        session.user.isPlatformAdmin = dbUser?.isPlatformAdmin ?? false
+
+        const sess = await prisma.session.findFirst({
+          where: { userId: user.id },
+          orderBy: { expires: 'desc' },
+          select: { activeOrgId: true, impersonatingOrgId: true },
+        })
+        session.activeOrgId = sess?.activeOrgId ?? null
+        session.impersonatingOrgId = sess?.impersonatingOrgId ?? null
       }
       return session
     },

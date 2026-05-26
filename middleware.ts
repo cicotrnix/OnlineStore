@@ -1,14 +1,23 @@
 import { auth } from '@/lib/auth'
+import { maintainSession } from '@/lib/auth/middleware'
 import { NextResponse } from 'next/server'
 
-export default auth((req) => {
+export default auth(async (req) => {
+  await maintainSession(req)
+
   const isAdmin = req.nextUrl.pathname.startsWith('/admin')
   if (isAdmin && !req.auth) {
-    const url = new URL('/sign-in', req.url)
-    return NextResponse.redirect(url)
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 })
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/account/:path*',
+    '/cart',
+    '/checkout/:path*',
+    '/catalog/:path*',
+    '/products/:path*',
+  ],
 }

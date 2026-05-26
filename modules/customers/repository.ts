@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/client'
+import type { Prisma } from '@prisma/client'
 import type { OrgRole } from './schemas'
 
 export const customersRepository = {
@@ -49,6 +50,33 @@ export const customersRepository = {
         },
       })
       return invitation
+    })
+  },
+
+  async createAddress(data: Prisma.OrganizationAddressUncheckedCreateInput) {
+    return prisma.organizationAddress.create({ data })
+  },
+
+  async listAddresses(orgId: string) {
+    return prisma.organizationAddress.findMany({
+      where: { organizationId: orgId },
+      orderBy: { createdAt: 'asc' },
+    })
+  },
+
+  async findAddressById(id: string) {
+    return prisma.organizationAddress.findUnique({ where: { id } })
+  },
+
+  async findDefaultBilling(orgId: string) {
+    return prisma.organizationAddress.findFirst({
+      where: { organizationId: orgId, isDefaultBilling: true },
+    })
+  },
+
+  async findDefaultShipping(orgId: string) {
+    return prisma.organizationAddress.findFirst({
+      where: { organizationId: orgId, isDefaultShipping: true },
     })
   },
 }
