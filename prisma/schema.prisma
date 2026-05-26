@@ -11,18 +11,29 @@ datasource db {
 
 // ===== Auth.js =====
 
-model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  emailVerified DateTime?
-  name          String?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+enum CatalogView {
+  CARDS
+  LIST
+}
 
-  accounts    Account[]
-  sessions    Session[]
-  memberships OrganizationMember[]
+model User {
+  id                   String      @id @default(cuid())
+  email                String      @unique
+  emailVerified        DateTime?
+  name                 String?
+  image                String?
+  isPlatformAdmin      Boolean     @default(false)
+  preferredCatalogView CatalogView @default(CARDS)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  accounts          Account[]
+  sessions          Session[]
+  memberships       OrganizationMember[]
+  cart              Cart?
+  placedOrders      Order[]              @relation("OrderPlacedBy")
+  cancelledOrders   Order[]              @relation("OrderCancelledBy")
+  impersonationLogs ImpersonationLog[]   @relation("ImpersonationAdmin")
 }
 
 model Account {
@@ -45,12 +56,21 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
+  id                 String   @id @default(cuid())
+  sessionToken       String   @unique
+  userId             String
+  expires            DateTime
+  activeOrgId        String?
+  impersonatingOrgId String?
+  lastSeenAt         DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrg        Organization? @relation("SessionActiveOrg", fields: [activeOrgId], references: [id], onDelete: SetNull)
+  impersonatingOrg Organization? @relation("SessionImpersonatingOrg", fields: [impersonatingOrgId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([activeOrgId])
+  @@index([impersonatingOrgId])
 }
 
 model VerificationToken {
@@ -77,8 +97,14 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members     OrganizationMember[]
-  invitations Invitation[]
+  members               OrganizationMember[]
+  invitations           Invitation[]
+  addresses             OrganizationAddress[]
+  customerPrices        CustomerPrice[]
+  orders                Order[]
+  activeSessions        Session[]             @relation("SessionActiveOrg")
+  impersonatingSessions Session[]             @relation("SessionImpersonatingOrg")
+  impersonationLogs     ImpersonationLog[]    @relation("ImpersonationTarget")
 }
 
 model OrganizationMember {
@@ -109,4 +135,196 @@ model Invitation {
 
   @@index([organizationId])
   @@index([email])
+}
+
+model OrganizationAddress {
+  id                String   @id @default(cuid())
+  organizationId    String
+  label             String
+  recipient         String
+  line1             String
+  line2             String?
+  city              String
+  state             String?
+  postalCode        String
+  country           String
+  phone             String?
+  isDefaultBilling  Boolean  @default(false)
+  isDefaultShipping Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  billingForOrders  Order[]      @relation("OrderBilling")
+  shippingForOrders Order[]      @relation("OrderShipping")
+
+  @@index([organizationId])
+}
+
+// ===== catalog =====
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  sku           String   @unique
+  slug          String   @unique
+  name          String
+  description   String?
+  basePrice     Decimal  @db.Decimal(12, 2)
+  stockQuantity Int      @default(0)
+  imageUrl      String?
+  isActive      Boolean  @default(true)
+  categoryId    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category       Category        @relation(fields: [categoryId], references: [id])
+  customerPrices CustomerPrice[]
+  cartItems      CartItem[]
+  orderLines     OrderLine[]
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+// ===== pricing =====
+
+model CustomerPrice {
+  id             String    @id @default(cuid())
+  organizationId String
+  productId      String
+  price          Decimal   @db.Decimal(12, 2)
+  validFrom      DateTime?
+  validUntil     DateTime?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, productId])
+  @@index([organizationId])
+}
+
+// ===== cart =====
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+}
+
+model CartItem {
+  id                String   @id @default(cuid())
+  cartId            String
+  productId         String
+  quantity          Int
+  unitPriceSnapshot Decimal  @db.Decimal(12, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+}
+
+// ===== orders =====
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  orderNumber       String      @unique
+  organizationId    String
+  placedByUserId    String
+  status            OrderStatus @default(PENDING_PAYMENT)
+  poNumber          String?
+  notes             String?
+  billingAddressId  String
+  shippingAddressId String
+  subtotal          Decimal     @db.Decimal(12, 2)
+  total             Decimal     @db.Decimal(12, 2)
+  currency          String
+  placedAt          DateTime    @default(now())
+  confirmedAt       DateTime?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+  cancelledByUserId String?
+
+  organization    Organization        @relation(fields: [organizationId], references: [id])
+  placedBy        User                @relation("OrderPlacedBy", fields: [placedByUserId], references: [id])
+  cancelledBy     User?               @relation("OrderCancelledBy", fields: [cancelledByUserId], references: [id])
+  billingAddress  OrganizationAddress @relation("OrderBilling", fields: [billingAddressId], references: [id])
+  shippingAddress OrganizationAddress @relation("OrderShipping", fields: [shippingAddressId], references: [id])
+  lines           OrderLine[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model OrderLine {
+  id             String   @id @default(cuid())
+  orderId        String
+  productId      String
+  sku            String
+  name           String
+  unitPrice      Decimal  @db.Decimal(12, 2)
+  quantity       Int
+  discountAmount Decimal  @default(0) @db.Decimal(12, 2)
+  lineTotal      Decimal  @db.Decimal(12, 2)
+  createdAt      DateTime @default(now())
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+// ===== audit / impersonation =====
+
+enum ImpersonationAction {
+  START
+  STOP
+}
+
+model ImpersonationLog {
+  id          String              @id @default(cuid())
+  adminUserId String
+  targetOrgId String
+  action      ImpersonationAction
+  reason      String?
+  createdAt   DateTime            @default(now())
+
+  adminUser User         @relation("ImpersonationAdmin", fields: [adminUserId], references: [id])
+  targetOrg Organization @relation("ImpersonationTarget", fields: [targetOrgId], references: [id])
+
+  @@index([adminUserId])
+  @@index([targetOrgId])
+  @@index([createdAt])
 }
