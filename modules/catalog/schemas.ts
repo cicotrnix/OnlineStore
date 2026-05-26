@@ -39,7 +39,7 @@ export const updateProductSchema = createProductSchema.partial().extend({
   id: z.string().cuid(),
 })
 
-export type CreateCategoryInput = z.infer<typeof createCategorySchema>
-export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>
-export type CreateProductInput = z.infer<typeof createProductSchema>
-export type UpdateProductInput = z.infer<typeof updateProductSchema>
+export type CreateCategoryInput = z.input<typeof createCategorySchema>
+export type UpdateCategoryInput = z.input<typeof updateCategorySchema>
+export type CreateProductInput = z.input<typeof createProductSchema>
+export type UpdateProductInput = z.input<typeof updateProductSchema>
