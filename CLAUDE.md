@@ -24,41 +24,22 @@ Antes de tocar código, leer en este orden:
 
 ## Estado actual del proyecto
 
-**Fase 0 — Fundación · En implementación.**
+**Fase 0 cerrada (v0.1.0). Fase 1 — Commerce core B2B · En implementación.**
+Spec: `docs/specs/2026-05-26-fase-1-commerce-core.md` (rev. 2 APPROVED).
+Plan: `docs/plans/2026-05-26-fase-1-commerce-core-plan.md` (33 tasks).
 
-Spec aprobado en `docs/specs/2026-05-25-fase-0-fundacion.md`.
-Plan paso a paso en `docs/plans/2026-05-25-fase-0-fundacion-plan.md` — 40 tasks organizados en 11 partes.
+Branch de trabajo: `feature/fase-1-commerce-core` (worktree). Merge a `main` sólo al cierre con tag `v1.0.0`.
 
-**Lo que ya existe en el repo (creado en sesión Cowork del 2026-05-25):**
-
-- Estructura base de Next.js 14 (`app/`, `package.json`, `tsconfig.json`, `next.config.mjs`).
-- Tailwind + PostCSS configurado (`tailwind.config.ts`, `postcss.config.mjs`, `app/globals.css`).
-- Biome para lint+format (`biome.json`).
-- Sistema de configuración con Zod (`modules/config/`, `store.config.ts`, `theme.config.ts`).
-- Helper `lib/theme/apply.ts` para CSS variables.
-- `.env.example` con todas las variables documentadas.
-- `.gitignore` adecuado.
-- `README.md` con quick start.
-
-**Pendiente en Fase 0** (continuar desde `docs/plans/2026-05-25-fase-0-fundacion-plan.md`):
-
-- Parte 1 Task 5 en adelante: Vitest, Playwright.
-- Parte 2 completa: Docker Compose para Postgres local, Prisma, schema inicial.
-- Parte 3 Task 10: tests del módulo config (TDD).
-- Parte 4 completa: Auth.js v5 con Resend magic links.
-- Parte 5 completa: módulo customers con TDD (organizations, members, invitations).
-- Parte 6 completa: páginas admin y flujos de invitación.
-- Parte 7 completa: Pino logger y Sentry.
-- Parte 8: CI con GitHub Actions.
-- Parte 9: VPS Hetzner CX22 + Coolify (requiere acción del usuario al final).
-- Parte 10: runbooks y ADRs.
-- Parte 11: validación de criterios de aceptación.
-
-**Limpieza pendiente del usuario en local:**
-- `rm -f _tmp_* next.config.ts.bak` (artefactos de la sesión Cowork por permisos de sandbox).
-- `pnpm install` para instalar deps.
-- `cp .env.example .env.local` y rellenar con valores reales.
-- Configurar git remote: `git remote add origin git@github.com:cicotrnix/OnlineStore.git`.
+**Fase 0 entregado (v0.1.0, 2026-05-25):**
+- Next.js 14 + TypeScript estricto + Tailwind + Biome + Vitest + Playwright.
+- Prisma 6 + Postgres 16 + pgvector (Docker local puerto 5435, Coolify en producción).
+- Auth.js v5 + Resend magic links + adapter Prisma.
+- Módulos `config` y `customers` (organizations + members + invitations) con TDD.
+- Admin: `/admin`, `/admin/settings`, `/invite/[token]`. Middleware de auth.
+- Observabilidad: Pino + Sentry + `/api/health`.
+- CI GitHub Actions (lint + typecheck + tests + build + e2e).
+- 4 runbooks + 3 ADRs (0001-0003).
+- Desplegado en Hetzner VPS via Coolify (sslip.io).
 
 ## Decisiones de stack (no abrir sin ADR nuevo)
 
