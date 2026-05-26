@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: `${storeConfig.identity.name} · Wholesale store`,
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function RootLayout({
   children,
 }: {
