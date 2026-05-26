@@ -34,6 +34,16 @@ model User {
   placedOrders      Order[]              @relation("OrderPlacedBy")
   cancelledOrders   Order[]              @relation("OrderCancelledBy")
   impersonationLogs ImpersonationLog[]   @relation("ImpersonationAdmin")
+
+  // ─── Fase 2 ───
+  quotesRequested      Quote[]                     @relation("QuoteRequester")
+  quotesAuthored       Quote[]                     @relation("QuoteAuthor")
+  quoteAuditLogs       QuoteAuditLog[]
+  approvalsRequested   ApprovalRequest[]           @relation("ApprovalRequester")
+  approvalsDecided     ApprovalRequest[]           @relation("ApprovalDecider")
+  notifications        Notification[]
+  invoicesPaidBy       Invoice[]
+  catalogAccessGranted OrganizationCatalogAccess[]
 }
 
 model Account {
@@ -90,21 +100,43 @@ enum OrgRole {
   VIEWER
 }
 
+enum PaymentTerms {
+  PREPAID
+  NET_15
+  NET_30
+  NET_60
+}
+
+enum ApprovalRole {
+  OWNER
+  ADMIN
+}
+
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String         @id @default(cuid())
+  name              String
+  slug              String         @unique
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  // ─── Fase 2 ───
+  creditLimit       Decimal?       @db.Decimal(12, 2)
+  creditUsed        Decimal        @default(0) @db.Decimal(12, 2)
+  paymentTerms      PaymentTerms   @default(PREPAID)
+  approvalThreshold Decimal?       @db.Decimal(12, 2)
+  approvalRoles     ApprovalRole[] @default([OWNER, ADMIN])
 
   members               OrganizationMember[]
   invitations           Invitation[]
   addresses             OrganizationAddress[]
   customerPrices        CustomerPrice[]
   orders                Order[]
-  activeSessions        Session[]             @relation("SessionActiveOrg")
-  impersonatingSessions Session[]             @relation("SessionImpersonatingOrg")
-  impersonationLogs     ImpersonationLog[]    @relation("ImpersonationTarget")
+  activeSessions        Session[]                   @relation("SessionActiveOrg")
+  impersonatingSessions Session[]                   @relation("SessionImpersonatingOrg")
+  impersonationLogs     ImpersonationLog[]          @relation("ImpersonationTarget")
+  quotes                Quote[]
+  invoices              Invoice[]
+  approvalRequests      ApprovalRequest[]
+  catalogAccess         OrganizationCatalogAccess[]
 }
 
 model OrganizationMember {
@@ -170,10 +202,12 @@ model Category {
   description String?
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
+  isPrivate   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  products Product[]
+  products      Product[]
+  catalogAccess OrganizationCatalogAccess[]
 }
 
 model Product {
@@ -186,14 +220,18 @@ model Product {
   stockQuantity Int      @default(0)
   imageUrl      String?
   isActive      Boolean  @default(true)
+  isPrivate     Boolean  @default(false)
   categoryId    String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  category       Category        @relation(fields: [categoryId], references: [id])
+  category       Category                    @relation(fields: [categoryId], references: [id])
   customerPrices CustomerPrice[]
   cartItems      CartItem[]
   orderLines     OrderLine[]
+  priceTiers     ProductPriceTier[]
+  catalogAccess  OrganizationCatalogAccess[]
+  quoteLines     QuoteLine[]
 
   @@index([categoryId])
   @@index([isActive])
@@ -232,13 +270,14 @@ model Cart {
 }
 
 model CartItem {
-  id                String   @id @default(cuid())
-  cartId            String
-  productId         String
-  quantity          Int
-  unitPriceSnapshot Decimal  @db.Decimal(12, 2)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                     String   @id @default(cuid())
+  cartId                 String
+  productId              String
+  quantity               Int
+  unitPriceSnapshot      Decimal  @db.Decimal(12, 2)
+  discountAmountSnapshot Decimal  @default(0) @db.Decimal(12, 2)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
@@ -251,38 +290,47 @@ model CartItem {
 
 enum OrderStatus {
   PENDING_PAYMENT
+  PENDING_APPROVAL
   CONFIRMED
   SHIPPED
   DELIVERED
   CANCELLED
 }
 
+enum PaymentMethod {
+  PREPAID
+  NET_TERMS
+}
+
 model Order {
-  id                String      @id @default(cuid())
-  orderNumber       String      @unique
+  id                String        @id @default(cuid())
+  orderNumber       String        @unique
   organizationId    String
   placedByUserId    String
-  status            OrderStatus @default(PENDING_PAYMENT)
+  status            OrderStatus   @default(PENDING_PAYMENT)
+  paymentMethod     PaymentMethod @default(PREPAID)
   poNumber          String?
   notes             String?
   billingAddressId  String
   shippingAddressId String
-  subtotal          Decimal     @db.Decimal(12, 2)
-  total             Decimal     @db.Decimal(12, 2)
+  subtotal          Decimal       @db.Decimal(12, 2)
+  total             Decimal       @db.Decimal(12, 2)
   currency          String
-  placedAt          DateTime    @default(now())
+  placedAt          DateTime      @default(now())
   confirmedAt       DateTime?
   shippedAt         DateTime?
   deliveredAt       DateTime?
   cancelledAt       DateTime?
   cancelledByUserId String?
 
-  organization    Organization        @relation(fields: [organizationId], references: [id])
-  placedBy        User                @relation("OrderPlacedBy", fields: [placedByUserId], references: [id])
-  cancelledBy     User?               @relation("OrderCancelledBy", fields: [cancelledByUserId], references: [id])
-  billingAddress  OrganizationAddress @relation("OrderBilling", fields: [billingAddressId], references: [id])
-  shippingAddress OrganizationAddress @relation("OrderShipping", fields: [shippingAddressId], references: [id])
-  lines           OrderLine[]
+  organization      Organization        @relation(fields: [organizationId], references: [id])
+  placedBy          User                @relation("OrderPlacedBy", fields: [placedByUserId], references: [id])
+  cancelledBy       User?               @relation("OrderCancelledBy", fields: [cancelledByUserId], references: [id])
+  billingAddress    OrganizationAddress @relation("OrderBilling", fields: [billingAddressId], references: [id])
+  shippingAddress   OrganizationAddress @relation("OrderShipping", fields: [shippingAddressId], references: [id])
+  lines             OrderLine[]
+  invoice           Invoice?
+  approvedFromQuote Quote?              @relation("QuoteConvertedOrder")
 
   @@index([organizationId])
   @@index([status])
@@ -327,4 +375,227 @@ model ImpersonationLog {
   @@index([adminUserId])
   @@index([targetOrgId])
   @@index([createdAt])
+}
+
+// ===== Fase 2: quotes =====
+
+enum QuoteStatus {
+  DRAFT
+  SUBMITTED
+  QUOTED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Quote {
+  id               String      @id @default(cuid())
+  number           String      @unique
+  organizationId   String
+  requestedById    String
+  status           QuoteStatus @default(DRAFT)
+  submittedAt      DateTime?
+  quotedAt         DateTime?
+  quotedById       String?
+  validUntil       DateTime?
+  decidedAt        DateTime?
+  decidedById      String?
+  notes            String?     @db.Text
+  adminNotes       String?     @db.Text
+  currency         String
+  subtotal         Decimal     @default(0) @db.Decimal(12, 2)
+  total            Decimal     @default(0) @db.Decimal(12, 2)
+  revisionCount    Int         @default(0)
+  lastRevisedAt    DateTime?
+  convertedOrderId String?     @unique
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  requestedBy    User            @relation("QuoteRequester", fields: [requestedById], references: [id])
+  quotedBy       User?           @relation("QuoteAuthor", fields: [quotedById], references: [id])
+  convertedOrder Order?          @relation("QuoteConvertedOrder", fields: [convertedOrderId], references: [id])
+  lines          QuoteLine[]
+  auditLog       QuoteAuditLog[]
+
+  @@index([organizationId, status])
+  @@index([requestedById])
+}
+
+model QuoteLine {
+  id              String   @id @default(cuid())
+  quoteId         String
+  productId       String
+  sku             String
+  name            String
+  qty             Int
+  unitPriceBase   Decimal  @db.Decimal(12, 2)
+  unitPriceQuoted Decimal? @db.Decimal(12, 2)
+  lineTotal       Decimal  @default(0) @db.Decimal(12, 2)
+  order           Int      @default(0)
+
+  quote   Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([quoteId])
+}
+
+model QuoteAuditLog {
+  id        String   @id @default(cuid())
+  quoteId   String
+  action    String
+  actorId   String?
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([quoteId])
+}
+
+// ===== Fase 2: accounts =====
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  number         String        @unique
+  organizationId String
+  orderId        String        @unique
+  status         InvoiceStatus @default(PENDING)
+  amount         Decimal       @db.Decimal(12, 2)
+  currency       String
+  issuedAt       DateTime      @default(now())
+  dueDate        DateTime
+  paidAt         DateTime?
+  paidNote       String?       @db.Text
+  paidById       String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order        Order        @relation(fields: [orderId], references: [id])
+  paidBy       User?        @relation(fields: [paidById], references: [id])
+
+  @@index([organizationId, status])
+  @@index([dueDate, status])
+}
+
+// ===== Fase 2: approvals =====
+
+enum ApprovalSubject {
+  ORDER
+  QUOTE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ApprovalRequest {
+  id             String          @id @default(cuid())
+  organizationId String
+  subjectType    ApprovalSubject
+  subjectId      String
+  requestedById  String
+  threshold      Decimal         @db.Decimal(12, 2)
+  amount         Decimal         @db.Decimal(12, 2)
+  status         ApprovalStatus  @default(PENDING)
+  decidedById    String?
+  decidedAt      DateTime?
+  reason         String?         @db.Text
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  requestedBy  User         @relation("ApprovalRequester", fields: [requestedById], references: [id])
+  decidedBy    User?        @relation("ApprovalDecider", fields: [decidedById], references: [id])
+
+  @@index([organizationId, status])
+  @@index([subjectType, subjectId])
+}
+
+// ===== Fase 2: notifications =====
+
+enum NotificationType {
+  QUOTE_SUBMITTED
+  QUOTE_QUOTED
+  QUOTE_REVISED
+  QUOTE_ACCEPTED
+  QUOTE_REJECTED
+  QUOTE_EXPIRING
+  APPROVAL_REQUESTED
+  APPROVAL_GRANTED
+  APPROVAL_REJECTED
+  INVOICE_DUE_SOON
+  INVOICE_OVERDUE
+  INVOICE_PAID
+  CREDIT_LIMIT_WARNING
+  CREDIT_BLOCKED
+}
+
+model Notification {
+  id                String           @id @default(cuid())
+  userId            String
+  type              NotificationType
+  subjectType       String?
+  subjectId         String?
+  title             String
+  body              String           @db.Text
+  link              String?
+  readAt            DateTime?
+  emailSentAt       DateTime?
+  emailFailedReason String?
+  emailRetryCount   Int              @default(0)
+  createdAt         DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@index([emailSentAt])
+}
+
+// ===== Fase 2: catalog extensions =====
+
+model OrganizationCatalogAccess {
+  id             String   @id @default(cuid())
+  organizationId String
+  productId      String?
+  categoryId     String?
+  grantedById    String
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product      Product?     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category     Category?    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  grantedBy    User         @relation(fields: [grantedById], references: [id])
+
+  @@unique([organizationId, productId])
+  @@unique([organizationId, categoryId])
+  @@index([organizationId])
+}
+
+// ===== Fase 2: pricing extension =====
+
+model ProductPriceTier {
+  id        String   @id @default(cuid())
+  productId String
+  minQty    Int
+  unitPrice Decimal  @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, minQty])
+  @@index([productId])
 }
