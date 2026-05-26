@@ -10,6 +10,7 @@ import {
   updateCategorySchema,
   updateProductSchema,
 } from './schemas'
+import { filterForOrg } from './visibility'
 
 export const catalogService = {
   async createCategory(input: CreateCategoryInput) {
@@ -68,5 +69,21 @@ export const catalogService = {
 
   async findProductById(id: string) {
     return catalogRepository.findProductById(id)
+  },
+
+  async listProductsVisible(
+    orgId: string | null,
+    opts: { categoryId?: string; activeOnly?: boolean; take?: number; skip?: number } = {}
+  ) {
+    const all = await catalogRepository.listProducts({ ...opts, take: (opts.take ?? 50) * 2 })
+    const visible = await filterForOrg(orgId, all)
+    return visible.slice(0, opts.take ?? 50)
+  },
+
+  async findProductBySlugVisible(orgId: string | null, slug: string) {
+    const product = await catalogRepository.findProductBySlug(slug)
+    if (!product) return null
+    const visible = await filterForOrg(orgId, [product])
+    return visible[0] ?? null
   },
 }

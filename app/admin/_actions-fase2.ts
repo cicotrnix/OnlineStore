@@ -84,7 +84,7 @@ export async function upsertProductTierAction(formData: FormData) {
   const minQty = Number(formData.get('minQty'))
   const unitPrice = Number(formData.get('unitPrice'))
   await upsertTier({ productId, minQty, unitPrice })
-  revalidatePath(`/admin/products`)
+  revalidatePath('/admin/products')
 }
 
 export async function grantCatalogAccessAction(formData: FormData) {

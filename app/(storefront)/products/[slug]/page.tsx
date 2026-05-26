@@ -18,12 +18,11 @@ type Props = {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
-  const product = await catalogService.findProductBySlug(slug)
-  if (!product || !product.isActive) notFound()
-
   const session = await auth()
   const orgId = session?.impersonatingOrgId ?? session?.activeOrgId ?? null
   const isImpersonating = !!session?.impersonatingOrgId
+  const product = await catalogService.findProductBySlugVisible(orgId, slug)
+  if (!product || !product.isActive) notFound()
   const customerPrice = orgId ? await pricingService.resolveForOrg(orgId, product.id) : null
   const showOverride = customerPrice && !customerPrice.equals(product.basePrice)
   const tiers = isFeatureEnabled('volumeDiscounts') ? await listTiersForProduct(product.id) : []
