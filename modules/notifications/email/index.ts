@@ -1,22 +1,44 @@
 import type { NotificationType } from '@prisma/client'
+import { render } from '@react-email/render'
+import type { JSX } from 'react'
+import {
+  ApprovalGrantedEmail,
+  ApprovalRejectedEmail,
+  ApprovalRequestedEmail,
+  CreditBlockedEmail,
+  CreditWarningEmail,
+  InvoiceDueSoonEmail,
+  InvoiceOverdueEmail,
+  InvoicePaidEmail,
+  QuoteAcceptedEmail,
+  QuoteExpiringEmail,
+  QuoteQuotedEmail,
+  QuoteRejectedEmail,
+  QuoteRevisedEmail,
+  QuoteSubmittedEmail,
+} from './templates'
+import type { BaseTemplateProps } from './templates/_base'
 
-export interface RenderVars {
-  title: string
-  body: string
-  link: string | null
-  userName: string
+export type RenderVars = BaseTemplateProps
+
+const TEMPLATES: Record<NotificationType, (p: BaseTemplateProps) => JSX.Element> = {
+  QUOTE_SUBMITTED: QuoteSubmittedEmail,
+  QUOTE_QUOTED: QuoteQuotedEmail,
+  QUOTE_REVISED: QuoteRevisedEmail,
+  QUOTE_ACCEPTED: QuoteAcceptedEmail,
+  QUOTE_REJECTED: QuoteRejectedEmail,
+  QUOTE_EXPIRING: QuoteExpiringEmail,
+  APPROVAL_REQUESTED: ApprovalRequestedEmail,
+  APPROVAL_GRANTED: ApprovalGrantedEmail,
+  APPROVAL_REJECTED: ApprovalRejectedEmail,
+  INVOICE_DUE_SOON: InvoiceDueSoonEmail,
+  INVOICE_OVERDUE: InvoiceOverdueEmail,
+  INVOICE_PAID: InvoicePaidEmail,
+  CREDIT_LIMIT_WARNING: CreditWarningEmail,
+  CREDIT_BLOCKED: CreditBlockedEmail,
 }
 
-/**
- * Render notification email HTML. Task 2.3 swaps this stub for react-email templates.
- */
-export async function renderEmailFor(_type: NotificationType, vars: RenderVars): Promise<string> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
-  const linkBlock = vars.link ? `<p><a href="${appUrl}${vars.link}">Ver detalle</a></p>` : ''
-  return `
-    <h2>${vars.title}</h2>
-    <p>Hola ${vars.userName},</p>
-    <p>${vars.body}</p>
-    ${linkBlock}
-  `
+export async function renderEmailFor(type: NotificationType, vars: RenderVars): Promise<string> {
+  const Template = TEMPLATES[type]
+  return render(Template(vars))
 }
