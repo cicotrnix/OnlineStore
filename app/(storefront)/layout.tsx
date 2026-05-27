@@ -1,5 +1,6 @@
 import { ImpersonationBanner } from '@/components/commerce/ImpersonationBanner'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
+import { SearchBar } from '@/components/commerce/SearchBar'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
@@ -40,6 +41,9 @@ export default async function StorefrontLayout({
           <Link href="/" className="font-semibold tracking-tight">
             {storeConfig.identity.name}
           </Link>
+          <div className="hidden md:block flex-1 mx-6 max-w-md">
+            <SearchBar />
+          </div>
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/catalog" className="text-gray-700 hover:text-gray-900">
               Catálogo

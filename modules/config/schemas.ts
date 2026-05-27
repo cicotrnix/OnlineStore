@@ -7,6 +7,7 @@ export const storeConfigSchema = z.object({
     name: z.string().min(1),
     logo: z.string().min(1),
     supportEmail: z.string().email(),
+    tagline: z.string().optional(),
   }),
   locale: z.object({
     default: z.string(),
