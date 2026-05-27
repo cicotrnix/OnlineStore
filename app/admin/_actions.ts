@@ -6,6 +6,7 @@ import { prisma } from '@/lib/db/client'
 import { catalogService } from '@/modules/catalog'
 import { ordersService } from '@/modules/orders'
 import { pricingService } from '@/modules/pricing'
+import { enqueueIndex } from '@/modules/search'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -29,7 +30,7 @@ export async function createProductAction(formData: FormData) {
   const stockQuantity = Number(formData.get('stockQuantity') ?? 0)
   const imageUrl = formData.get('imageUrl')?.toString().trim() || null
   const categoryId = String(formData.get('categoryId'))
-  await catalogService.createProduct({
+  const product = await catalogService.createProduct({
     sku,
     slug,
     name,
@@ -39,6 +40,7 @@ export async function createProductAction(formData: FormData) {
     imageUrl,
     categoryId,
   })
+  await enqueueIndex(product.id, 'UPSERT')
   revalidatePath('/admin/products')
 }
 
@@ -47,6 +49,7 @@ export async function toggleProductActiveAction(formData: FormData) {
   const id = String(formData.get('id'))
   const isActive = formData.get('isActive') === 'true'
   await catalogService.updateProduct({ id, isActive: !isActive })
+  await enqueueIndex(id, isActive ? 'DELETE' : 'UPSERT')
   revalidatePath('/admin/products')
 }
 
@@ -56,6 +59,21 @@ export async function createCategoryAction(formData: FormData) {
   const name = String(formData.get('name'))
   const sortOrder = Number(formData.get('sortOrder') ?? 0)
   await catalogService.createCategory({ slug, name, sortOrder })
+  revalidatePath('/admin/categories')
+}
+
+export async function toggleCategoryPrivacyAction(formData: FormData) {
+  await requirePlatformAdmin()
+  const categoryId = String(formData.get('categoryId'))
+  const isPrivate = formData.get('isPrivate') === 'true'
+  await prisma.category.update({ where: { id: categoryId }, data: { isPrivate } })
+  const products = await prisma.product.findMany({
+    where: { categoryId },
+    select: { id: true },
+  })
+  for (const p of products) {
+    await enqueueIndex(p.id, 'UPSERT')
+  }
   revalidatePath('/admin/categories')
 }
 

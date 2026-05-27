@@ -6,6 +6,7 @@ import { markPaid } from '@/modules/accounts'
 import { grantAccess, revokeAccess } from '@/modules/catalog'
 import { upsertTier } from '@/modules/pricing'
 import { quote, revise } from '@/modules/quotes'
+import { enqueueIndex } from '@/modules/search'
 import { Decimal } from '@prisma/client/runtime/library'
 import { revalidatePath } from 'next/cache'
 
@@ -110,5 +111,6 @@ export async function toggleProductPrivateAction(formData: FormData) {
   const id = String(formData.get('id'))
   const current = formData.get('isPrivate') === 'true'
   await prisma.product.update({ where: { id }, data: { isPrivate: !current } })
+  await enqueueIndex(id, 'UPSERT')
   revalidatePath('/admin/products')
 }
