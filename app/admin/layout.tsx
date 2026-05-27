@@ -13,6 +13,7 @@ const navItems = [
   { href: '/admin/invoices', label: 'Facturas' },
   { href: '/admin/approvals', label: 'Aprobaciones' },
   { href: '/admin/customers', label: 'Clientes' },
+  { href: '/admin/search', label: 'Búsqueda' },
   { href: '/admin/settings', label: 'Settings' },
 ]
 

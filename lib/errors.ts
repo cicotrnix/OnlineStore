@@ -51,3 +51,44 @@ export class CatalogAccessDeniedError extends Error {
     this.name = 'CatalogAccessDeniedError'
   }
 }
+
+export class SearchUnavailableError extends Error {
+  code = 'SEARCH_UNAVAILABLE'
+  constructor(
+    message: string,
+    public readonly reason?: string
+  ) {
+    super(message)
+    this.name = 'SearchUnavailableError'
+  }
+}
+
+export class EmbeddingFailedError extends Error {
+  code = 'EMBEDDING_FAILED'
+  constructor(
+    message: string,
+    public readonly retryable: boolean
+  ) {
+    super(message)
+    this.name = 'EmbeddingFailedError'
+  }
+}
+
+export class IndexQueueFullError extends Error {
+  code = 'INDEX_QUEUE_FULL'
+  constructor(message: string) {
+    super(message)
+    this.name = 'IndexQueueFullError'
+  }
+}
+
+export class RateLimitExceededError extends Error {
+  code = 'RATE_LIMIT_EXCEEDED'
+  constructor(
+    message: string,
+    public readonly retryAfterSeconds: number
+  ) {
+    super(message)
+    this.name = 'RateLimitExceededError'
+  }
+}

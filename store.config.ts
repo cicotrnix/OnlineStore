@@ -9,6 +9,7 @@ export default defineStoreConfig({
     name: 'Acme Wholesale',
     logo: '/brand/logo.svg',
     supportEmail: 'support@acme.example',
+    tagline: 'Mayorista B2B · USA + LATAM',
   },
   locale: {
     default: 'en-US',

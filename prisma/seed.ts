@@ -353,11 +353,18 @@ async function main() {
     ],
   })
 
+  // Fase 3: enqueue all products for search indexing (noop locally without Meilisearch/Voyage envs)
+  const { enqueueIndex } = await import('@/modules/search')
+  for (const p of products) {
+    await enqueueIndex(p.id, 'UPSERT')
+  }
+
   console.log('seed complete:')
   console.log(`  - admin user: ${admin.email}`)
   console.log('  - buyer users: buyer1@acme.com, buyer2@acme.com')
   console.log(`  - org: ${acme.slug}`)
   console.log(`  - ${products.length} products, 2 customer prices`)
+  console.log(`  - search index queue: ${products.length} UPSERT enqueued`)
 }
 
 main()

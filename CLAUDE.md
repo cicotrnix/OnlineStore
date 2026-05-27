@@ -24,7 +24,7 @@ Antes de tocar código, leer en este orden:
 
 ## Estado actual del proyecto
 
-**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0). Fase 2 cerrada (v2.0.0, 2026-05-26).**
+**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0). Fase 2 cerrada (v2.0.0). Fase 3 cerrada (v3.0.0, 2026-05-26).**
 
 **Fase 0 entregado (v0.1.0, 2026-05-25):**
 - Next.js 14 + TypeScript estricto + Tailwind + Biome + Vitest + Playwright.
@@ -61,6 +61,20 @@ Antes de tocar código, leer en este orden:
 - Admin: `/admin/quotes`, `/admin/invoices` (markPaid), `/admin/approvals` (read-only history), `/admin/customers/[id]/credit` (creditLimit + paymentTerms + threshold + catalog access). Productos: private toggle + per-product tier mgmt. Dashboard: widgets gated.
 - Vitest: 119/119 passing (+ 6 skipped). Playwright E2E: 7/7 fase2.spec.ts.
 - ADRs 0010-0014, 5 runbooks (quotes, approvals, credit, private-catalogs, notifications).
+
+**Fase 3 entregado (v3.0.0, 2026-05-26):**
+- Schema: `SearchIndexQueue` + 2 enums + `Product.embedding` (vector 512) / `embeddingUpdatedAt` / `searchableText`. HNSW idx con vector_cosine_ops (m=16, ef_construction=64). ADR 0019 documenta el patrón `Unsupported("vector(512)")` + `$queryRaw`.
+- Lib wrappers: `lib/meilisearch.ts` (Meilisearch Cloud SDK + noop fallback + `buildAccessFilter`), `lib/voyage.ts` (HTTP fetch, voyage-3-lite 512 dims, retry split: query fail-fast / document full backoff), `lib/rate-limit.ts` (in-memory LRU per IP, ANON_SEARCH_LIMITS 10/min 100/h).
+- Módulo `modules/search/` con TDD: `rrf` (k=60), `facets` (categoría + 4 buckets precio + stock), `access` (`getAccessGrants` + `filterAccessibleIds` defense-in-depth), `embeddings` (wrapper Voyage + `buildSearchableText` + `formatVectorForPostgres`), `index-queue` (`enqueueIndex` idempotente + `processIndexQueue` con FOR UPDATE SKIP LOCKED, MAX_ATTEMPTS=5), `query` (orquestador hybrid + exact-SKU pre-check + fallback ILIKE + 5 modos).
+- Storefront: `/` homepage real (hero + tagline + search prominente + FeaturedGrid), SearchBar en header storefront, `/search` con FacetSidebar + Pagination + rate-limit anonymous + aria-live results count.
+- Admin: `/admin/search` stats (pending/processing/done/failed) + reindex todo + retry failed inline.
+- Hooks: admin product create/toggleActive/togglePrivate + new toggleCategoryPrivacyAction reenqueue products on category isPrivate change.
+- Scripts ops: `process-search-index-queue` (cron 1min), `cleanup-stale-search-queue` (semanal 03:00 UTC dom), `bootstrap-search-index` (post-deploy), `init-meilisearch-index` (one-shot settings).
+- Feature flag `modules.semanticSearch` (ya existía Fase 2, default true en seed/demo). Meilisearch always-on; semantic toggle controla Voyage.
+- Seed extendido: 6 productos auto-enqueued post-creación.
+- Vitest: 157/157 passing (+ 6 skipped). Playwright E2E: 6/6 fase3.spec.ts (homepage + anon search + private hidden + admin gate).
+- ADRs 0015-0019 (Meilisearch Cloud, Voyage choice, RRF+exact-SKU, cron worker vs background, Unsupported vector pattern), 3 runbooks (search-operations, search-reindex, search-troubleshooting).
+- store.config.ts: `identity.tagline` opcional agregado al schema.
 
 ## Decisiones de stack (no abrir sin ADR nuevo)
 
