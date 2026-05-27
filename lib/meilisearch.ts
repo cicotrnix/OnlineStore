@@ -1,19 +1,17 @@
-import { MeiliSearch } from 'meilisearch'
+import { Meilisearch } from 'meilisearch'
 
-let cached: MeiliSearch | null = null
+let cached: Meilisearch | null = null
 
 export function isMeilisearchEnabled(): boolean {
   return Boolean(process.env.MEILISEARCH_HOST && process.env.MEILISEARCH_API_KEY)
 }
 
-export function getMeilisearchClient(): MeiliSearch {
+export function getMeilisearchClient(): Meilisearch {
   if (!isMeilisearchEnabled()) {
-    throw new Error(
-      'Meilisearch not configured: missing MEILISEARCH_HOST or MEILISEARCH_API_KEY',
-    )
+    throw new Error('Meilisearch not configured: missing MEILISEARCH_HOST or MEILISEARCH_API_KEY')
   }
   if (!cached) {
-    cached = new MeiliSearch({
+    cached = new Meilisearch({
       host: process.env.MEILISEARCH_HOST as string,
       apiKey: process.env.MEILISEARCH_API_KEY as string,
     })
@@ -48,9 +46,7 @@ export function buildAccessFilter(input: AccessFilterInput): string {
       ? `categoryId IN [${grantedCategories.map((id) => `"${id}"`).join(',')}]`
       : null
 
-  const productClause = productList
-    ? `(isPrivate = false OR ${productList})`
-    : 'isPrivate = false'
+  const productClause = productList ? `(isPrivate = false OR ${productList})` : 'isPrivate = false'
   const categoryClause =
     categoryList || productList
       ? `(categoryIsPrivate = false${categoryList ? ` OR ${categoryList}` : ''}${productList ? ` OR ${productList}` : ''})`

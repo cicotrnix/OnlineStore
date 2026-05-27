@@ -12,15 +12,9 @@ interface VoyageResponse {
   data: Array<{ embedding: number[] }>
 }
 
-async function voyageRequest(
-  text: string,
-  inputType: 'query' | 'document',
-): Promise<number[]> {
+async function voyageRequest(text: string, inputType: 'query' | 'document'): Promise<number[]> {
   if (!isVoyageEnabled()) {
-    throw new EmbeddingFailedError(
-      'Voyage not configured: missing VOYAGE_API_KEY',
-      false,
-    )
+    throw new EmbeddingFailedError('Voyage not configured: missing VOYAGE_API_KEY', false)
   }
 
   const truncated = text.slice(0, 8000)
@@ -41,10 +35,7 @@ async function voyageRequest(
   if (!response.ok) {
     const isRetryable = response.status === 429 || response.status >= 500
     const body = await response.text().catch(() => '')
-    throw new EmbeddingFailedError(
-      `Voyage API ${response.status}: ${body}`,
-      isRetryable,
-    )
+    throw new EmbeddingFailedError(`Voyage API ${response.status}: ${body}`, isRetryable)
   }
 
   const data: VoyageResponse = await response.json()
@@ -52,7 +43,7 @@ async function voyageRequest(
   if (!embedding || embedding.length !== DIMS) {
     throw new EmbeddingFailedError(
       `Voyage returned invalid embedding (length ${embedding?.length})`,
-      false,
+      false
     )
   }
   return embedding
@@ -80,7 +71,7 @@ export async function embedQuery(text: string): Promise<number[]> {
  */
 export async function embedDocument(
   text: string,
-  opts: { skipBackoffDelay?: boolean } = {},
+  opts: { skipBackoffDelay?: boolean } = {}
 ): Promise<number[]> {
   const delays = [1000, 2000, 4000, 8000, 16000]
   let lastErr: unknown
