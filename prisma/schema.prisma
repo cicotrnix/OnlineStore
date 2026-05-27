@@ -211,19 +211,22 @@ model Category {
 }
 
 model Product {
-  id            String   @id @default(cuid())
-  sku           String   @unique
-  slug          String   @unique
-  name          String
-  description   String?
-  basePrice     Decimal  @db.Decimal(12, 2)
-  stockQuantity Int      @default(0)
-  imageUrl      String?
-  isActive      Boolean  @default(true)
-  isPrivate     Boolean  @default(false)
-  categoryId    String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 String                      @id @default(cuid())
+  sku                String                      @unique
+  slug               String                      @unique
+  name               String
+  description        String?
+  basePrice          Decimal                     @db.Decimal(12, 2)
+  stockQuantity      Int                         @default(0)
+  imageUrl           String?
+  isActive           Boolean                     @default(true)
+  isPrivate          Boolean                     @default(false)
+  categoryId         String
+  embedding          Unsupported("vector(512)")?
+  embeddingUpdatedAt DateTime?
+  searchableText     String?                     @db.Text
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
 
   category       Category                    @relation(fields: [categoryId], references: [id])
   customerPrices CustomerPrice[]
@@ -597,5 +600,33 @@ model ProductPriceTier {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([productId, minQty])
+  @@index([productId])
+}
+
+// ===== Fase 3: search index queue =====
+
+enum SearchIndexAction {
+  UPSERT
+  DELETE
+}
+
+enum SearchIndexStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model SearchIndexQueue {
+  id          String            @id @default(cuid())
+  productId   String
+  action      SearchIndexAction
+  status      SearchIndexStatus @default(PENDING)
+  attempts    Int               @default(0)
+  lastError   String?           @db.Text
+  enqueuedAt  DateTime          @default(now())
+  processedAt DateTime?
+
+  @@index([status, enqueuedAt])
   @@index([productId])
 }
