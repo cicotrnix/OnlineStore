@@ -267,7 +267,7 @@ Plugin `online-store-toolkit` con:
 | 0 — Fundación | ✅ Cerrada (desplegada en prod) | [`docs/specs/2026-05-25-fase-0-fundacion.md`](docs/specs/2026-05-25-fase-0-fundacion.md) | [`docs/plans/2026-05-25-fase-0-fundacion-plan.md`](docs/plans/2026-05-25-fase-0-fundacion-plan.md) | App viva en sslip.io · Coolify + Postgres + pgvector en Hetzner |
 | 1 — Commerce core | ✅ Cerrada (v1.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-1-commerce-core.md`](docs/specs/2026-05-26-fase-1-commerce-core.md) | [`docs/plans/2026-05-26-fase-1-commerce-core-plan.md`](docs/plans/2026-05-26-fase-1-commerce-core-plan.md) | Catalog, pricing, cart, checkout, orders, impersonation desplegados |
 | 2 — Especialización B2B | ✅ Cerrada (v2.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-2-especializacion-b2b.md`](docs/specs/2026-05-26-fase-2-especializacion-b2b.md) | [`docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md`](docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md) | RFQ, crédito, aprobaciones, catálogos privados, descuentos por volumen, notifications |
-| 3 — Búsqueda | Pendiente | — | — | — |
+| 3 — Búsqueda | ✅ Cerrada (v3.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-3-busqueda-descubrimiento.md`](docs/specs/2026-05-26-fase-3-busqueda-descubrimiento.md) | [`docs/plans/2026-05-26-fase-3-busqueda-descubrimiento-plan.md`](docs/plans/2026-05-26-fase-3-busqueda-descubrimiento-plan.md) | Meilisearch + Voyage semántico + RRF + filtros facetados + homepage real + admin search panel |
 | 4 — IA aplicada | Pendiente | — | — | — |
 | 5 — Integraciones | Pendiente | — | — | — |
 | 6 — Multi-tenant | Pendiente | — | — | — |
@@ -276,9 +276,9 @@ Plugin `online-store-toolkit` con:
 
 ## 10. Próximo paso inmediato
 
-Fase 2 cerrada (v2.0.0, 2026-05-26): 119 unit tests verdes, 7 e2e Fase 2 verdes, lint + typecheck + build limpios. Cambios mergeados a `main`, tag `v2.0.0` publicado, Coolify deploy en verde.
+Fase 3 cerrada (v3.0.0, 2026-05-26): 157 unit tests verdes, 6 e2e Fase 3 verdes, lint + typecheck + build limpios. Cambios mergeados a `main`, tag `v3.0.0` publicado. Ops manual pendiente: cuentas Meilisearch Cloud + Voyage AI, env vars en Coolify, scheduled tasks (worker 1min + cleanup semanal), init+bootstrap scripts en VPS.
 
-Próximo: brainstorming de **Fase 3 — Búsqueda semántica** en sesión Cowork (embeddings con pgvector, filtros, sinónimos, ranking por similaridad).
+Próximo: brainstorming de **Fase 4 — IA aplicada** en sesión Cowork (chatbot, recomendaciones, generación de contenido).
 
 ---
 

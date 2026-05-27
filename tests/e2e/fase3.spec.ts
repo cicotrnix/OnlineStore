@@ -5,15 +5,16 @@ test.describe('Fase 3 — homepage', () => {
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expect(page.getByLabel('Buscar productos').first()).toBeVisible()
-    await expect(
-      page.getByRole('heading', { name: /productos destacados/i }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: /productos destacados/i })).toBeVisible()
   })
 
   test('search submit navigates to /search?q=', async ({ page }) => {
     await page.goto('/')
     await page.getByLabel('Buscar productos').first().fill('tornillo')
-    await page.getByRole('button', { name: /buscar/i }).first().click()
+    await page
+      .getByRole('button', { name: /buscar/i })
+      .first()
+      .click()
     await expect(page).toHaveURL(/\/search\?q=tornillo/)
   })
 })
