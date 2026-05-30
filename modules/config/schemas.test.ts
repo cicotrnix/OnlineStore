@@ -1,25 +1,36 @@
 import { describe, expect, it } from 'vitest'
 import { storeConfigSchema, themeConfigSchema } from './schemas'
 
-const validStore = {
-  identity: { name: 'Acme', logo: '/logo.svg', supportEmail: 'support@acme.com' },
-  locale: { default: 'en-US', supported: ['en-US'] },
-  currency: { base: 'USD' as const },
-  modules: {
-    rfq: false,
-    credit: false,
-    privateCatalogs: false,
-    approvals: false,
-    volumeDiscounts: false,
-    semanticSearch: false,
-    aiChat: false,
-  },
-  payments: {
-    stripe: { enabled: false },
-    mercadopago: { enabled: false },
-  },
-  ui: { defaultView: 'cards' as const, allowToggle: true },
+function makeValidConfig() {
+  return {
+    identity: { name: 'Acme', logo: '/logo.svg', supportEmail: 'support@acme.com' },
+    locale: { default: 'en-US', supported: ['en-US'] },
+    currency: { base: 'USD' as const },
+    modules: {
+      rfq: false,
+      credit: false,
+      privateCatalogs: false,
+      approvals: false,
+      volumeDiscounts: false,
+      semanticSearch: false,
+    },
+    payments: {
+      stripe: { enabled: false },
+      mercadopago: { enabled: false },
+    },
+    ui: { defaultView: 'cards' as const, allowToggle: true },
+    ai: {
+      model: 'claude-sonnet-4-6',
+      contentModel: 'claude-sonnet-4-6',
+      chatModel: 'claude-haiku-4-5-20251001',
+      content: false,
+      chat: false,
+      recommendations: false,
+    },
+  }
 }
+
+const validStore = makeValidConfig()
 
 const validTheme = {
   colors: {
@@ -69,6 +80,26 @@ describe('storeConfigSchema', () => {
         identity: { ...validStore.identity, supportEmail: 'not-an-email' },
       })
     ).toThrow()
+  })
+
+  it('valida el bloque ai', () => {
+    const cfg = makeValidConfig()
+    cfg.ai = {
+      model: 'claude-sonnet-4-6',
+      contentModel: 'claude-sonnet-4-6',
+      chatModel: 'claude-haiku-4-5-20251001',
+      content: false,
+      chat: false,
+      recommendations: false,
+    }
+    expect(() => storeConfigSchema.parse(cfg)).not.toThrow()
+  })
+
+  it('rechaza config sin bloque ai', () => {
+    const cfg = makeValidConfig()
+    // @ts-expect-error: ai requerido
+    cfg.ai = undefined
+    expect(() => storeConfigSchema.parse(cfg)).toThrow()
   })
 })
 

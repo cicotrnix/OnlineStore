@@ -23,7 +23,6 @@ export const storeConfigSchema = z.object({
     approvals: z.boolean(),
     volumeDiscounts: z.boolean(),
     semanticSearch: z.boolean(),
-    aiChat: z.boolean(),
   }),
   payments: z.object({
     stripe: z.object({ enabled: z.boolean() }),
@@ -32,6 +31,14 @@ export const storeConfigSchema = z.object({
   ui: z.object({
     defaultView: z.enum(['cards', 'list']),
     allowToggle: z.boolean(),
+  }),
+  ai: z.object({
+    model: z.string().min(1),
+    chatModel: z.string().min(1),
+    contentModel: z.string().min(1),
+    content: z.boolean(),
+    chat: z.boolean(),
+    recommendations: z.boolean(),
   }),
 })
 

@@ -10,7 +10,6 @@ const baseModules: StoreConfig['modules'] = {
   approvals: false,
   volumeDiscounts: false,
   semanticSearch: false,
-  aiChat: false,
 }
 
 function makeConfig(overrides: Partial<StoreConfig['modules']>): StoreConfig {
@@ -21,6 +20,14 @@ function makeConfig(overrides: Partial<StoreConfig['modules']>): StoreConfig {
     modules: { ...baseModules, ...overrides },
     payments: { stripe: { enabled: false }, mercadopago: { enabled: false } },
     ui: { defaultView: 'cards', allowToggle: true },
+    ai: {
+      model: 'claude-sonnet-4-6',
+      contentModel: 'claude-sonnet-4-6',
+      chatModel: 'claude-haiku-4-5-20251001',
+      content: false,
+      chat: false,
+      recommendations: false,
+    },
   }
 }
 
