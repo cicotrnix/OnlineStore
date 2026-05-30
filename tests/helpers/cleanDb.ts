@@ -21,6 +21,7 @@ export async function cleanDb(): Promise<void> {
   await prisma.quote.deleteMany()
   await prisma.impersonationLog.deleteMany()
   await prisma.organizationAddress.deleteMany()
+  await prisma.productContent.deleteMany()
   await prisma.product.deleteMany()
   await prisma.category.deleteMany()
   await prisma.organizationMember.deleteMany()

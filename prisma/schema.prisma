@@ -225,6 +225,8 @@ model Product {
   embedding          Unsupported("vector(512)")?
   embeddingUpdatedAt DateTime?
   searchableText     String?                     @db.Text
+  attributes         Json?
+  compatibleModels   String[]
   createdAt          DateTime                    @default(now())
   updatedAt          DateTime                    @updatedAt
 
@@ -235,9 +237,33 @@ model Product {
   priceTiers     ProductPriceTier[]
   catalogAccess  OrganizationCatalogAccess[]
   quoteLines     QuoteLine[]
+  content        ProductContent[]
 
   @@index([categoryId])
   @@index([isActive])
+}
+
+enum ProductContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model ProductContent {
+  id                String               @id @default(cuid())
+  productId         String
+  locale            String
+  longDescriptionMd String?              @db.Text
+  shortDescription  String?
+  seoTitle          String?
+  seoDescription    String?
+  status            ProductContentStatus @default(DRAFT)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, locale])
+  @@index([productId])
 }
 
 // ===== pricing =====
