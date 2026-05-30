@@ -276,10 +276,21 @@ Plugin `online-store-toolkit` con:
 
 ## 10. Próximo paso inmediato
 
-Fase 3 cerrada (v3.0.0, 2026-05-26): 157 unit tests verdes, 6 e2e Fase 3 verdes, lint + typecheck + build limpios. Cambios mergeados a `main`, tag `v3.0.0` publicado. Ops manual pendiente: cuentas Meilisearch Cloud + Voyage AI, env vars en Coolify, scheduled tasks (worker 1min + cleanup semanal), init+bootstrap scripts en VPS.
+Fase 3 cerrada (v3.0.0, 2026-05-26): 157 unit tests verdes, 6 e2e Fase 3 verdes, lint + typecheck + build limpios. Cambios mergeados a `main`, tag `v3.0.0` publicado.
+
+**Ops manual completado (2026-05-30):**
+- ✅ Cuentas Meilisearch Cloud + Voyage AI creadas.
+- ✅ Env vars en Coolify (`MEILISEARCH_HOST`, `MEILISEARCH_API_KEY`, `VOYAGE_API_KEY`).
+- ✅ Índice Meilisearch inicializado vía `scripts/init-meilisearch-index.ts`.
+- ✅ Catálogo real cargado e indexado: 12 baterías Pi-Power para iPhone (categoría "Battery") vía `scripts/load-pipower-catalog.ts` (loader idempotente por SKU, no destructivo). Buscable en `/` y `/search`.
+- ✅ Búsqueda híbrida viva en producción.
+
+**Pendiente manual (Herney):**
+- Scheduled tasks en Coolify: `process-search-index-queue` `* * * * *` + `cleanup-stale-search-queue` `0 3 * * 0`.
+- Imágenes y descripciones reales de los 12 productos (placeholder hoy).
 
 Próximo: brainstorming de **Fase 4 — IA aplicada** en sesión Cowork (chatbot, recomendaciones, generación de contenido).
 
 ---
 
-*Última actualización: 2026-05-26 cierre Fase 2 · Próxima revisión: arranque Fase 3*
+*Última actualización: 2026-05-30 cierre ops Fase 3 · Próxima revisión: arranque Fase 4*
