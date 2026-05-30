@@ -66,3 +66,5 @@ export function resetRateLimits(): void {
 }
 
 export const ANON_SEARCH_LIMITS: RateLimitConfig = { perMinute: 10, perHour: 100 }
+export const AI_CHAT_LIMITS: RateLimitConfig = { perMinute: 5, perHour: 30 }
+export const AI_CONTENT_GEN_LIMITS: RateLimitConfig = { perMinute: 3, perHour: 10 }
