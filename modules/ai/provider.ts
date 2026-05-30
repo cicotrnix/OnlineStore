@@ -1,7 +1,8 @@
 import { logger } from '@/lib/observability/logger'
 import storeConfig from '@/store.config'
 import Anthropic from '@anthropic-ai/sdk'
-import { AIDisabledError } from './errors'
+import { currentPeriodYm, isBudgetExceeded, recordUsage } from './budget'
+import { AIBudgetExceededError, AIDisabledError } from './errors'
 
 export interface AICompleteOptions {
   system?: string
@@ -28,6 +29,7 @@ function getClient(): Anthropic {
 
 export async function complete(prompt: string, opts: AICompleteOptions): Promise<AICompletion> {
   if (!isAIEnabled()) throw new AIDisabledError()
+  if (await isBudgetExceeded()) throw new AIBudgetExceededError(currentPeriodYm())
 
   const model = opts.model ?? storeConfig.ai.model
   const msg = await getClient().messages.create({
@@ -44,6 +46,7 @@ export async function complete(prompt: string, opts: AICompleteOptions): Promise
     inputTokens: msg.usage.input_tokens,
     outputTokens: msg.usage.output_tokens,
   }
+  await recordUsage(usage.inputTokens + usage.outputTokens)
   logger.info({ model, usage }, 'ai completion')
   return { text, usage }
 }

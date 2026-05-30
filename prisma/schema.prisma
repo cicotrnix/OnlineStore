@@ -630,3 +630,12 @@ model SearchIndexQueue {
   @@index([status, enqueuedAt])
   @@index([productId])
 }
+
+// ===== Fase 4: AI usage tracking =====
+
+model AiUsage {
+  id         String   @id @default(cuid())
+  periodYm   String   @unique // "YYYY-MM"
+  tokensUsed Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}

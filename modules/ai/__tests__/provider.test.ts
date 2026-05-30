@@ -1,10 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { isBudgetExceeded } from '../budget'
 
 const create = vi.fn()
 vi.mock('@anthropic-ai/sdk', () => ({
   default: class {
     messages = { create }
   },
+}))
+
+vi.mock('../budget', () => ({
+  isBudgetExceeded: vi.fn().mockResolvedValue(false),
+  recordUsage: vi.fn().mockResolvedValue(undefined),
+  currentPeriodYm: vi.fn().mockReturnValue('2026-05'),
 }))
 
 describe('AIProvider', () => {
@@ -42,5 +49,13 @@ describe('AIProvider', () => {
     expect(out.text).toBe('respuesta')
     expect(out.usage).toEqual({ inputTokens: 10, outputTokens: 5 })
     expect(create).toHaveBeenCalledOnce()
+  })
+
+  it('complete lanza AIBudgetExceededError cuando se excedió el presupuesto', async () => {
+    process.env.ANTHROPIC_API_KEY = 'sk-test'
+    vi.mocked(isBudgetExceeded).mockResolvedValueOnce(true)
+    const { complete } = await import('../provider')
+    const { AIBudgetExceededError } = await import('../errors')
+    await expect(complete('x', {})).rejects.toBeInstanceOf(AIBudgetExceededError)
   })
 })
