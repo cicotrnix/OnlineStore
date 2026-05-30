@@ -665,3 +665,26 @@ model AiUsage {
   tokensUsed Int      @default(0)
   updatedAt  DateTime @updatedAt
 }
+
+// ===== Fase 4: AI content generation queue =====
+
+enum AiJobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model AiContentJob {
+  id          String      @id @default(cuid())
+  productId   String
+  locale      String
+  status      AiJobStatus @default(PENDING)
+  attempts    Int         @default(0)
+  lastError   String?     @db.Text
+  enqueuedAt  DateTime    @default(now())
+  processedAt DateTime?
+
+  @@index([status, enqueuedAt])
+  @@index([productId])
+}
