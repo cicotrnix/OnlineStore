@@ -1,9 +1,11 @@
 import { ImpersonationBanner } from '@/components/commerce/ImpersonationBanner'
+import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
 import { SearchBar } from '@/components/commerce/SearchBar'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
+import { getLocale } from '@/lib/i18n'
 import { cartService } from '@/modules/cart'
 import storeConfig from '@/store.config'
 import Link from 'next/link'
@@ -19,6 +21,7 @@ export default async function StorefrontLayout({
   const userId = session?.user?.id
   const cart = userId ? await cartService.get(userId) : null
   const cartCount = cart?.items.reduce((acc, i) => acc + i.quantity, 0) ?? 0
+  const locale = await getLocale({ userId: userId ?? null })
 
   let impersonatingName: string | null = null
   if (session?.impersonatingOrgId) {
@@ -79,6 +82,7 @@ export default async function StorefrontLayout({
                 Aprobaciones
               </Link>
             )}
+            <LocaleSwitch current={locale} />
             {userId ? (
               <NotificationBadge />
             ) : (
