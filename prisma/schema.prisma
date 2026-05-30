@@ -24,6 +24,7 @@ model User {
   image                String?
   isPlatformAdmin      Boolean     @default(false)
   preferredCatalogView CatalogView @default(CARDS)
+  preferredLocale      String?
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
 
