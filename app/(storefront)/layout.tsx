@@ -1,3 +1,4 @@
+import { ChatWidget } from '@/components/commerce/ChatWidget'
 import { ImpersonationBanner } from '@/components/commerce/ImpersonationBanner'
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
@@ -99,6 +100,7 @@ export default async function StorefrontLayout({
           © {new Date().getFullYear()} {storeConfig.identity.name}
         </div>
       </footer>
+      {storeConfig.ai.chat && <ChatWidget />}
     </div>
   )
 }
