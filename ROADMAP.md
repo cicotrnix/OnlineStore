@@ -174,11 +174,10 @@ export default {
     credit: true,
     privateCatalogs: true,
     multiUserApproval: true,
-    aiChat: true,
   },
   payments: { stripe: true, mercadopago: false },
   shipping: { ups: true, fedex: true },
-  ai: { contentGen: true, semanticSearch: true, recommendations: true }
+  ai: { model: 'claude-sonnet-4-6', content: true, chat: true, recommendations: true }
 }
 ```
 
@@ -268,7 +267,7 @@ Plugin `online-store-toolkit` con:
 | 1 — Commerce core | ✅ Cerrada (v1.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-1-commerce-core.md`](docs/specs/2026-05-26-fase-1-commerce-core.md) | [`docs/plans/2026-05-26-fase-1-commerce-core-plan.md`](docs/plans/2026-05-26-fase-1-commerce-core-plan.md) | Catalog, pricing, cart, checkout, orders, impersonation desplegados |
 | 2 — Especialización B2B | ✅ Cerrada (v2.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-2-especializacion-b2b.md`](docs/specs/2026-05-26-fase-2-especializacion-b2b.md) | [`docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md`](docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md) | RFQ, crédito, aprobaciones, catálogos privados, descuentos por volumen, notifications |
 | 3 — Búsqueda | ✅ Cerrada (v3.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-3-busqueda-descubrimiento.md`](docs/specs/2026-05-26-fase-3-busqueda-descubrimiento.md) | [`docs/plans/2026-05-26-fase-3-busqueda-descubrimiento-plan.md`](docs/plans/2026-05-26-fase-3-busqueda-descubrimiento-plan.md) | Meilisearch + Voyage semántico + RRF + filtros facetados + homepage real + admin search panel |
-| 4 — IA aplicada | Pendiente | — | — | — |
+| 4 — IA aplicada | ✅ Cerrada (v4.0.0, 2026-05-30) | [`docs/specs/2026-05-30-fase-4-ia-aplicada.md`](docs/specs/2026-05-30-fase-4-ia-aplicada.md) | [`docs/plans/2026-05-30-fase-4-fundacion-plan.md`](docs/plans/2026-05-30-fase-4-fundacion-plan.md) + cortes 0.5/1/2/3 | AIProvider + i18n + content gen bilingüe + chatbot tool-use + recos pgvector |
 | 5 — Integraciones | Pendiente | — | — | — |
 | 6 — Multi-tenant | Pendiente | — | — | — |
 
@@ -276,21 +275,18 @@ Plugin `online-store-toolkit` con:
 
 ## 10. Próximo paso inmediato
 
-Fase 3 cerrada (v3.0.0, 2026-05-26): 157 unit tests verdes, 6 e2e Fase 3 verdes, lint + typecheck + build limpios. Cambios mergeados a `main`, tag `v3.0.0` publicado.
+Fase 4 cerrada (v4.0.0, 2026-05-30): 208 unit tests verdes, lint + typecheck + build limpios. Branch `feature/fase-4-fundacion` con 35+ commits (Fundación + Corte 0.5 i18n + Corte 1 content + Corte 2 chat + Corte 3 recos). **NO mergeado todavía — esperando OK de Herney para PR + tag + deploy.**
 
-**Ops manual completado (2026-05-30):**
-- ✅ Cuentas Meilisearch Cloud + Voyage AI creadas.
-- ✅ Env vars en Coolify (`MEILISEARCH_HOST`, `MEILISEARCH_API_KEY`, `VOYAGE_API_KEY`).
-- ✅ Índice Meilisearch inicializado vía `scripts/init-meilisearch-index.ts`.
-- ✅ Catálogo real cargado e indexado: 12 baterías Pi-Power para iPhone (categoría "Battery") vía `scripts/load-pipower-catalog.ts` (loader idempotente por SKU, no destructivo). Buscable en `/` y `/search`.
-- ✅ Búsqueda híbrida viva en producción.
+**Pendiente manual (Herney) post-merge:**
+- Cargar `ANTHROPIC_API_KEY` en Coolify env vars (sin esto, módulos AI están en noop fallback).
+- Setear `AI_MONTHLY_TOKEN_BUDGET` (recomendado, `0` = sin límite).
+- Scheduled task Coolify: `process-ai-content-jobs.ts` cada 1 min (mismo cron pattern que `process-search-index-queue`).
+- Encolar bulk content generation desde `/admin/products` → "Generar contenido AI (todos)" para los 12 productos × 2 locales = 24 jobs.
+- Aprobar y publicar contenido generado en `/admin/products/[id]` (gate `isPlatformAdmin`).
+- (Pendientes Fase 3 todavía abiertos): scheduled tasks Coolify para `process-search-index-queue` + `cleanup-stale-search-queue`.
 
-**Pendiente manual (Herney):**
-- Scheduled tasks en Coolify: `process-search-index-queue` `* * * * *` + `cleanup-stale-search-queue` `0 3 * * 0`.
-- Imágenes y descripciones reales de los 12 productos (placeholder hoy).
-
-Próximo: brainstorming de **Fase 4 — IA aplicada** en sesión Cowork (chatbot, recomendaciones, generación de contenido).
+Próximo: brainstorming de **Fase 5 — Integraciones** en sesión Cowork (pagos Stripe/MercadoPago, envíos, ERP).
 
 ---
 
-*Última actualización: 2026-05-30 cierre ops Fase 3 · Próxima revisión: arranque Fase 4*
+*Última actualización: 2026-05-30 cierre código Fase 4 · Próxima revisión: arranque Fase 5*

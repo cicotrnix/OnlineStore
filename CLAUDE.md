@@ -24,7 +24,7 @@ Antes de tocar código, leer en este orden:
 
 ## Estado actual del proyecto
 
-**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0). Fase 2 cerrada (v2.0.0). Fase 3 cerrada (v3.0.0, 2026-05-26).**
+**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0). Fase 2 cerrada (v2.0.0). Fase 3 cerrada (v3.0.0). Fase 4 cerrada (v4.0.0, 2026-05-30).**
 
 **Fase 0 entregado (v0.1.0, 2026-05-25):**
 - Next.js 14 + TypeScript estricto + Tailwind + Biome + Vitest + Playwright.
@@ -75,6 +75,18 @@ Antes de tocar código, leer en este orden:
 - Vitest: 157/157 passing (+ 6 skipped). Playwright E2E: 6/6 fase3.spec.ts (homepage + anon search + private hidden + admin gate).
 - ADRs 0015-0019 (Meilisearch Cloud, Voyage choice, RRF+exact-SKU, cron worker vs background, Unsupported vector pattern), 3 runbooks (search-operations, search-reindex, search-troubleshooting).
 - store.config.ts: `identity.tagline` opcional agregado al schema.
+
+**Fase 4 entregado (v4.0.0, 2026-05-30):**
+- Fundación módulo `modules/ai/`: `AIProvider` (`@anthropic-ai/sdk` con cliente cacheado, noop fallback sin `ANTHROPIC_API_KEY`), `budget` (`AiUsage` per-mes, kill-switch `AI_MONTHLY_TOKEN_BUDGET`), `content-jobs` (cola `AiContentJob` con `FOR UPDATE SKIP LOCKED`, MAX_ATTEMPTS=5, clon del patrón Fase 3), errors tipados, presets de rate-limit `AI_CHAT_LIMITS`/`AI_CONTENT_GEN_LIMITS`.
+- Config: bloque `ai` canónico (`model` / `contentModel` Sonnet / `chatModel` Haiku 4.5 / flags). `identity.brandVoice` opcional. `modules.aiChat` legacy retirado.
+- i18n cookie-based (Corte 0.5): `User.preferredLocale`, `getLocale()` server-side, fallback chain user→cookie→default, `LocaleSwitch` en header storefront, helper `t(locale, key)` (sin librería externa).
+- Corte 1 (content): módulo `modules/ai/content/` (prompt builder con guardrail "no inventa" + `dominio-como-datos`, parser de secciones, service `generateContentForProduct`, `publishContent` con gate `isPlatformAdmin` + reindex post-publish). Admin UI `/admin/products/[id]` con genera/regenera + publica por locale. Bulk "Generar todo" en `/admin/products`. Worker `scripts/process-ai-content-jobs.ts`. PDP renderea `ProductContent` published del locale activo + `generateMetadata` SEO. Importadas 9 imágenes webp Pi-Power (~50KB cada). Loader extendido con `attributes` reales + `compatibleModels`. Badge "Tag-On Flex" en ProductCard + PDP cuando `attributes.flex_included === 'tag-on'`.
+- Corte 2 (chatbot): módulo `modules/ai/chat/` con tool-use (3 tools: `searchProducts`, `getProductDetail`, `checkCompatibility`), B2B pricing/access enforced en cada tool, system prompt + guardrails off-topic, MAX_TOOL_ROUNDS=5. Endpoint `POST /api/ai/chat` con rate-limit `AI_CHAT_LIMITS`. Widget flotante `ChatWidget` montado por storefront layout cuando flag activo.
+- Corte 3 (recommendations): módulo `modules/ai/recommendations/` con `getRelatedProducts` (vecinos pgvector cosine) y `getPersonalizedRecommendations` (heurística sobre historial OrderLine). Sin LLM en hot path. Filtra por `filterAccessibleIds` (Fase 3) para respetar visibilidad B2B. Componente `RelatedProducts` en PDP con título dinámico.
+- Schema delta: `AiUsage`, `AiContentJob` + enum, `ProductContent` + enum `ProductContentStatus`, `Product.attributes/compatibleModels/content`, `User.preferredLocale`, `identity.brandVoice` Zod block.
+- Vitest: 208/208 passing (+ 6 skipped). Lint+typecheck+build limpios.
+- ADRs 0020-0025 (provider+model split, attrs JSON, ProductContent multilingual, chatbot tool-use, recommendations pgvector, i18n cookie). Runbooks: ai-content, ai-chat, ai-recommendations.
+- Flags `ai.content`, `ai.chat`, `ai.recommendations` activos por default en `store.config.ts` (inertes sin `ANTHROPIC_API_KEY`).
 
 ## Decisiones de stack (no abrir sin ADR nuevo)
 

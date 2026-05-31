@@ -24,6 +24,7 @@ model User {
   image                String?
   isPlatformAdmin      Boolean     @default(false)
   preferredCatalogView CatalogView @default(CARDS)
+  preferredLocale      String?
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
 
@@ -225,6 +226,8 @@ model Product {
   embedding          Unsupported("vector(512)")?
   embeddingUpdatedAt DateTime?
   searchableText     String?                     @db.Text
+  attributes         Json?
+  compatibleModels   String[]
   createdAt          DateTime                    @default(now())
   updatedAt          DateTime                    @updatedAt
 
@@ -235,9 +238,33 @@ model Product {
   priceTiers     ProductPriceTier[]
   catalogAccess  OrganizationCatalogAccess[]
   quoteLines     QuoteLine[]
+  content        ProductContent[]
 
   @@index([categoryId])
   @@index([isActive])
+}
+
+enum ProductContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model ProductContent {
+  id                String               @id @default(cuid())
+  productId         String
+  locale            String
+  longDescriptionMd String?              @db.Text
+  shortDescription  String?
+  seoTitle          String?
+  seoDescription    String?
+  status            ProductContentStatus @default(DRAFT)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, locale])
+  @@index([productId])
 }
 
 // ===== pricing =====
@@ -625,6 +652,38 @@ model SearchIndexQueue {
   attempts    Int               @default(0)
   lastError   String?           @db.Text
   enqueuedAt  DateTime          @default(now())
+  processedAt DateTime?
+
+  @@index([status, enqueuedAt])
+  @@index([productId])
+}
+
+// ===== Fase 4: AI usage tracking =====
+
+model AiUsage {
+  id         String   @id @default(cuid())
+  periodYm   String   @unique // "YYYY-MM"
+  tokensUsed Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+// ===== Fase 4: AI content generation queue =====
+
+enum AiJobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model AiContentJob {
+  id          String      @id @default(cuid())
+  productId   String
+  locale      String
+  status      AiJobStatus @default(PENDING)
+  attempts    Int         @default(0)
+  lastError   String?     @db.Text
+  enqueuedAt  DateTime    @default(now())
   processedAt DateTime?
 
   @@index([status, enqueuedAt])

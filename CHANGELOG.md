@@ -1,5 +1,65 @@
 # Changelog
 
+## v4.0.0 — 2026-05-30 — Phase 4: AI Layer
+
+### Added — Fundación
+
+- `modules/ai/provider.ts` — `AIProvider` wrapper over `@anthropic-ai/sdk` with cached client, noop fallback when `ANTHROPIC_API_KEY` is missing. Throws `AIDisabledError` cleanly so dev/test/CI never break.
+- `modules/ai/budget.ts` — monthly token counter (`AiUsage` table, one row per `YYYY-MM`) + kill-switch via `AI_MONTHLY_TOKEN_BUDGET` env. `complete()` checks before every call and records usage after.
+- `modules/ai/content-jobs.ts` — `AiContentJob` queue cloned from Fase 3 `SearchIndexQueue` pattern (`FOR UPDATE SKIP LOCKED`, `MAX_ATTEMPTS=5`). `enqueueContentJob` idempotent by `(productId, locale)` PENDING.
+- Config: canonical `ai` block (`model`/`contentModel`/`chatModel`/`content`/`chat`/`recommendations`); `identity.brandVoice` optional. Removed legacy `modules.aiChat`.
+- Rate-limit presets `AI_CHAT_LIMITS` (5/min, 30/h) and `AI_CONTENT_GEN_LIMITS` (3/min, 10/h).
+
+### Added — Corte 0.5 (i18n)
+
+- Cookie-based locale (no path routing). `User.preferredLocale` for logged users. `lib/i18n/getLocale()` server-side with fallback chain. `LocaleSwitch` in storefront header. Helper `t(locale, key)` with dictionary in `lib/i18n/messages.ts`.
+
+### Added — Corte 1 (content generation)
+
+- `modules/ai/content/` — prompt builder (with domain-as-data guardrail: never invents specs), parser of section headers, service `generateContentForProduct`, `publishContent` with platform-admin gate.
+- Admin UI `/admin/products/[id]` shows per-locale draft/published, Generate/Regenerate (EN+ES), Publish buttons.
+- `/admin/products` adds bulk "Generar contenido AI (todos)".
+- Worker `scripts/process-ai-content-jobs.ts` consumes the queue.
+- PDP renders `ProductContent` published for active locale with EN fallback, plus `generateMetadata` for SEO title/description.
+- 9 Pi-Power webp images imported (~50 KB each) and assigned to products by iPhone model.
+- Loader `scripts/load-pipower-catalog.ts` extended with `attributes` (capacity_mAh, voltage_V, cycles, A-number, flex_included, hazmat, etc.) and `compatibleModels`.
+- Badge "Tag-On Flex" in PDP and ProductCard.
+
+### Added — Corte 2 (chatbot)
+
+- `modules/ai/chat/` — tool-use grounding with 3 tools (`searchProducts`, `getProductDetail`, `checkCompatibility`). Every tool handler respects `filterForOrg` (Fase 2) and `pricingService.resolveForOrg` (Fase 1). `MAX_TOOL_ROUNDS=5`.
+- Endpoint `POST /api/ai/chat` with rate-limit `AI_CHAT_LIMITS` by `userId || ip`.
+- Floating `ChatWidget` in storefront layout, gated by `ai.chat` flag.
+
+### Added — Corte 3 (recommendations)
+
+- `modules/ai/recommendations/` — `getRelatedProducts` (pgvector cosine vecinos, excluding base product, filtered by access) + `getPersonalizedRecommendations` (heuristic over OrderLine history seeding more pgvector lookups). **No LLM in hot path.**
+- `RelatedProducts` component in PDP with dynamic title ("Recomendado para ti" vs "Productos relacionados").
+
+### Schema
+
+- New: `AiUsage`, `AiContentJob` + enum `AiJobStatus`, `ProductContent` + enum `ProductContentStatus`.
+- Extended: `Product.attributes Json?`, `Product.compatibleModels String[]`, `Product.content ProductContent[]`, `User.preferredLocale String?`.
+
+### Tests
+
+- Vitest: 208 passing (+ 6 skipped) across 47 files. New tests for provider, budget, content-jobs, prompt builder, parser, service, publish, chat tools, chat service, recommendations.
+- All gates green: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
+
+### Docs
+
+- ADRs 0020 (AIProvider + model split + nested module exception), 0021 (Product.attributes JSON vs EAV), 0022 (ProductContent multilingual), 0023 (chatbot tool-use grounding), 0024 (recommendations pgvector no LLM), 0025 (i18n cookie vs routing).
+- Runbooks: `ai-content`, `ai-chat`, `ai-recommendations`.
+
+### Manual ops post-deploy
+
+- Set `ANTHROPIC_API_KEY` in Coolify env vars.
+- Set `AI_MONTHLY_TOKEN_BUDGET` (recommended; `0` = unlimited).
+- Coolify scheduled task: `process-ai-content-jobs.ts` `* * * * *`.
+- Encolar bulk content gen desde `/admin/products` y aprobar contenido producto por producto.
+
+---
+
 ## v3.0.0 — 2026-05-26 — Phase 3: Search & Discovery
 
 ### Added
