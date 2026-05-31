@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody } from '@/components/ui/Card'
 import type { Decimal } from '@prisma/client/runtime/library'
 import Link from 'next/link'
@@ -13,6 +14,12 @@ type Product = {
   imageUrl: string | null
   basePrice: Decimal
   stockQuantity: number
+  attributes?: unknown
+}
+
+function isTagOnFlex(attributes: unknown): boolean {
+  if (!attributes || typeof attributes !== 'object') return false
+  return (attributes as Record<string, unknown>).flex_included === 'tag-on'
 }
 
 type Props = {
@@ -51,6 +58,11 @@ export function ProductCard({
           >
             {product.name}
           </Link>
+          {isTagOnFlex(product.attributes) && (
+            <div className="mt-1">
+              <Badge variant="info">Tag-On Flex</Badge>
+            </div>
+          )}
         </div>
         <PriceTag basePrice={product.basePrice} customerPrice={customerPrice} currency={currency} />
         <div className="flex items-center justify-between mt-auto pt-2">
