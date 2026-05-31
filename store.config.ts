@@ -51,7 +51,7 @@ export default defineStoreConfig({
     contentModel: 'claude-sonnet-4-6',
     chatModel: 'claude-haiku-4-5-20251001',
     content: true,
-    chat: false,
+    chat: true,
     recommendations: false,
   },
 })
