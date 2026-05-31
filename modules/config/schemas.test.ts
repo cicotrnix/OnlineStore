@@ -101,6 +101,22 @@ describe('storeConfigSchema', () => {
     cfg.ai = undefined
     expect(() => storeConfigSchema.parse(cfg)).toThrow()
   })
+
+  it('valida identity.brandVoice cuando se provee', () => {
+    const cfg = makeValidConfig()
+    cfg.identity.brandVoice = {
+      audience: 'iPhone repair shops in USA + LATAM',
+      tone: 'technical, precise, no hype',
+      rules: ['no emoji', 'no exclamations except CTA', 'metric units first'],
+    }
+    expect(() => storeConfigSchema.parse(cfg)).not.toThrow()
+  })
+
+  it('brandVoice es opcional', () => {
+    const cfg = makeValidConfig()
+    expect(cfg.identity.brandVoice).toBeUndefined()
+    expect(() => storeConfigSchema.parse(cfg)).not.toThrow()
+  })
 })
 
 describe('themeConfigSchema', () => {

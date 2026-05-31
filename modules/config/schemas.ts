@@ -8,6 +8,13 @@ export const storeConfigSchema = z.object({
     logo: z.string().min(1),
     supportEmail: z.string().email(),
     tagline: z.string().optional(),
+    brandVoice: z
+      .object({
+        audience: z.string().min(1),
+        tone: z.string().min(1),
+        rules: z.array(z.string()).default([]),
+      })
+      .optional(),
   }),
   locale: z.object({
     default: z.string(),
