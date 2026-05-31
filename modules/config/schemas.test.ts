@@ -3,7 +3,14 @@ import { storeConfigSchema, themeConfigSchema } from './schemas'
 
 function makeValidConfig() {
   return {
-    identity: { name: 'Acme', logo: '/logo.svg', supportEmail: 'support@acme.com' },
+    identity: {
+      name: 'Acme',
+      logo: '/logo.svg',
+      supportEmail: 'support@acme.com',
+      brandVoice: undefined as
+        | { audience: string; tone: string; rules: string[] }
+        | undefined,
+    },
     locale: { default: 'en-US', supported: ['en-US'] },
     currency: { base: 'USD' as const },
     modules: {
