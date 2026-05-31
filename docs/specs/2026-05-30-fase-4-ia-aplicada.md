@@ -57,7 +57,7 @@ Cada sub-módulo es cerrado (expone API solo vía su `index.ts`), como el resto 
 - `Product.attributes Json?` — capacity_mah, voltage_v, cycles_rated, apple_model_code, flex_included, pre_programmed_flex_included, product_installation_type, requires_soldering, professional_installation_recommended, warranty_months, hazmat_class, requires_ground_shipping. **JSON liviano, no EAV** (12 productos → YAGNI). **ADR 0021.**
 - `Product.compatibleModels String[]` — modelos de iPhone compatibles (alimenta el chatbot).
 - `ProductContent` (nuevo) — clave `(productId, locale)`; campos `longDescriptionMd`, `shortDescription`, `seoTitle`, `seoDescription`, `status` (`draft`/`published`), timestamps. **ADR 0022** (almacenamiento de contenido multilingüe).
-- `store.config.ts`: bloque `identity.brandVoice` (audiencia, tono, reglas) + bloque `ai` (model, locales, flags `aiContent`/`aiChat`/`aiRecommendations`).
+- `store.config.ts`: bloque `identity.brandVoice` (audiencia, tono, reglas) + bloque `ai` canónico (`model`, `contentModel`, `chatModel`, flags `ai.content`/`ai.chat`/`ai.recommendations`). El legacy `modules.aiChat` heredado de Fase 2 se retira; el bloque `ai` es la única fuente de flags de IA.
 
 ### 4.3 Datos e imágenes
 
@@ -93,7 +93,7 @@ Cada sub-módulo es cerrado (expone API solo vía su `index.ts`), como el resto 
 
 **Matiz B2B:** las tools pasan por `pricing` y acceso/catálogo — logueado ve su precio negociado y solo su catálogo; anónimo ve precio base y catálogo público. Reusa `pricing`, `search`, `catalog`.
 
-**UI:** widget flotante en el storefront, respuestas en streaming, rate-limited (reusa `lib/rate-limit.ts`), detrás del flag `aiChat`.
+**UI:** widget flotante en el storefront, respuestas en streaming, rate-limited (reusa `lib/rate-limit.ts`), detrás del flag `ai.chat`.
 
 **Guardrails:** acotado al dominio de la tienda (no responde off-topic), no inventa, escala al email de soporte cuando no sabe. Input del usuario nunca es prompt libre con poder — solo alimenta tools.
 
@@ -120,7 +120,7 @@ Cada sub-módulo es cerrado (expone API solo vía su `index.ts`), como el resto 
 ## 8. Transversales
 
 - **Costo/rate-limit:** el contenido se genera una vez y se guarda (no por request); el chat va en streaming con límite por org; log de tokens vía Pino.
-- **Feature flags:** `store.config.ts` gana `aiContent`, `aiRecommendations` (`aiChat` ya existe). Defaults OFF hasta cargar API key.
+- **Feature flags:** `store.config.ts` gana bloque `ai` canónico con `ai.content`, `ai.chat`, `ai.recommendations`. El legacy `modules.aiChat` (Fase 2) se retira. Defaults OFF hasta cargar API key; rollout gradual: `ai.content` y `ai.recommendations` activos primero, `ai.chat` se sube cuando el costo/uso esté monitoreado.
 - **i18n:** EN/ES en contenido; switch básico de locale en storefront.
 - **Observabilidad:** Sentry + Pino en cada llamada de IA; métricas de fallo y fallback noop.
 - **Seguridad:** `ANTHROPIC_API_KEY` solo server-side; prompt-injection acotado por tool-use; sin datos de cliente en prompts más allá de lo necesario.
@@ -168,8 +168,8 @@ Cada corte: spec interno (este doc) → plan en `docs/plans/` → implementació
 
 CC revisó el spec contra el código real. Resolución de cada punto — **el plan debe seguir esto**:
 
-1. **`aiChat` default.** CC reportó que `store.config.ts` lo tiene en `true`. **Verificado: es `false`** (línea 26). No hay nada que bajar; los flags de IA (`aiChat`, y los nuevos `aiContent`, `aiRecommendations`) quedan en `false` hasta cargar la key. Subir `aiChat` solo al cerrar el Corte 2.
-2. **Zod schema cerrado.** Confirmado: `storeConfigSchema.identity` y `.modules` son objetos cerrados. Extender `modules/config/schemas.ts` (agregar `identity.brandVoice`, bloque `ai`, flags `aiContent`/`aiRecommendations`) **y actualizar `modules/config/schemas.test.ts`** es sub-task explícito de la Fundación.
+1. **Flag `ai.chat` (resuelto en implementación).** El legacy `modules.aiChat` heredado de Fase 2 se retiró del Zod schema, `store.config.ts` y tests durante Fundación. El bloque `ai` canónico es ahora la única fuente: `ai.content` / `ai.chat` / `ai.recommendations`. Rollout gradual en producción: `ai.content` y `ai.recommendations` activos primero, `ai.chat` se sube tras verificar uso/costo.
+2. **Zod schema cerrado.** Confirmado: `storeConfigSchema.identity` y `.modules` son objetos cerrados. Extender `modules/config/schemas.ts` (agregar `identity.brandVoice`, bloque `ai` con flags canónicos `ai.content`/`ai.chat`/`ai.recommendations`) **y actualizar `modules/config/schemas.test.ts`** es sub-task explícito de la Fundación.
 3. **Estructura anidada.** `modules/ai/<sub>/` es excepción a la convención `service.ts`-por-módulo. Justificada por tamaño; documentar en **ADR 0020**.
 4. **i18n NO es sub-task chico.** El "switch de locale" esconde una decisión real (routing `/[locale]/...` vs cookie/preferencia + RSC). Se trata como **Corte 0.5 (infra i18n)** entre Fundación y Corte 1, con **ADR 0025**. Recomendación (YAGNI): **cookie/preferencia de usuario**, no routing por path, salvo que SEO multi-idioma lo exija. Confirmar con owner.
 5. **Cost budget + kill-switch (crítico, seguridad).** Una key comprometida factura miles. Agregar `AI_MONTHLY_TOKEN_BUDGET` (env) + contador de uso en DB + **kill-switch**: si se excede el presupuesto, el `AIProvider` corta y devuelve error en vez de seguir llamando. Va en la Fundación, no se aplaza.

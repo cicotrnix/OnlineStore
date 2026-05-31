@@ -174,11 +174,10 @@ export default {
     credit: true,
     privateCatalogs: true,
     multiUserApproval: true,
-    aiChat: true,
   },
   payments: { stripe: true, mercadopago: false },
   shipping: { ups: true, fedex: true },
-  ai: { contentGen: true, semanticSearch: true, recommendations: true }
+  ai: { model: 'claude-sonnet-4-6', content: true, chat: true, recommendations: true }
 }
 ```
 
