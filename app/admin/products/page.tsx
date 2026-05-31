@@ -1,5 +1,6 @@
 import { createProductAction, toggleProductActiveAction } from '@/app/admin/_actions'
 import { toggleProductPrivateAction, upsertProductTierAction } from '@/app/admin/_actions-fase2'
+import { enqueueBulkContentGenAction } from '@/app/admin/products/_ai-actions'
 import { StockBadge } from '@/components/commerce/StockBadge'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -36,11 +37,18 @@ export default async function AdminProductsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-medium tracking-tight">Productos</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {products.length} producto{products.length === 1 ? '' : 's'} registrados.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-medium tracking-tight">Productos</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {products.length} producto{products.length === 1 ? '' : 's'} registrados.
+          </p>
+        </div>
+        <form action={enqueueBulkContentGenAction}>
+          <Button type="submit" variant="secondary" size="sm">
+            Generar contenido AI (todos)
+          </Button>
+        </form>
       </div>
 
       <Card>
