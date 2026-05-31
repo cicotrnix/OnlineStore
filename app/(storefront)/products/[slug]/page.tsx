@@ -2,12 +2,14 @@ import { AddToCartButton } from '@/components/commerce/AddToCartButton'
 import { AddToQuoteButton } from '@/components/commerce/AddToQuoteButton'
 import { PriceTag } from '@/components/commerce/PriceTag'
 import { PriceTierTable } from '@/components/commerce/PriceTierTable'
+import { RelatedProducts } from '@/components/commerce/RelatedProducts'
 import { StockBadge } from '@/components/commerce/StockBadge'
 import { Badge } from '@/components/ui/Badge'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { DEFAULT_LOCALE, getLocale } from '@/lib/i18n'
+import { getPersonalizedRecommendations, getRelatedProducts } from '@/modules/ai/recommendations'
 import { catalogService } from '@/modules/catalog'
 import { listTiersForProduct, pricingService } from '@/modules/pricing'
 import storeConfig from '@/store.config'
@@ -61,6 +63,21 @@ export default async function ProductPage({ params }: Props) {
     product.attributes &&
     typeof product.attributes === 'object' &&
     (product.attributes as Record<string, unknown>).flex_included === 'tag-on'
+
+  const personalized =
+    storeConfig.ai.recommendations && session?.user?.id
+      ? await getPersonalizedRecommendations({
+          userId: session.user.id,
+          orgId,
+          limit: 8,
+        }).catch(() => [])
+      : []
+  const related = storeConfig.ai.recommendations
+    ? personalized.length > 0
+      ? personalized
+      : await getRelatedProducts({ productId: product.id, orgId, limit: 8 }).catch(() => [])
+    : []
+  const relatedTitle = personalized.length > 0 ? 'Recomendado para ti' : 'Productos relacionados'
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 grid gap-10 md:grid-cols-2">
@@ -144,6 +161,7 @@ export default async function ProductPage({ params }: Props) {
           </div>
         )}
       </div>
+      <RelatedProducts title={relatedTitle} products={related} signedIn={!!session?.user} />
     </div>
   )
 }
