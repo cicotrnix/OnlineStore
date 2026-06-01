@@ -366,6 +366,7 @@ model Order {
   shippingAddress   OrganizationAddress @relation("OrderShipping", fields: [shippingAddressId], references: [id])
   lines             OrderLine[]
   invoice           Invoice?
+  payment           Payment?
   approvedFromQuote Quote?              @relation("QuoteConvertedOrder")
 
   @@index([organizationId])
@@ -773,4 +774,77 @@ model TaxDocument {
   reviewedById   String?
 
   @@index([organizationId])
+}
+
+// ===== Fase 5 Corte 2: Pagos =====
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  REFUNDED
+  FAILED
+  NEEDS_REVIEW
+}
+
+enum PaymentMethodType {
+  STRIPE_CARD
+  WIRE
+  ACH
+}
+
+model Payment {
+  id              String            @id @default(cuid())
+  orderId         String            @unique
+  order           Order             @relation(fields: [orderId], references: [id])
+  method          PaymentMethodType
+  status          PaymentStatus     @default(PENDING)
+  amountCents     BigInt
+  currency        String
+  // referencias externas
+  stripeSessionId String?           @unique
+  stripeIntentId  String?           @unique
+  idempotencyKey  String?           @unique
+  // wire
+  wireReference   String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  events          PaymentEvent[]
+
+  @@index([status])
+}
+
+model PaymentEvent {
+  id        String   @id @default(cuid())
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  eventId   String   @unique // Stripe event.id o uuid del wire
+  type      String   // ej: checkout.session.completed
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([paymentId])
+}
+
+// ===== Fase 5: Step-up auth (sensitive actions) =====
+
+enum SensitiveActionStatus {
+  ISSUED
+  USED
+  EXPIRED
+}
+
+model SensitiveActionToken {
+  id        String                @id @default(cuid())
+  userId    String
+  action    String                // ej: 'payment.refund'
+  subjectId String                // ej: paymentId
+  tokenHash String                @unique
+  otpHash   String
+  status    SensitiveActionStatus @default(ISSUED)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime              @default(now())
+
+  @@index([userId, action])
 }

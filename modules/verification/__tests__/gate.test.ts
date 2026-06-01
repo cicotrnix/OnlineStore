@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/db/client'
+import { cartService } from '@/modules/cart'
+import { catalogService } from '@/modules/catalog'
+import { checkoutService } from '@/modules/checkout'
+import { customersService } from '@/modules/customers'
 import { cleanDb } from '@/tests/helpers/cleanDb'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { checkoutService } from '@/modules/checkout'
-import { catalogService } from '@/modules/catalog'
-import { cartService } from '@/modules/cart'
-import { customersService } from '@/modules/customers'
 
 beforeEach(async () => {
   await cleanDb()
@@ -61,7 +61,7 @@ describe('checkout verification gate (Fase 5)', () => {
         orgId: org.id,
         billingAddressId: addr.id,
         shippingAddressId: addr.id,
-      }),
+      })
     ).rejects.toThrow('ORG_NOT_VERIFIED')
   })
 
