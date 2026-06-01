@@ -13,15 +13,15 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" aria-label={storeConfig.identity.name} className="block">
+        <div className="max-w-7xl mx-auto pl-2 pr-6 h-20 flex items-center justify-between">
+          <Link href="/" aria-label={storeConfig.identity.name} className="-my-2 block shrink-0">
             <Image
               src={storeConfig.identity.logo}
               alt={storeConfig.identity.name}
-              width={160}
-              height={36}
+              width={1600}
+              height={998}
               priority
-              className="h-8 w-auto"
+              className="h-16 md:h-20 w-auto"
             />
           </Link>
           <nav className="flex items-center gap-5 text-sm">
@@ -49,9 +49,9 @@ export default async function HomePage() {
               src={storeConfig.identity.logo}
               alt={storeConfig.identity.name}
               width={1600}
-              height={900}
+              height={998}
               priority
-              className="h-24 md:h-32 w-auto"
+              className="h-32 md:h-40 w-auto"
             />
           </div>
           {storeConfig.identity.tagline && (
