@@ -44,15 +44,15 @@ export default async function StorefrontLayout({
     <div className="min-h-screen flex flex-col bg-gray-50">
       {impersonatingName && <ImpersonationBanner orgName={impersonatingName} />}
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" aria-label={storeConfig.identity.name} className="block shrink-0">
+        <div className="max-w-7xl mx-auto pl-2 pr-6 h-20 flex items-center justify-between">
+          <Link href="/" aria-label={storeConfig.identity.name} className="-my-2 block shrink-0">
             <Image
               src={storeConfig.identity.logo}
               alt={storeConfig.identity.name}
-              width={160}
-              height={36}
+              width={1600}
+              height={998}
               priority
-              className="h-8 w-auto"
+              className="h-16 md:h-20 w-auto"
             />
           </Link>
           <div className="hidden md:block flex-1 mx-6 max-w-md">
