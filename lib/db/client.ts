@@ -8,8 +8,8 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
  * Tests pueden saltarlo con APPEND_ONLY_GUARD=off (cleanDb necesita borrar).
  */
 // DomainEvent NO va aquí — su `status` muta (PENDING→PROCESSING→DONE). El asiento
-// de doble partida y los PaymentEvent sí son auténticamente append-only.
-const APPEND_ONLY_MODELS = ['JournalEntry', 'JournalLine', 'PaymentEvent']
+// de doble partida, los PaymentEvent y los AuditLog sí son auténticamente append-only.
+const APPEND_ONLY_MODELS = ['JournalEntry', 'JournalLine', 'PaymentEvent', 'AuditLog']
 const APPEND_ONLY_BLOCKED = ['update', 'updateMany', 'delete', 'deleteMany', 'upsert']
 
 function makeClient(): PrismaClient {

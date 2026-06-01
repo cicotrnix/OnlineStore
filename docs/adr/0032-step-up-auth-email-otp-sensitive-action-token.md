@@ -19,6 +19,8 @@ Auth.js v5 actual usa magic-link passwordless. Suficiente para login + navegaci�
 - **Single-use**: status `USED` bloquea reusar.
 - **TTL 10 min**: balance entre UX (admin abre dashboard, decide refund, mira email) y exposición.
 - **Hashes en DB**, no plaintext. Sin riesgo si el DB se filtra.
+- **OTP generado con `crypto.randomInt(100000, 1000000)`** — no `Math.random` (CSPRNG obligatorio para autenticación).
+- **Brute-force lockout**: `SensitiveActionToken.otpAttempts` se incrementa en cada OTP fallido. Tras 5 fallos → `status = BLOCKED`; el OTP correcto post-bloqueo NO funciona. El admin debe re-issuar.
 
 ## Consecuencias
 

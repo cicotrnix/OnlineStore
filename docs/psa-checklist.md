@@ -1,8 +1,8 @@
 # Payments Security Assurance (PSA) — Corte 2 Checklist
 
-> Doctrina: **Payment Security Defense Doctrine (PSDD)**. El webhook firmado es la **única fuente de verdad**. Nada en el cliente, nada del frontend, decide capturar un pago ni decrementar stock. Este checklist se pasa antes de cerrar Corte 2 y antes de cualquier merge que toque `modules/payments/**`.
+> Doctrina: **Payment Security Defense Doctrine (PSDD)**. El webhook firmado es la **única fuente de verdad**. Nada en el cliente, nada del frontend, decide capturar un pago, marcar refund, ni decrementar stock. Este checklist se pasa antes de cerrar Corte 2 y antes de cualquier merge que toque `modules/payments/**`.
 
-Última revisión: 2026-06-01 — Corte 2 (PSDD pagos Stripe Checkout + wire ACH).
+Última revisión: 2026-06-01 — post-review PR #11 (refund webhook-driven + invoice.issued + COGS + step-up brute-force lockout + AuditLog).
 
 ## §1 — Source of truth
 
@@ -30,6 +30,7 @@ Test cobertura: `modules/payments/__tests__/service.test.ts`:
 - [x] Auto-refund fuera de la tx (Stripe API call) si hay `stripeIntentId`. Razón: tx ya commiteada en NEEDS_REVIEW; el refund falla idempotente vía `auto-refund-${paymentId}` idempotency key.
 - [x] Se lanza `PaymentMismatchError` después del refund para que el caller (route handler) responda 422 al webhook.
 - [x] Logger emite `ERROR` con `expectedCents`, `amountTotal`, `expectedCurrency`, `currency` para forensics.
+- [x] **`AuditLog` row** (append-only) escrita dentro de la tx con `category='payment.mismatch'`, `subjectId=paymentId` y payload con eventId/sessionId/amounts/currencies/orderId.
 - [x] El stock **NO** baja en un mismatch.
 
 Test cobertura: `webhook mismatch → NEEDS_REVIEW + auto-refund + PaymentMismatchError` ✅
@@ -44,22 +45,27 @@ Test cobertura: `webhook mismatch → NEEDS_REVIEW + auto-refund + PaymentMismat
 
 Test cobertura: `webhook captura → CAPTURED + stock baja + payment.captured emitido` ✅
 
-## §5 — Refunds con step-up
+## §5 — Refunds con step-up + webhook-driven
 
 - [x] `refundPayment` requiere `consumeSensitiveActionToken` válido. Sin step-up → `STEP_UP_FAILED`.
 - [x] Token sensible: SHA-256 hashes en DB (nunca plaintext), TTL 10 min, single-use enforced via `status = USED`.
 - [x] Token está scoped a `(userId, action, subjectId)`. Token emitido para `payment.refund:p1` no sirve para `payment.refund:p2`.
+- [x] OTP generado con `crypto.randomInt(100000, 1000000)` — no `Math.random`.
+- [x] **Brute-force lockout**: contador `otpAttempts` en `SensitiveActionToken`. Tras 5 OTP fallidos → status = `BLOCKED`; el OTP correcto post-bloqueo tampoco funciona.
 - [x] OTP de 6 dígitos enviado vía email (Resend); el token opaco devuelto al cliente. Ambos requeridos para consumir.
-- [x] Refund emite `payment.refunded` evento en tx.
-- [x] Si `Payment.status !== CAPTURED` → no se permite refund.
+- [x] **`refundPayment` NO marca REFUNDED** — solo `REFUND_PENDING`. La transición a `REFUNDED` + emisión de `payment.refunded` ocurre solo cuando llega `charge.refunded` webhook firmado.
+- [x] **Idempotency key estable** para Stripe Refund API: `refund-${paymentId}` (sin `Date.now`). Segunda llamada de `refundPayment` devuelve el mismo `refundId`.
+- [x] Si `Payment.status === REFUND_PENDING || REFUNDED` → `refundPayment` es idempotente (no re-llama OTP, reusa refund existente).
+- [x] Si `Payment.status !== CAPTURED` (y no es PENDING/REFUNDED) → no se permite iniciar refund.
 
-Test cobertura: `modules/payments/__tests__/step-up.test.ts` (4 tests) + `modules/payments/__tests__/refund.test.ts` (2 tests) ✅
+Test cobertura: `modules/payments/__tests__/step-up.test.ts` (5 tests) + `modules/payments/__tests__/refund.test.ts` (4 tests) ✅
 
 ## §6 — Webhook hardening
 
 - [x] HMAC sha256 con secret de `STRIPE_WEBHOOK_SECRET` (env). `lib/stripe/index.ts:FakeStripe.verifyWebhook()`.
 - [x] Comparación timing-safe — sí, vía `crypto.timingSafeEqual` (FakeStripe usa `===` interno, OK para fake; producción StripeClient real debe usar SDK que ya lo hace).
-- [x] Eventos no soportados (no `checkout.session.completed` ni `payment_intent.payment_failed`) → ignorados con `{ ok: true, reason: 'event type ignored' }`.
+- [x] Eventos soportados: `checkout.session.completed`, `payment_intent.payment_failed`, `charge.refunded`. Otros tipos ignorados con `{ ok: true, reason: 'event type ignored' }`.
+- [x] `charge.refunded` lookup por `obj.payment_intent` → `stripeIntentId`. Row lock + status check evita REFUNDED en replay.
 - [x] Pagos desconocidos (`stripeSessionId` no en DB) → log warn + `{ ok: false, reason: 'unknown payment' }`.
 
 ## §7 — Wire / ACH (manual reconciliation)
@@ -91,10 +97,13 @@ Tests obligatorios para considerar PSDD compliance (todos pasan):
 8. [x] `OTP incorrecto = false`
 9. [x] `subject diferente = false`
 10. [x] `token consumido no se reutiliza`
-11. [x] `refund válido con step-up correcto → REFUNDED + payment.refunded`
-12. [x] `refund sin step-up válido → STEP_UP_FAILED`
+11. [x] `5 OTP incorrectos → token BLOCKED y no acepta OTP válido luego`
+12. [x] `inicia refund: REFUND_PENDING (NO REFUNDED) + sin payment.refunded aún`
+13. [x] `refund sin step-up válido → STEP_UP_FAILED`
+14. [x] `webhook charge.refunded → REFUNDED + emite payment.refunded; replay idempotente`
+15. [x] `refundPayment idempotente: 2 calls → mismo refund id`
 
-Suite: `pnpm vitest run modules/payments` → **12/12 pass**.
+Suite: `pnpm vitest run modules/payments` → **15/15 pass**.
 
 ## §10 — Pre-producción (lo que Herney debe provisionar)
 
@@ -146,7 +155,12 @@ Suite: `pnpm vitest run modules/payments` → **12/12 pass**.
 | `payment.refunded` | CxC (1100) + Inventario (1300) | Stripe-clearing (1200) + COGS (5000) |
 
 - [x] Cada regla emite líneas balanceadas por construcción (test paramétrico cubre 100 valores).
-- [x] Inventario/COGS solo se postean si el payload trae `cogsCents > 0` (no obliga al productor a calcularlos si no aplica).
+- [x] **Productores emiten `invoice.issued`**:
+  - `ordersService.placeOrder` (al colocar la orden — wire/prepaid recibe instrucciones de wire + revenue recognition accrual).
+  - `handleStripeWebhook` checkout.session.completed (card path — idempotente vía `ensureInvoiceAndEmit`; si Invoice ya existe por order.placed, no re-emite).
+  - `reconcileWire` (defense in depth para wire conciliado sin order.placed previo, idempotente).
+- [x] **`cogsCents` calculado** desde `Product.unitCostCents × OrderLine.quantity` en `handleStripeWebhook` y `reconcileWire`. Si ningún producto tiene `unitCostCents` → `cogsCents = 0` → no se postea COGS (regla salta).
+- [x] **`restockCents`** calculado igual en `charge.refunded` → revierte COGS/Inventario.
 
 ### §12.6 — Integración con bus
 
@@ -174,8 +188,11 @@ Suite: `pnpm vitest run modules/accounting`.
 8. [x] `POSTING_RULES payment.refunded sin restock: 2 líneas`
 9. [x] `accountingSubscriber end-to-end via bus: invoice.issued → asiento posteado`
 10. [x] `replay del mismo evento via dispatcher no duplica asientos`
+11. [x] `integridad card: order → invoice.issued → payment.captured → AR=0, Revenue=total, Stripe-clearing=total, COGS/Inv balanceados`
+12. [x] `integridad wire: reconcileWire → AR=0 + Banco=total + COGS/Inv si hay costo`
+13. [x] `integridad refund vía webhook: revierte Stripe-clearing → CxC y COGS/Inv`
 
-**10/10 tests pass.**
+**13/13 tests pass.**
 
 ## §11 — Sustitución del FakeStripe en producción
 

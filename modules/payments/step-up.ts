@@ -2,16 +2,22 @@
  * Step-up authentication para acciones sensibles (refunds, etc).
  * Flow:
  *   1) issueSensitiveActionToken(userId, action, subjectId) → genera OTP por email
- *      y devuelve un opaque token. Guarda hashes (token + OTP).
+ *      y devuelve un opaque token. Guarda hashes (token + OTP) + contador de
+ *      intentos OTP.
  *   2) Usuario recibe email con OTP. Confirma con consumeSensitiveActionToken
  *      pasando token + OTP. Se marca USED y devuelve true.
  *
+ * Hardening Fase 5 review:
+ * - OTP usa crypto.randomInt (no Math.random).
+ * - Contador otpAttempts: tras MAX_OTP_ATTEMPTS=5 OTP fallidos → status=BLOCKED.
+ *
  * El consumer (refundPayment) verifica el token antes de ejecutar la acción.
  */
-import { createHash, randomBytes } from 'node:crypto'
+import { createHash, randomBytes, randomInt } from 'node:crypto'
 import { prisma } from '@/lib/db/client'
 
 const TTL_MS = 10 * 60 * 1000 // 10 min
+export const MAX_OTP_ATTEMPTS = 5
 
 function sha256(input: string): string {
   return createHash('sha256').update(input).digest('hex')
@@ -29,7 +35,8 @@ export async function issueSensitiveActionToken(input: {
   subjectId: string
 }): Promise<IssuedToken> {
   const token = randomBytes(24).toString('hex')
-  const otp = String(Math.floor(100000 + Math.random() * 900000))
+  // crypto.randomInt(min, max) → [min, max). 100000..999999 → 6 dígitos.
+  const otp = String(randomInt(100000, 1000000))
   const expiresAt = new Date(Date.now() + TTL_MS)
   await prisma.sensitiveActionToken.create({
     data: {
@@ -70,7 +77,18 @@ export async function consumeSensitiveActionToken(input: {
   ) {
     return false
   }
-  if (row.otpHash !== sha256(input.otp)) return false
+  if (row.otpHash !== sha256(input.otp)) {
+    const nextAttempts = row.otpAttempts + 1
+    const block = nextAttempts >= MAX_OTP_ATTEMPTS
+    await prisma.sensitiveActionToken.update({
+      where: { id: row.id },
+      data: {
+        otpAttempts: nextAttempts,
+        ...(block ? { status: 'BLOCKED' as const } : {}),
+      },
+    })
+    return false
+  }
 
   await prisma.sensitiveActionToken.update({
     where: { id: row.id },

@@ -59,8 +59,18 @@ class FakeStripe implements StripeClient {
     return session
   }
 
-  async refund(_paymentIntentId: string, _idempotencyKey: string): Promise<{ id: string }> {
-    return { id: `re_${Math.random().toString(36).slice(2, 10)}` }
+  private refundsByKey = new Map<string, string>()
+
+  async refund(_paymentIntentId: string, idempotencyKey: string): Promise<{ id: string }> {
+    // Idempotente: misma key → mismo refund id (espejo de la API real).
+    const cached = this.refundsByKey.get(idempotencyKey)
+    if (cached) return { id: cached }
+    const id = `re_${createHmac('sha256', this.signingSecret)
+      .update(idempotencyKey)
+      .digest('hex')
+      .slice(0, 12)}`
+    this.refundsByKey.set(idempotencyKey, id)
+    return { id }
   }
 
   verifyWebhook(rawBody: string, signature: string): StripeWebhookEvent | null {
@@ -87,6 +97,7 @@ class FakeStripe implements StripeClient {
   _reset() {
     this.sessions.clear()
     this.idempotency.clear()
+    this.refundsByKey.clear()
   }
 }
 

@@ -3,7 +3,55 @@ import { logger } from '@/lib/observability/logger'
 import { type StripeClient, getStripeClient } from '@/lib/stripe'
 import { emitEvent } from '@/modules/events'
 import { ordersService } from '@/modules/orders'
+import type { Prisma } from '@prisma/client'
 import { PaymentMismatchError, PaymentWebhookInvalidError } from './errors'
+
+/**
+ * Suma el costo del proveedor de las líneas (qty × unitCostCents) cuando
+ * exista. Devuelve 0n si ningún producto tiene unitCostCents (no se postea
+ * COGS hasta que ops cargue costos).
+ */
+async function calculateCogsCents(tx: Prisma.TransactionClient, orderId: string): Promise<bigint> {
+  const lines = await tx.orderLine.findMany({
+    where: { orderId },
+    select: { quantity: true, product: { select: { unitCostCents: true } } },
+  })
+  let total = 0n
+  for (const ln of lines) {
+    const cost = ln.product.unitCostCents
+    if (cost == null) continue
+    total += cost * BigInt(ln.quantity)
+  }
+  return total
+}
+
+/**
+ * Crea/recupera Invoice para una orden. Idempotente por orderId UNIQUE.
+ * Emite invoice.issued solo si la Invoice fue creada en esta tx.
+ */
+async function ensureInvoiceAndEmit(
+  tx: Prisma.TransactionClient,
+  order: { id: string; total: { toString(): string }; currency: string; organizationId: string }
+): Promise<{ invoiceId: string; created: boolean }> {
+  const existing = await tx.invoice.findUnique({ where: { orderId: order.id } })
+  if (existing) return { invoiceId: existing.id, created: false }
+
+  const { createInvoiceFromOrder } = await import('@/modules/accounts')
+  const invoice = await createInvoiceFromOrder(order.id, tx)
+  await emitEvent(tx, {
+    type: 'invoice.issued',
+    aggregateType: 'Invoice',
+    aggregateId: invoice.id,
+    payload: {
+      invoiceId: invoice.id,
+      orderId: order.id,
+      amountCents: decimalToCents(order.total),
+      currency: order.currency,
+      organizationId: order.organizationId,
+    },
+  })
+  return { invoiceId: invoice.id, created: true }
+}
 
 export interface CreateCardCheckoutInput {
   orderId: string
@@ -29,14 +77,9 @@ export async function createCardCheckout(
   if (!order) throw new Error('order not found')
 
   const idempotencyKey = `pay-${order.id}`
-  // Crea/reusa Payment PENDING con idempotency.
-  const existing = await prisma.payment.findUnique({
-    where: { idempotencyKey },
-  })
-  if (existing?.stripeSessionId) {
-    return { paymentId: existing.id, url: '' } // url cached client-side
-  }
-
+  // Stripe createCheckoutSession es idempotente por idempotencyKey — invocarlo
+  // siempre devuelve la misma sesión y URL. Eso evita guardar la URL en DB y
+  // permite servirla al caller también en el path "ya existe el Payment".
   const session = await client.createCheckoutSession({
     orderId: order.id,
     amountCents: decimalToCents(order.total),
@@ -82,7 +125,8 @@ export async function handleStripeWebhook(
   // Solo procesamos eventos relevantes.
   if (
     event.type !== 'checkout.session.completed' &&
-    event.type !== 'payment_intent.payment_failed'
+    event.type !== 'payment_intent.payment_failed' &&
+    event.type !== 'charge.refunded'
   ) {
     return { ok: true, eventId: event.id, reason: 'event type ignored' }
   }
@@ -97,8 +141,18 @@ export async function handleStripeWebhook(
   const amountTotal = Number(obj.amount_total ?? 0)
   const currency = String(obj.currency ?? 'usd').toUpperCase()
 
-  const payment = await prisma.payment.findUnique({
-    where: { stripeSessionId: sessionId },
+  // Lookup distinto según el tipo de evento:
+  // - checkout.session.completed → obj.id es session id (cs_...)
+  // - payment_intent.payment_failed → obj.id es payment intent id (pi_...)
+  // - charge.refunded → obj.payment_intent es el pi_...
+  const intentLookup =
+    event.type === 'charge.refunded'
+      ? String(obj.payment_intent ?? '')
+      : event.type === 'payment_intent.payment_failed'
+        ? sessionId
+        : null
+  const payment = await prisma.payment.findFirst({
+    where: intentLookup ? { stripeIntentId: intentLookup } : { stripeSessionId: sessionId },
     include: {
       order: {
         select: {
@@ -113,8 +167,37 @@ export async function handleStripeWebhook(
     },
   })
   if (!payment) {
-    logger.warn({ sessionId }, 'webhook for unknown payment')
+    logger.warn({ sessionId, intentLookup, type: event.type }, 'webhook for unknown payment')
     return { ok: false, eventId: event.id, reason: 'unknown payment' }
+  }
+
+  if (event.type === 'charge.refunded') {
+    await prisma.$transaction(async (tx) => {
+      await tx.paymentEvent.create({
+        data: { paymentId: payment.id, eventId: event.id, type: event.type, payload: payload },
+      })
+      // Row lock idempotency: si ya REFUNDED por replay previo, salir.
+      await tx.$executeRawUnsafe(`SELECT id FROM "Payment" WHERE id = $1 FOR UPDATE`, payment.id)
+      const current = await tx.payment.findUniqueOrThrow({
+        where: { id: payment.id },
+        select: { status: true, amountCents: true },
+      })
+      if (current.status === 'REFUNDED') return
+      await tx.payment.update({ where: { id: payment.id }, data: { status: 'REFUNDED' } })
+      const restockCents = await calculateCogsCents(tx, payment.orderId)
+      await emitEvent(tx, {
+        type: 'payment.refunded',
+        aggregateType: 'Payment',
+        aggregateId: payment.id,
+        payload: {
+          orderId: payment.orderId,
+          amountCents: Number(current.amountCents),
+          currency: payment.order.currency,
+          restockCents: Number(restockCents),
+        },
+      })
+    })
+    return { ok: true, eventId: event.id }
   }
 
   if (event.type === 'payment_intent.payment_failed') {
@@ -147,6 +230,21 @@ export async function handleStripeWebhook(
       await tx.payment.update({
         where: { id: payment.id },
         data: { status: 'NEEDS_REVIEW' },
+      })
+      await tx.auditLog.create({
+        data: {
+          category: 'payment.mismatch',
+          subjectId: payment.id,
+          payload: {
+            eventId: event.id,
+            stripeSessionId: sessionId,
+            expectedCents,
+            amountTotal,
+            expectedCurrency: payment.order.currency,
+            currency,
+            orderId: payment.orderId,
+          },
+        },
       })
     })
     // Auto-refund (fuera de tx — Stripe API).
@@ -201,6 +299,17 @@ export async function handleStripeWebhook(
       }
     }
 
+    // Emite invoice.issued (idempotente por orderId UNIQUE en Invoice).
+    await ensureInvoiceAndEmit(tx, {
+      id: payment.order.id,
+      total: payment.order.total,
+      currency: payment.order.currency,
+      organizationId: payment.order.organizationId,
+    })
+
+    // COGS calculado desde Product.unitCostCents (0n si ningún producto tiene costo).
+    const cogsCents = await calculateCogsCents(tx, payment.orderId)
+
     await emitEvent(tx, {
       type: 'payment.captured',
       aggregateType: 'Payment',
@@ -209,6 +318,7 @@ export async function handleStripeWebhook(
         orderId: payment.orderId,
         amountCents: expectedCents,
         currency: payment.order.currency,
+        cogsCents: Number(cogsCents),
       },
     })
   })
@@ -277,6 +387,13 @@ export async function reconcileWire(input: {
         if (r === 0) throw new Error(`insufficient stock at reconcile for ${ln.productId}`)
       }
     }
+    // Necesitamos organizationId para Invoice — refetch order completo.
+    const fullOrder = await tx.order.findUniqueOrThrow({
+      where: { id: order.id },
+      select: { id: true, total: true, currency: true, organizationId: true },
+    })
+    await ensureInvoiceAndEmit(tx, fullOrder)
+    const cogsCents = await calculateCogsCents(tx, order.id)
     await emitEvent(tx, {
       type: 'payment.reconciled',
       aggregateType: 'Payment',
@@ -285,6 +402,8 @@ export async function reconcileWire(input: {
         orderId: order.id,
         wireReference: input.wireReference,
         amountCents: input.amountCents,
+        currency: order.currency,
+        cogsCents: Number(cogsCents),
       },
     })
   })

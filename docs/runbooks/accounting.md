@@ -3,6 +3,11 @@
 ## Operación normal
 
 - Posteo es automático via `accountingSubscriber` del bus. Cero acción humana en happy path.
+- **Productores que emiten `invoice.issued`** (revenue recognition accrual):
+  - `ordersService.placeOrder` — al colocar la orden (wire instructions email + revenue ya reconocido).
+  - `handleStripeWebhook` (card capture) — idempotente, no re-emite si Invoice ya existe.
+  - `reconcileWire` — defense in depth, idempotente.
+- **`Product.unitCostCents`** debe cargarse por producto para que COGS postee. Si es null en un producto, su porción de COGS es 0 (no se postea esa parte).
 - Verificar diariamente:
   ```sql
   SELECT

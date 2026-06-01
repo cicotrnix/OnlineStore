@@ -17,7 +17,10 @@ Stripe Checkout hosted devuelve al cliente una `success_url`. Confiar en ese ret
 - Stock decrement vía SQL atómico `UPDATE Product SET stock = stock - $1 WHERE id = $2 AND stock >= $1` — falla si no hay stock.
 - Mismatch (monto/moneda) → `Payment.status=NEEDS_REVIEW` + auto-refund (idempotency key `auto-refund-${paymentId}`) + audit + throw `PaymentMismatchError`.
 - Wire/ACH: `reconcileWire` con `eventId = wire-${wireReference}` determinístico → idempotente por referencia.
-- Refunds: gated por step-up email-OTP + sensitive_action_token (sub-módulo nuevo, ADR 0032).
+- Refunds: gated por step-up email-OTP + sensitive_action_token (sub-módulo nuevo, ADR 0032). **`refundPayment` solo INICIA el refund** (marca `REFUND_PENDING`, llama Stripe Refund API con idempotency key estable `refund-${paymentId}`). La transición a `REFUNDED` + emisión de `payment.refunded` ocurre exclusivamente cuando llega `charge.refunded` webhook firmado — mismo principio que captura.
+- **Reconocimiento de ingreso (accrual)**: `invoice.issued` se emite al colocar la orden (`ordersService.placeOrder`). Para card, el webhook de captura también llama `ensureInvoiceAndEmit` que es idempotente (Invoice.orderId UNIQUE). Esto asegura que Revenue y CxC se posteen aún si el wire instructions email se necesita disparar antes del pago.
+- **COGS**: `Product.unitCostCents` (nullable). En cada captura/reconciliación se calcula `cogsCents = Σ(qty × unitCost)`; si todos los productos tienen costo null, `cogsCents=0` y la regla COGS/Inventario salta.
+- **Mismatch → AuditLog**: además del log estructurado y `Payment.status=NEEDS_REVIEW`, se escribe una fila en `AuditLog` (append-only) con eventId, sessionId, amounts esperados/recibidos y orderId, para forensics independiente del logger externo.
 - Cliente Stripe es interface (`StripeClient`); `FakeStripe` para tests; producción detecta `STRIPE_SECRET_KEY` y reemplaza.
 
 ## Consecuencias

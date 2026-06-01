@@ -102,6 +102,45 @@ export const ordersService = {
       })
 
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } })
+
+      // Fase 5: bus events. order.placed → email + analytics + webhook.
+      // invoice.issued solo se emite aquí si NO es prepaid-card-checkout:
+      // - PREPAID puede ser tarjeta (Stripe Checkout) o wire/ACH manual.
+      //   Para no emitir doble, dejamos que el webhook de Stripe emita en
+      //   captura (ensureInvoiceAndEmit es idempotente: el segundo no crea).
+      // - Hoy decidimos emitir invoice.issued en ambos casos al placement
+      //   porque accrual reconoce ingreso al colocar la orden. La idempotencia
+      //   por orderId UNIQUE en Invoice + UNIQUE en eventId garantiza no-doble.
+      const { createInvoiceFromOrder } = await import('@/modules/accounts')
+      const invoice = await createInvoiceFromOrder(order.id, tx)
+      const { emitEvent } = await import('@/modules/events')
+      const totalCents = Math.round(order.total.toNumber() * 100)
+      await emitEvent(tx, {
+        type: 'order.placed',
+        aggregateType: 'Order',
+        aggregateId: order.id,
+        payload: {
+          orderNumber: order.orderNumber,
+          organizationId: order.organizationId,
+          userId: order.placedByUserId,
+          totalCents,
+          currency: order.currency,
+          paymentMethod: order.paymentMethod,
+        },
+      })
+      await emitEvent(tx, {
+        type: 'invoice.issued',
+        aggregateType: 'Invoice',
+        aggregateId: invoice.id,
+        payload: {
+          invoiceId: invoice.id,
+          orderId: order.id,
+          amountCents: totalCents,
+          currency: order.currency,
+          organizationId: order.organizationId,
+        },
+      })
+
       return order
     })
   },

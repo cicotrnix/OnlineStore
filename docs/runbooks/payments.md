@@ -5,12 +5,19 @@
 - Verificar `SELECT status, COUNT(*) FROM "Payment" GROUP BY status;`. Alarma si `NEEDS_REVIEW > 0`.
 - Revisar `SELECT * FROM "Payment" WHERE status='NEEDS_REVIEW';` → mismatch detectado por webhook. El auto-refund ya se disparó; documentar y cerrar caso.
 
-## Refund manual
+## Refund manual (webhook-driven, PSDD)
 
 1. Admin abre `/admin/orders/[id]` → "Refund".
 2. Sistema emite step-up token + envía OTP por email (Resend).
-3. Admin pega token + OTP → `refundPayment` se ejecuta.
-4. Auditoría: buscar `DomainEvent` `payment.refunded` con `aggregateId=paymentId`.
+3. Admin pega token + OTP → `refundPayment` ejecuta:
+   - Valida step-up (5 OTP fallidos bloquean el token).
+   - Llama a Stripe Refund API con idempotency key `refund-${paymentId}`.
+   - Marca `Payment.status = REFUND_PENDING`. **NO** marca REFUNDED ni emite `payment.refunded` aquí.
+4. Stripe envía webhook `charge.refunded` asíncrono (segundos a minutos).
+5. `handleStripeWebhook` recibe, verifica firma, transiciona `REFUND_PENDING → REFUNDED` y emite `payment.refunded` (con `restockCents` calculado).
+6. Auditoría: buscar `DomainEvent` `payment.refunded` con `aggregateId=paymentId` + `PaymentEvent` `type='charge.refunded'`.
+
+Si el webhook no llega en > 30 min: investigar Stripe Dashboard. El refund ya se inició; reintentar `refundPayment` es seguro (idempotencia estable).
 
 ## Wire reconciliation
 
@@ -30,8 +37,9 @@
 ## Stripe Dashboard config
 
 Endpoint: `https://<host>/api/webhooks/stripe`. Eventos:
-- `checkout.session.completed`
-- `payment_intent.payment_failed`
+- `checkout.session.completed` (captura)
+- `payment_intent.payment_failed` (FAILED)
+- `charge.refunded` (REFUNDED + emite payment.refunded)
 
 Otros eventos son ignorados con `{ ok: true, reason: 'event type ignored' }`.
 

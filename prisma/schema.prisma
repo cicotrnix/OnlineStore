@@ -224,6 +224,7 @@ model Product {
   name               String
   description        String?
   basePrice          Decimal                     @db.Decimal(12, 2)
+  unitCostCents      BigInt?                     // Fase 5 review: costo de proveedor para COGS. Nullable: si no se conoce, no se postea COGS.
   stockQuantity      Int                         @default(0)
   imageUrl           String?
   isActive           Boolean                     @default(true)
@@ -788,6 +789,7 @@ enum PaymentStatus {
   PENDING
   AUTHORIZED
   CAPTURED
+  REFUND_PENDING
   REFUNDED
   FAILED
   NEEDS_REVIEW
@@ -838,21 +840,37 @@ enum SensitiveActionStatus {
   ISSUED
   USED
   EXPIRED
+  BLOCKED // Fase 5 review: tras MAX_OTP_ATTEMPTS=5 fallidos
 }
 
 model SensitiveActionToken {
-  id        String                @id @default(cuid())
-  userId    String
-  action    String                // ej: 'payment.refund'
-  subjectId String                // ej: paymentId
-  tokenHash String                @unique
-  otpHash   String
-  status    SensitiveActionStatus @default(ISSUED)
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime              @default(now())
+  id          String                @id @default(cuid())
+  userId      String
+  action      String                // ej: 'payment.refund'
+  subjectId   String                // ej: paymentId
+  tokenHash   String                @unique
+  otpHash     String
+  status      SensitiveActionStatus @default(ISSUED)
+  otpAttempts Int                   @default(0) // Fase 5 review: contador anti-brute-force
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime              @default(now())
 
   @@index([userId, action])
+}
+
+// ===== Fase 5 review: AuditLog append-only para evidencia forense =====
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  category  String   // ej: 'payment.mismatch', 'period.closed'
+  subjectId String?
+  actorId   String?
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([category, createdAt])
+  @@index([subjectId])
 }
 
 // ===== Fase 5 Corte 3: Contabilidad doble partida (BIGINT cents, append-only) =====

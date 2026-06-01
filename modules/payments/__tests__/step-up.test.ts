@@ -86,4 +86,36 @@ describe('sensitive action step-up', () => {
     })
     expect(ok).toBe(false)
   })
+
+  it('5 OTP incorrectos → token BLOCKED y no acepta el OTP válido luego', async () => {
+    const { prisma } = await import('@/lib/db/client')
+    const u = await user()
+    const { token, otp } = await issueSensitiveActionToken({
+      userId: u.id,
+      action: 'payment.refund',
+      subjectId: 'p1',
+    })
+    for (let i = 0; i < 5; i++) {
+      const ok = await consumeSensitiveActionToken({
+        token,
+        otp: '000000',
+        userId: u.id,
+        action: 'payment.refund',
+        subjectId: 'p1',
+      })
+      expect(ok).toBe(false)
+    }
+    const row = await prisma.sensitiveActionToken.findFirstOrThrow({ where: { userId: u.id } })
+    expect(row.status).toBe('BLOCKED')
+    expect(row.otpAttempts).toBe(5)
+    // OTP correcto post-bloqueo no funciona.
+    const finalOk = await consumeSensitiveActionToken({
+      token,
+      otp,
+      userId: u.id,
+      action: 'payment.refund',
+      subjectId: 'p1',
+    })
+    expect(finalOk).toBe(false)
+  })
 })
