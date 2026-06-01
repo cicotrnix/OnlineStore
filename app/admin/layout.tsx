@@ -1,6 +1,8 @@
 import { requireAuth } from '@/lib/auth/helpers'
+import { maintainCurrentSession } from '@/lib/auth/maintain'
 import { prisma } from '@/lib/db/client'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,11 +20,13 @@ const navItems = [
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  await maintainCurrentSession()
   const user = await requireAuth()
   const u = await prisma.user.findUnique({
     where: { id: user.id },
     select: { isPlatformAdmin: true },
   })
+  if (!u?.isPlatformAdmin) redirect('/')
 
   return (
     <div className="min-h-screen flex bg-gray-50">

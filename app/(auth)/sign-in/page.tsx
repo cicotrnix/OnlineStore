@@ -1,5 +1,6 @@
-import { signIn } from '@/lib/auth'
+import { auth, signIn } from '@/lib/auth'
 import storeConfig from '@/store.config'
+import { redirect } from 'next/navigation'
 
 type Props = {
   searchParams: Promise<{ check?: string }>
@@ -8,6 +9,11 @@ type Props = {
 export default async function SignInPage({ searchParams }: Props) {
   const params = await searchParams
   const checkInbox = params.check === 'email'
+
+  if (!checkInbox) {
+    const session = await auth()
+    if (session?.user) redirect('/')
+  }
 
   if (checkInbox) {
     return (

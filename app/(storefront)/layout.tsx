@@ -4,6 +4,7 @@ import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
 import { SearchBar } from '@/components/commerce/SearchBar'
 import { auth } from '@/lib/auth/config'
+import { maintainCurrentSession } from '@/lib/auth/maintain'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { getLocale } from '@/lib/i18n'
@@ -18,6 +19,7 @@ export default async function StorefrontLayout({
 }: {
   children: React.ReactNode
 }) {
+  await maintainCurrentSession()
   const session = await auth()
   const userId = session?.user?.id
   const cart = userId ? await cartService.get(userId) : null
