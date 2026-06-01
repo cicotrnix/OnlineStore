@@ -689,3 +689,47 @@ model AiContentJob {
   @@index([status, enqueuedAt])
   @@index([productId])
 }
+
+// ===== Fase 5: bus de eventos (outbox) =====
+
+enum DomainEventStatus {
+  PENDING
+  PROCESSING
+  DONE
+}
+
+enum EventDeliveryStatus {
+  PENDING
+  DONE
+  FAILED
+}
+
+model DomainEvent {
+  id            String            @id @default(cuid())
+  type          String
+  aggregateType String
+  aggregateId   String
+  payload       Json
+  status        DomainEventStatus @default(PENDING)
+  occurredAt    DateTime          @default(now())
+  createdAt     DateTime          @default(now())
+  deliveries    EventDelivery[]
+
+  @@index([status, occurredAt])
+  @@index([aggregateType, aggregateId])
+}
+
+model EventDelivery {
+  id          String              @id @default(cuid())
+  eventId     String
+  event       DomainEvent         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  subscriber  String
+  status      EventDeliveryStatus @default(PENDING)
+  attempts    Int                 @default(0)
+  lastError   String?             @db.Text
+  processedAt DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@unique([eventId, subscriber])
+  @@index([status])
+}
