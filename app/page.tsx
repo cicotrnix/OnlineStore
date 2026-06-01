@@ -1,4 +1,5 @@
 import { SearchBar } from '@/components/commerce/SearchBar'
+import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { FeaturedGrid } from '@/components/storefront/FeaturedGrid'
 import { auth } from '@/lib/auth/config'
 import storeConfig from '@/store.config'
@@ -29,9 +30,12 @@ export default async function HomePage() {
               Catálogo
             </Link>
             {session?.user ? (
-              <Link href="/orders" className="text-gray-700 hover:text-gray-900">
-                Mi cuenta
-              </Link>
+              <>
+                <Link href="/orders" className="text-gray-700 hover:text-gray-900">
+                  Mi cuenta
+                </Link>
+                <SignOutButton />
+              </>
             ) : (
               <Link href="/sign-in" className="text-gray-700 hover:text-gray-900">
                 Entrar
@@ -85,9 +89,13 @@ export default async function HomePage() {
             <Link href="/catalog" className="hover:text-gray-700">
               Catálogo
             </Link>
-            <Link href="/sign-in" className="hover:text-gray-700">
-              Iniciar sesión
-            </Link>
+            {session?.user ? (
+              <SignOutButton label="Salir" className="hover:text-gray-700" />
+            ) : (
+              <Link href="/sign-in" className="hover:text-gray-700">
+                Iniciar sesión
+              </Link>
+            )}
           </div>
         </div>
       </footer>

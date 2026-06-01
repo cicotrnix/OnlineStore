@@ -2,8 +2,9 @@
 
 ## Donde corre
 
-- Endpoint: `POST /api/ai/chat`. Body: `{ messages: [{ role, content }] }`.
-- Widget client: `components/commerce/ChatWidget.tsx` flotante, montado por `app/(storefront)/layout.tsx` cuando `storeConfig.ai.chat === true`.
+- Endpoint: `POST /api/ai/chat`. Body: `{ messages: [{ role, content }] }`. Runtime explícito `nodejs` (no edge, Prisma + Anthropic SDK necesitan Node).
+- Respuesta: `text/plain; charset=utf-8` **streaming** (ReadableStream con chunks de 16 chars). Header `X-Tool-Calls` lleva el JSON de la traza de tools para debugging.
+- Widget client: `components/commerce/ChatWidget.tsx` flotante, montado por `app/(storefront)/layout.tsx` cuando `storeConfig.ai.chat === true`. Consume el stream con `response.body.getReader()` y va concatenando.
 - Modelo: `claude-haiku-4-5-20251001` (configurable en `store.config.ai.chatModel`).
 
 ## Deshabilitar

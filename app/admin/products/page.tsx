@@ -12,7 +12,14 @@ import { formatMoney } from '@/lib/money'
 import { catalogService } from '@/modules/catalog'
 import storeConfig from '@/store.config'
 
-export default async function AdminProductsPage() {
+type Props = { searchParams: Promise<{ flash?: string; n?: string }> }
+
+export default async function AdminProductsPage({ searchParams }: Props) {
+  const sp = await searchParams
+  const bulkMessage =
+    sp.flash === 'bulk-queued'
+      ? `Encolados ${sp.n ?? '?'} jobs de generación AI. El worker procesa cada minuto.`
+      : null
   const products = await catalogService.listProducts({
     activeOnly: false,
     take: 100,
@@ -37,6 +44,14 @@ export default async function AdminProductsPage() {
 
   return (
     <div className="space-y-8">
+      {bulkMessage && (
+        <output
+          aria-live="polite"
+          className="block rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
+        >
+          {bulkMessage}
+        </output>
+      )}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Productos</h1>
