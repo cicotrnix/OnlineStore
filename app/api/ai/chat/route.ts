@@ -6,10 +6,14 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 interface Body {
   messages: { role: 'user' | 'assistant'; content: string }[]
 }
+
+const CHUNK_SIZE = 16
+const CHUNK_DELAY_MS = 25
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -32,11 +36,35 @@ export async function POST(req: Request) {
   }
 
   const locale = await getLocale({ userId })
+
+  let result: Awaited<ReturnType<typeof runChat>>
   try {
-    const result = await runChat({ messages: body.messages, orgId, locale })
-    return NextResponse.json(result)
+    result = await runChat({ messages: body.messages, orgId, locale })
   } catch (err) {
     const code = err instanceof Error ? err.name : 'Unknown'
     return NextResponse.json({ error: code, message: String(err) }, { status: 503 })
   }
+
+  // Streaming UX: chunk del texto final para que el widget lo muestre
+  // progresivamente. Tool-use rounds ya corrieron sin stream — el costo
+  // adicional aquí es solo la presentación.
+  const encoder = new TextEncoder()
+  const text = result.text
+  const stream = new ReadableStream({
+    async start(controller) {
+      for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+        controller.enqueue(encoder.encode(text.slice(i, i + CHUNK_SIZE)))
+        if (CHUNK_DELAY_MS > 0) await new Promise((r) => setTimeout(r, CHUNK_DELAY_MS))
+      }
+      controller.close()
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Tool-Calls': JSON.stringify(result.toolCalls),
+    },
+  })
 }

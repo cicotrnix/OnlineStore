@@ -1,7 +1,17 @@
 import { prisma } from '@/lib/db/client'
 import { cleanDb } from '@/tests/helpers/cleanDb'
 import { Decimal } from '@prisma/client/runtime/library'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/store.config', async () => {
+  const actual = await vi.importActual<typeof import('@/store.config')>('@/store.config')
+  return {
+    default: {
+      ...actual.default,
+      modules: { ...actual.default.modules, privateCatalogs: true },
+    },
+  }
+})
 
 async function makeProductWithEmbedding(suffix: string, vec: number[]) {
   const cat = await prisma.category.create({ data: { slug: `c-${suffix}`, name: 'C' } })
@@ -36,7 +46,7 @@ beforeEach(async () => {
 })
 
 describe('getRelatedProducts', () => {
-  it('devuelve vecinos pgvector excluyendo el producto base', async () => {
+  it('devuelve vecinos pgvector excluyendo el producto base, preservando ranking', async () => {
     const a = await makeProductWithEmbedding(`a-${Date.now()}`, makeVec(0.9))
     const b = await makeProductWithEmbedding(`b-${Date.now() + 1}`, makeVec(0.85))
     const c = await makeProductWithEmbedding(`c-${Date.now() + 2}`, makeVec(0.1))
@@ -47,7 +57,19 @@ describe('getRelatedProducts', () => {
     expect(result.map((p) => p.id)).not.toContain(a.id)
     expect(result.map((p) => p.id)).toContain(b.id)
     expect(result.map((p) => p.id)).toContain(c.id)
+    // b está mucho más cerca que c (cos≈0.998 vs cos≈0.22) — debe estar primero.
     expect(result[0]?.id).toBe(b.id)
+  })
+
+  it('NO incluye producto privado para anónimo (defense-in-depth)', async () => {
+    const a = await makeProductWithEmbedding(`pa-${Date.now()}`, makeVec(0.9))
+    const b = await makeProductWithEmbedding(`pb-${Date.now() + 1}`, makeVec(0.85))
+    // Marcar b como privado
+    await prisma.product.update({ where: { id: b.id }, data: { isPrivate: true } })
+
+    const { getRelatedProducts } = await import('../service')
+    const result = await getRelatedProducts({ productId: a.id, orgId: null, limit: 5 })
+    expect(result.map((p) => p.id)).not.toContain(b.id)
   })
 
   it('devuelve lista vacía si producto base no tiene embedding', async () => {

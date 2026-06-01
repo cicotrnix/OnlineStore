@@ -35,8 +35,25 @@ export function ChatWidget() {
         ])
         return
       }
-      const body = (await res.json()) as { text?: string; error?: string }
-      setMessages([...next, { role: 'assistant', content: body.text || `Error: ${body.error}` }])
+      if (!res.ok || !res.body) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string }
+        setMessages([
+          ...next,
+          { role: 'assistant', content: `Error: ${body.error ?? res.statusText}` },
+        ])
+        return
+      }
+      // Stream: añade un message placeholder y va concatenando chunks.
+      setMessages([...next, { role: 'assistant', content: '' }])
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let acc = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        acc += decoder.decode(value, { stream: true })
+        setMessages([...next, { role: 'assistant', content: acc }])
+      }
     } finally {
       setLoading(false)
     }

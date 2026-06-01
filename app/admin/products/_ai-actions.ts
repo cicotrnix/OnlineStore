@@ -6,6 +6,7 @@ import { LOCALES, isSupportedLocale } from '@/lib/i18n'
 import { enqueueContentJob } from '@/modules/ai'
 import { publishContent } from '@/modules/ai/content'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 async function requirePlatformAdmin() {
   const user = await requireAuth()
@@ -25,6 +26,7 @@ export async function enqueueContentGenAction(formData: FormData): Promise<void>
   }
   revalidatePath(`/admin/products/${productId}`)
   revalidatePath('/admin/products')
+  redirect(`/admin/products/${productId}?flash=queued`)
 }
 
 export async function enqueueBulkContentGenAction(): Promise<void> {
@@ -33,12 +35,15 @@ export async function enqueueBulkContentGenAction(): Promise<void> {
     where: { isActive: true },
     select: { id: true },
   })
+  let count = 0
   for (const p of products) {
     for (const locale of LOCALES) {
       await enqueueContentJob(p.id, locale)
+      count++
     }
   }
   revalidatePath('/admin/products')
+  redirect(`/admin/products?flash=bulk-queued&n=${count}`)
 }
 
 export async function publishContentAction(formData: FormData): Promise<void> {
@@ -48,4 +53,6 @@ export async function publishContentAction(formData: FormData): Promise<void> {
   if (!isSupportedLocale(locale)) throw new Error('Invalid locale')
   await publishContent({ productId, locale, byUserId: user.id })
   revalidatePath(`/admin/products/${productId}`)
+  revalidatePath('/products', 'page')
+  redirect(`/admin/products/${productId}?flash=published&locale=${locale}`)
 }

@@ -275,18 +275,26 @@ Plugin `online-store-toolkit` con:
 
 ## 10. Próximo paso inmediato
 
-Fase 4 cerrada (v4.0.0, 2026-05-30): 208 unit tests verdes, lint + typecheck + build limpios. Branch `feature/fase-4-fundacion` con 35+ commits (Fundación + Corte 0.5 i18n + Corte 1 content + Corte 2 chat + Corte 3 recos). **NO mergeado todavía — esperando OK de Herney para PR + tag + deploy.**
+Fase 4 cerrada y desplegada (v4.0.0, 2026-05-30 código; cierre Cortes 2-3 + pulido + chat habilitado 2026-06-01).
 
-**Pendiente manual (Herney) post-merge:**
-- Cargar `ANTHROPIC_API_KEY` en Coolify env vars (sin esto, módulos AI están en noop fallback).
-- Setear `AI_MONTHLY_TOKEN_BUDGET` (recomendado, `0` = sin límite).
-- Scheduled task Coolify: `process-ai-content-jobs.ts` cada 1 min (mismo cron pattern que `process-search-index-queue`).
-- Encolar bulk content generation desde `/admin/products` → "Generar contenido AI (todos)" para los 12 productos × 2 locales = 24 jobs.
-- Aprobar y publicar contenido generado en `/admin/products/[id]` (gate `isPlatformAdmin`).
-- (Pendientes Fase 3 todavía abiertos): scheduled tasks Coolify para `process-search-index-queue` + `cleanup-stale-search-queue`.
+**Entregado en producción:**
+- Fundación: `AIProvider` (Anthropic SDK, noop fallback, cliente cacheado), `budget` (kill-switch + `AiUsage`), `content-jobs` (cola FOR UPDATE SKIP LOCKED), rate-limit presets.
+- Corte 0.5 i18n cookie + `User.preferredLocale`.
+- Corte 1 (content): admin UI generar/publicar con feedback (flash via redirect+aria-live), worker `process-ai-content-jobs.ts`, PDP renderea ProductContent por locale + SEO.
+- Corte 2 (chat): tool-use con 3 tools (`searchProducts`, `getProductDetail`, `checkCompatibility`), respeto B2B pricing/access (test cubre CustomerPrice + producto privado + inactive), guardrails off-topic, MAX_TOOL_ROUNDS=5, rate-limit `AI_CHAT_LIMITS` keyed por userId||ip, **respuesta streaming** (ReadableStream con chunks). Widget consume stream y muestra progresivo. Flag `ai.chat: true`.
+- Corte 3 (recommendations): pgvector cosine + heurística OrderLine, sin LLM en hot path, test extra confirma defense-in-depth (producto privado excluido para anónimo).
+- Pulido UI: header storefront muestra "Salir" cuando hay sesión (form server action a `signOut`), botón en homepage layout y footer. Toast en admin tras encolar/publicar.
+- Tests: 213 unit (+ 5 vs 208 previos: 4 chat B2B/privacy/inactive + 1 recos privacy). 27 e2e.
+
+**Manual ops (Herney):**
+- ✅ `ANTHROPIC_API_KEY` en Coolify (ya cargada).
+- Setear `AI_MONTHLY_TOKEN_BUDGET` (recomendado).
+- Scheduled task `process-ai-content-jobs.ts` cada 1 min.
+- Encolar bulk content via `/admin/products` → "Generar contenido AI (todos)" y aprobar locale por locale.
+- Scheduled tasks Fase 3 (`process-search-index-queue`, `cleanup-stale-search-queue`) si aún no están activos.
 
 Próximo: brainstorming de **Fase 5 — Integraciones** en sesión Cowork (pagos Stripe/MercadoPago, envíos, ERP).
 
 ---
 
-*Última actualización: 2026-05-30 cierre código Fase 4 · Próxima revisión: arranque Fase 5*
+*Última actualización: 2026-06-01 cierre Fase 4 completo · Próxima revisión: arranque Fase 5*

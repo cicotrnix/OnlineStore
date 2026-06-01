@@ -9,10 +9,20 @@ import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
-type Props = { params: Promise<{ id: string }> }
+type Props = {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ flash?: string; locale?: string }>
+}
 
-export default async function AdminProductDetailPage({ params }: Props) {
+const FLASH_MESSAGES: Record<string, (locale?: string) => string> = {
+  queued: () => 'Generación AI encolada (EN + ES). El worker procesa cada minuto.',
+  published: (locale) => `Contenido publicado para ${locale ?? 'el locale'}. Reindex en cola.`,
+}
+
+export default async function AdminProductDetailPage({ params, searchParams }: Props) {
   const { id } = await params
+  const sp = await searchParams
+  const flashMessage = sp.flash ? FLASH_MESSAGES[sp.flash]?.(sp.locale) : null
   const user = await requireAuth()
   const u = await prisma.user.findUnique({
     where: { id: user.id },
@@ -31,6 +41,14 @@ export default async function AdminProductDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-6 max-w-4xl">
+      {flashMessage && (
+        <output
+          aria-live="polite"
+          className="block rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
+        >
+          {flashMessage}
+        </output>
+      )}
       <div>
         <h1 className="text-2xl font-medium tracking-tight">{product.name}</h1>
         <p className="mt-1 text-sm text-gray-500 font-mono">

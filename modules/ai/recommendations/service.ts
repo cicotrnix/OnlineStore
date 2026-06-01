@@ -31,8 +31,10 @@ export async function getRelatedProducts(input: GetRelatedInput): Promise<Relate
 
   if (rows.length === 0) return []
   const candidateIds = rows.map((r) => r.id)
-  const accessibleIds = await filterAccessibleIds(input.orgId, candidateIds)
-  const top = accessibleIds.slice(0, limit)
+  // filterAccessibleIds usa prisma.findMany sin orderBy → orden arbitrario.
+  // Re-intersectar con candidateIds preserva el ranking del vector.
+  const accessibleSet = new Set(await filterAccessibleIds(input.orgId, candidateIds))
+  const top = candidateIds.filter((id) => accessibleSet.has(id)).slice(0, limit)
   if (top.length === 0) return []
 
   const products = await prisma.product.findMany({

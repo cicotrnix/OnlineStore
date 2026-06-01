@@ -3,6 +3,7 @@ import { ImpersonationBanner } from '@/components/commerce/ImpersonationBanner'
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
 import { SearchBar } from '@/components/commerce/SearchBar'
+import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { auth } from '@/lib/auth/config'
 import { maintainCurrentSession } from '@/lib/auth/maintain'
 import { prisma } from '@/lib/db/client'
@@ -95,7 +96,10 @@ export default async function StorefrontLayout({
             )}
             <LocaleSwitch current={locale} />
             {userId ? (
-              <NotificationBadge />
+              <>
+                <NotificationBadge />
+                <SignOutButton />
+              </>
             ) : (
               <Link href="/sign-in" className="text-gray-700 hover:text-gray-900">
                 Entrar
