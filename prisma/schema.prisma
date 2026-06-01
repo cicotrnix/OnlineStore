@@ -367,6 +367,7 @@ model Order {
   lines             OrderLine[]
   invoice           Invoice?
   payment           Payment?
+  shipment          Shipment?
   approvedFromQuote Quote?              @relation("QuoteConvertedOrder")
 
   @@index([organizationId])
@@ -935,4 +936,57 @@ model JournalLine {
 
   @@index([entryId])
   @@index([accountId])
+}
+
+// ===== Fase 5 Corte 4: Envíos (FedEx Ground + Miami forwarder) =====
+
+enum ShipmentCarrier {
+  FEDEX
+  PICKUP
+}
+
+enum ShipmentService {
+  FEDEX_GROUND
+  FEDEX_HOME_DELIVERY
+}
+
+enum ShipmentStatus {
+  PENDING
+  RATE_QUOTED
+  LABEL_PURCHASED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+model Shipment {
+  id              String          @id @default(cuid())
+  orderId         String          @unique
+  order           Order           @relation(fields: [orderId], references: [id])
+  carrier         ShipmentCarrier @default(FEDEX)
+  service         ShipmentService @default(FEDEX_GROUND)
+  status          ShipmentStatus  @default(PENDING)
+  // Forwarder Miami para export — guardamos dirección destino real (cliente final extranjero) en `notes`.
+  isExport        Boolean         @default(false)
+  forwarderRef    String?         // ej: cuenta del forwarder en Miami
+  // Hazmat clase 9 (litio): Ground-only es enforced; flag se captura por orden.
+  hazmat          Boolean         @default(false)
+  hazmatCells     Int?
+  hazmatWattHours Int?
+  // Cotización (centavos).
+  rateCents       BigInt?
+  rateCurrency    String          @default("USD")
+  rateQuotedAt    DateTime?
+  // Etiqueta.
+  trackingNumber  String?         @unique
+  labelUrl        String?
+  labelPurchasedAt DateTime?
+  dispatchedAt    DateTime?
+  deliveredAt     DateTime?
+  notes           String?         @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([status])
+  @@index([orderId])
 }

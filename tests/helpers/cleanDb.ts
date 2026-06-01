@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db/client'
  * for any integration test that depends on a clean slate. Idempotent.
  */
 export async function cleanDb(): Promise<void> {
+  await prisma.shipment.deleteMany()
   await prisma.journalLine.deleteMany()
   await prisma.journalEntry.deleteMany()
   await prisma.accountingPeriod.deleteMany()
