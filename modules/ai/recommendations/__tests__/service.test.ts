@@ -46,7 +46,7 @@ beforeEach(async () => {
 })
 
 describe('getRelatedProducts', () => {
-  it('devuelve vecinos pgvector excluyendo el producto base', async () => {
+  it('devuelve vecinos pgvector excluyendo el producto base, preservando ranking', async () => {
     const a = await makeProductWithEmbedding(`a-${Date.now()}`, makeVec(0.9))
     const b = await makeProductWithEmbedding(`b-${Date.now() + 1}`, makeVec(0.85))
     const c = await makeProductWithEmbedding(`c-${Date.now() + 2}`, makeVec(0.1))
@@ -57,6 +57,7 @@ describe('getRelatedProducts', () => {
     expect(result.map((p) => p.id)).not.toContain(a.id)
     expect(result.map((p) => p.id)).toContain(b.id)
     expect(result.map((p) => p.id)).toContain(c.id)
+    // b está mucho más cerca que c (cos≈0.998 vs cos≈0.22) — debe estar primero.
     expect(result[0]?.id).toBe(b.id)
   })
 
