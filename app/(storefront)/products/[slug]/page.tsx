@@ -140,7 +140,7 @@ export default async function ProductPage({ params }: Props) {
                 : !session?.user
                   ? 'Inicia sesión para comprar'
                   : product.stockQuantity === 0
-                    ? 'Agotado'
+                    ? 'Out of stock'
                     : undefined
             }
           />
