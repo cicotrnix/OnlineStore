@@ -33,6 +33,11 @@ async function seed() {
     slug: 'co-org',
     ownerUserId: user.id,
   })
+  // Fase 5 gate: checkout exige org VERIFIED.
+  await prisma.organization.update({
+    where: { id: org.id },
+    data: { verificationStatus: 'VERIFIED', verifiedAt: new Date(), taxExempt: true },
+  })
   const cat = await catalogService.createCategory({ slug: 'co-cat', name: 'C' })
   const product = await catalogService.createProduct({
     sku: 'CO-1',

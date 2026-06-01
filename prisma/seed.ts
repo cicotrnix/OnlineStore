@@ -54,8 +54,12 @@ async function main() {
       name: 'RepairHub Co',
       slug: 'repairhub-co',
       creditLimit: new Decimal('5000.00'),
-      paymentTerms: 'NET_30',
+      paymentTerms: 'PREPAID',
       approvalThreshold: new Decimal('1000.00'),
+      verificationStatus: 'VERIFIED',
+      verifiedAt: new Date(),
+      country: 'US',
+      taxExempt: true,
       members: {
         create: [
           { userId: buyer1.id, role: 'OWNER' },

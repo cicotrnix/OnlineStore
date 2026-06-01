@@ -125,8 +125,14 @@ model Organization {
   paymentTerms      PaymentTerms   @default(PREPAID)
   approvalThreshold Decimal?       @db.Decimal(12, 2)
   approvalRoles     ApprovalRole[] @default([OWNER, ADMIN])
+  // ─── Fase 5: verificación B2B ───
+  verificationStatus VerificationStatus @default(PENDING)
+  country            String?
+  taxExempt          Boolean            @default(false)
+  verifiedAt         DateTime?
 
   members               OrganizationMember[]
+  taxDocuments          TaxDocument[]
   invitations           Invitation[]
   addresses             OrganizationAddress[]
   customerPrices        CustomerPrice[]
@@ -732,4 +738,39 @@ model EventDelivery {
 
   @@unique([eventId, subscriber])
   @@index([status])
+}
+
+// ===== Fase 5: verificación B2B =====
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum TaxDocumentType {
+  US_RESALE_CERT
+  FOREIGN_EQUIV
+}
+
+enum TaxDocumentStatus {
+  UPLOADED
+  APPROVED
+  REJECTED
+}
+
+model TaxDocument {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type           TaxDocumentType
+  number         String
+  jurisdiction   String
+  fileKey        String
+  status         TaxDocumentStatus @default(UPLOADED)
+  uploadedAt     DateTime          @default(now())
+  reviewedAt     DateTime?
+  reviewedById   String?
+
+  @@index([organizationId])
 }
