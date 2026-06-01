@@ -169,7 +169,7 @@ describe('integridad contable end-to-end via bus', () => {
     expect(byCode.get(ACCOUNT_CODES.INVENTORY)?.creditCents).toBe(3000n)
   })
 
-  it('refund vía webhook: revierte Stripe-clearing → CxC y COGS/Inv', async () => {
+  it('refund card via webhook: Revenue neto = 0, CxC = 0, Stripe-clearing = 0, COGS/Inv = 0', async () => {
     const { order } = await makeOrderWithCost({
       totalCents: 5000,
       unitCostCents: 2000,
@@ -198,16 +198,74 @@ describe('integridad contable end-to-end via bus', () => {
     const tb = await trialBalance()
     expect(tb.totalDebits).toBe(tb.totalCredits)
     const byCode = new Map(tb.rows.map((r) => [r.accountCode, r]))
-    // Tras refund: Stripe-clearing balance 0 (Dr 5000 capture + Cr 5000 refund).
+    // Stripe-clearing: Dr 5000 capture + Cr 5000 refund → 0.
     expect(byCode.get(ACCOUNT_CODES.STRIPE_CLEARING)?.balanceCents).toBe(0n)
-    // Inventario balance 0 (Cr 2000 capture + Dr 2000 restock).
+    // Inventario: Cr 2000 capture + Dr 2000 restock → 0.
     expect(byCode.get(ACCOUNT_CODES.INVENTORY)?.balanceCents).toBe(0n)
-    // COGS balance 0 (Dr 2000 capture + Cr 2000 restock-reversal).
+    // COGS: Dr 2000 capture + Cr 2000 restock-reversal → 0.
     expect(byCode.get(ACCOUNT_CODES.COGS)?.balanceCents).toBe(0n)
-    // Ventas mantiene Cr 5000 (no se revierte aquí; el revenue ya se reconoció;
-    // el reversal contable formal vendría en una nota de crédito separada).
+    // Ventas (4000) Cr 5000. Devoluciones (4100) Dr 5000. Revenue neto = 0.
     expect(byCode.get(ACCOUNT_CODES.SALES_REVENUE)?.creditCents).toBe(5000n)
-    // CxC: Dr 5000 invoice + Cr 5000 capture + Dr 5000 refund = Dr 5000 (saldo abierto post-refund).
-    expect(byCode.get(ACCOUNT_CODES.ACCOUNTS_RECEIVABLE)?.balanceCents).toBe(5000n)
+    expect(byCode.get(ACCOUNT_CODES.SALES_RETURNS)?.debitCents).toBe(5000n)
+    const revenue = byCode.get(ACCOUNT_CODES.SALES_REVENUE)!
+    const returns = byCode.get(ACCOUNT_CODES.SALES_RETURNS)!
+    expect(returns.debitCents - revenue.creditCents).toBe(0n) // Revenue neto = 0
+    // CxC: Dr 5000 invoice + Cr 5000 capture = 0 (el refund NO toca CxC ahora).
+    expect(byCode.get(ACCOUNT_CODES.ACCOUNTS_RECEIVABLE)?.balanceCents).toBe(0n)
+  })
+
+  it('refund WIRE: acredita Banco (no Stripe-clearing), Revenue neto = 0, CxC = 0', async () => {
+    const { order } = await makeOrderWithCost({
+      totalCents: 7000,
+      unitCostCents: 3000,
+      stock: 3,
+    })
+    const admin = await prisma.user.create({
+      data: { email: `wra-${Date.now()}@t.com`, isPlatformAdmin: true },
+    })
+    await reconcileWire({
+      orderId: order.id,
+      amountCents: 7000,
+      wireReference: `WR-${Date.now()}`,
+      adminUserId: admin.id,
+    })
+    await dispatchPending({ batchSize: 50 })
+
+    // Refund de wire: no hay webhook automático. Admin emite payment.refunded manualmente.
+    // Sin step-up real porque ese flow lo cubre payments tests; aquí verificamos
+    // sólo el efecto contable del evento con method='WIRE'.
+    const payment = await prisma.payment.findFirstOrThrow({ where: { orderId: order.id } })
+    const { emitEvent } = await import('@/modules/events')
+    await prisma.$transaction(async (tx) => {
+      await emitEvent(tx, {
+        type: 'payment.refunded',
+        aggregateType: 'Payment',
+        aggregateId: payment.id,
+        payload: {
+          orderId: order.id,
+          amountCents: 7000,
+          currency: 'USD',
+          method: 'WIRE',
+          restockCents: 3000,
+        },
+      })
+    })
+    await dispatchPending({ batchSize: 50 })
+
+    const tb = await trialBalance()
+    expect(tb.totalDebits).toBe(tb.totalCredits)
+    const byCode = new Map(tb.rows.map((r) => [r.accountCode, r]))
+    // Banco: Dr 7000 reconcile + Cr 7000 refund → 0.
+    expect(byCode.get(ACCOUNT_CODES.CASH_BANK)?.balanceCents).toBe(0n)
+    // Stripe-clearing NO debe estar tocado por el refund WIRE.
+    expect(byCode.get(ACCOUNT_CODES.STRIPE_CLEARING)?.balanceCents ?? 0n).toBe(0n)
+    // Revenue neto = 0.
+    expect(byCode.get(ACCOUNT_CODES.SALES_REVENUE)?.creditCents).toBe(7000n)
+    expect(byCode.get(ACCOUNT_CODES.SALES_RETURNS)?.debitCents).toBe(7000n)
+    // CxC: Dr 7000 invoice + Cr 7000 reconcile = 0; refund no toca CxC.
+    expect(byCode.get(ACCOUNT_CODES.ACCOUNTS_RECEIVABLE)?.balanceCents).toBe(0n)
+    // Inventario + COGS net 0.
+    expect(byCode.get(ACCOUNT_CODES.INVENTORY)?.balanceCents).toBe(0n)
+    expect(byCode.get(ACCOUNT_CODES.COGS)?.balanceCents).toBe(0n)
   })
 })

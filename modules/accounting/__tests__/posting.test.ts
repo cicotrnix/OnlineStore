@@ -132,13 +132,39 @@ describe('POSTING_RULES — montos correctos por regla', () => {
     expect(lines).toHaveLength(4)
   })
 
-  it('payment.refunded sin restock: solo reverso de cobro', async () => {
+  it('payment.refunded sin restock (STRIPE_CARD default): Dr Sales Returns / Cr Stripe-clearing', async () => {
     const lines = (await POSTING_RULES['payment.refunded']!({
       payload: { amountCents: 5000n },
       occurredAt: new Date(),
     }))!
     expect(lines).toHaveLength(2)
-    const ar = lines.find((l) => l.accountCode === ACCOUNT_CODES.ACCOUNTS_RECEIVABLE)!
-    expect(ar.debitCents).toBe(5000n)
+    const ret = lines.find((l) => l.accountCode === ACCOUNT_CODES.SALES_RETURNS)!
+    expect(ret.debitCents).toBe(5000n)
+    const clearing = lines.find((l) => l.accountCode === ACCOUNT_CODES.STRIPE_CLEARING)!
+    expect(clearing.creditCents).toBe(5000n)
+    // CxC NO se toca en el reverso — el ingreso se neutraliza vía contra-ingreso 4100.
+    expect(lines.find((l) => l.accountCode === ACCOUNT_CODES.ACCOUNTS_RECEIVABLE)).toBeUndefined()
+  })
+
+  it('payment.refunded WIRE: acredita Banco (1010), no Stripe-clearing', async () => {
+    const lines = (await POSTING_RULES['payment.refunded']!({
+      payload: { amountCents: 5000n, method: 'WIRE' },
+      occurredAt: new Date(),
+    }))!
+    const bank = lines.find((l) => l.accountCode === ACCOUNT_CODES.CASH_BANK)!
+    expect(bank.creditCents).toBe(5000n)
+    expect(lines.find((l) => l.accountCode === ACCOUNT_CODES.STRIPE_CLEARING)).toBeUndefined()
+  })
+
+  it('payment.refunded con restockCents: añade reverso COGS/Inventario', async () => {
+    const lines = (await POSTING_RULES['payment.refunded']!({
+      payload: { amountCents: 5000n, restockCents: 2000n },
+      occurredAt: new Date(),
+    }))!
+    expect(lines).toHaveLength(4)
+    const inv = lines.find((l) => l.accountCode === ACCOUNT_CODES.INVENTORY)!
+    expect(inv.debitCents).toBe(2000n)
+    const cogs = lines.find((l) => l.accountCode === ACCOUNT_CODES.COGS)!
+    expect(cogs.creditCents).toBe(2000n)
   })
 })

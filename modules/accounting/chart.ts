@@ -31,6 +31,8 @@ export const CHART_OF_ACCOUNTS: ChartAccount[] = [
 
   // Ingresos
   { code: '4000', name: 'Ventas', type: 'REVENUE', normalSide: 'CREDIT' },
+  // Contra-ingreso (devoluciones/refunds): naturaleza débito, reduce Revenue neto.
+  { code: '4100', name: 'Devoluciones sobre ventas', type: 'REVENUE', normalSide: 'DEBIT' },
 
   // COGS
   { code: '5000', name: 'Costo de mercaderías vendidas', type: 'COGS', normalSide: 'DEBIT' },
@@ -45,5 +47,6 @@ export const ACCOUNT_CODES = {
   STRIPE_CLEARING: '1200',
   INVENTORY: '1300',
   SALES_REVENUE: '4000',
+  SALES_RETURNS: '4100',
   COGS: '5000',
 } as const

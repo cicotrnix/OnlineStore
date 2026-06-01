@@ -152,7 +152,12 @@ Suite: `pnpm vitest run modules/payments` → **15/15 pass**.
 | `invoice.issued` | CxC (1100) | Ventas (4000) |
 | `payment.captured` | Stripe-clearing (1200) + COGS (5000) | CxC (1100) + Inventario (1300) |
 | `payment.reconciled` | Banco (1010) + COGS (5000) | CxC (1100) + Inventario (1300) |
-| `payment.refunded` | CxC (1100) + Inventario (1300) | Stripe-clearing (1200) + COGS (5000) |
+| `payment.refunded` (card) | **Devoluciones sobre ventas (4100)** + Inventario (1300) | Stripe-clearing (1200) + COGS (5000) |
+| `payment.refunded` (wire/ACH) | **Devoluciones sobre ventas (4100)** + Inventario (1300) | **Banco (1010)** + COGS (5000) |
+
+- [x] **Contra-ingreso 4100 Sales Returns** (type REVENUE, normalSide DEBIT) sembrado en el chart.
+- [x] **El refund NO toca CxC**. Revenue se neutraliza vía Dr 4100 (no por reabrir CxC). Esto preserva el balance correcto: Revenue neto (4000 − 4100) = 0 tras refund total; CxC sigue cuadrada por el cobro original.
+- [x] **Crédito según método**: `payload.method` decide la cuenta — `STRIPE_CARD`/default → Stripe-clearing (1200); `WIRE`/`ACH` → Banco (1010). El handler `charge.refunded` propaga `payment.method` al payload.
 
 - [x] Cada regla emite líneas balanceadas por construcción (test paramétrico cubre 100 valores).
 - [x] **Productores emiten `invoice.issued`**:
@@ -190,9 +195,12 @@ Suite: `pnpm vitest run modules/accounting`.
 10. [x] `replay del mismo evento via dispatcher no duplica asientos`
 11. [x] `integridad card: order → invoice.issued → payment.captured → AR=0, Revenue=total, Stripe-clearing=total, COGS/Inv balanceados`
 12. [x] `integridad wire: reconcileWire → AR=0 + Banco=total + COGS/Inv si hay costo`
-13. [x] `integridad refund vía webhook: revierte Stripe-clearing → CxC y COGS/Inv`
+13. [x] `integridad refund card: Revenue neto = 0, CxC = 0, Stripe-clearing = 0, COGS/Inv = 0`
+14. [x] `integridad refund wire: acredita Banco (no Stripe-clearing), Revenue neto = 0, CxC = 0`
+15. [x] `payment.refunded sin restock (STRIPE_CARD default): Dr 4100 / Cr 1200, NO toca CxC`
+16. [x] `payment.refunded WIRE: acredita 1010 Banco, no Stripe-clearing`
 
-**13/13 tests pass.**
+**16/16 tests pass.**
 
 ## §11 — Sustitución del FakeStripe en producción
 

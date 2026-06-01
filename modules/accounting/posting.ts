@@ -173,11 +173,20 @@ export const POSTING_RULES: Record<string, PostingRule> = {
 
   'payment.refunded': ({ payload }) => {
     const amount = cents(payload.amountCents)
-    // Reverso: revierte Stripe-clearing/CxC. Si hubo COGS, también revierte stock.
+    // Reverso contable correcto:
+    // - Dr Sales Returns (4100, contra-ingreso): reduce Revenue neto.
+    // - Cr cuenta de cobranza (Stripe-clearing si fue tarjeta, Banco si wire/ACH):
+    //   la plata sale por el mismo canal que entró.
+    // - Si hubo COGS, también revierte Inventario/COGS.
+    const method = String(payload.method ?? 'STRIPE_CARD').toUpperCase()
+    const clearingAccount =
+      method === 'WIRE' || method === 'ACH'
+        ? ACCOUNT_CODES.CASH_BANK
+        : ACCOUNT_CODES.STRIPE_CLEARING
     const restock = cents(payload.restockCents ?? 0)
     const lines: PostLineInput[] = [
-      { accountCode: ACCOUNT_CODES.ACCOUNTS_RECEIVABLE, debitCents: amount },
-      { accountCode: ACCOUNT_CODES.STRIPE_CLEARING, creditCents: amount },
+      { accountCode: ACCOUNT_CODES.SALES_RETURNS, debitCents: amount },
+      { accountCode: clearingAccount, creditCents: amount },
     ]
     if (restock > 0n) {
       lines.push(

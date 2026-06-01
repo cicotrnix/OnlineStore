@@ -42,6 +42,29 @@ Pendiente: Balance General + P&L vistas SQL. Por ahora derivables del trial bala
 3. `closePeriod({year, month, closedBy: adminUserId})`.
 4. Post-cierre, todo posteo en ese mes → `ClosedPeriodError`.
 
+## Devoluciones / Refunds
+
+El refund **no toca CxC** ni revierte directamente la cuenta de Ventas. En su
+lugar usa la cuenta contra-ingreso **4100 Devoluciones sobre ventas** (REVENUE
+normalSide DEBIT). Asiento típico:
+
+| Tipo de pago | Líneas |
+|---|---|
+| Card (STRIPE_CARD) | Dr 4100 Devoluciones · Cr 1200 Stripe-clearing · Dr 1300 Inv · Cr 5000 COGS |
+| Wire / ACH | Dr 4100 Devoluciones · **Cr 1010 Banco** · Dr 1300 Inv · Cr 5000 COGS |
+
+La cuenta de clearing/banco a acreditar viene del **`payment.refunded.payload.method`**
+(`STRIPE_CARD` → 1200, `WIRE`/`ACH` → 1010). El handler `charge.refunded` propaga
+`payment.method` desde el modelo `Payment`.
+
+Para un refund parcial: el productor emite `payment.refunded` con `amountCents`
+parcial; la regla genera el asiento con ese monto. Revenue neto se reduce solo
+por la porción reembolsada.
+
+En reportes:
+- **Revenue neto** = 4000 Cr − 4100 Dr.
+- **CxC abierta** sigue siendo solo lo no cobrado original (refunds no reabren CxC).
+
 ## Corrección de errores
 
 **Nunca** UPDATE/DELETE — el guard lo bloquea. Para corregir:

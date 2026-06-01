@@ -193,6 +193,7 @@ export async function handleStripeWebhook(
           orderId: payment.orderId,
           amountCents: Number(current.amountCents),
           currency: payment.order.currency,
+          method: payment.method, // STRIPE_CARD | WIRE | ACH
           restockCents: Number(restockCents),
         },
       })
