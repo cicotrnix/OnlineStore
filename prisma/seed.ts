@@ -42,17 +42,17 @@ async function main() {
 
   // Buyer users
   const buyer1 = await prisma.user.create({
-    data: { email: 'buyer1@acme.com', name: 'Ana Buyer' },
+    data: { email: 'buyer1@repairhub.com', name: 'Ana Buyer' },
   })
   const buyer2 = await prisma.user.create({
-    data: { email: 'buyer2@acme.com', name: 'Bruno Buyer' },
+    data: { email: 'buyer2@repairhub.com', name: 'Bruno Buyer' },
   })
 
-  // Customer organization
+  // Customer organization (demo B2B customer of PiPower)
   const acme = await prisma.organization.create({
     data: {
-      name: 'Acme Wholesale',
-      slug: 'acme-wholesale',
+      name: 'RepairHub Co',
+      slug: 'repairhub-co',
       creditLimit: new Decimal('5000.00'),
       paymentTerms: 'NET_30',
       approvalThreshold: new Decimal('1000.00'),
@@ -66,7 +66,7 @@ async function main() {
         create: [
           {
             label: 'Bodega principal',
-            recipient: 'Acme Receiving',
+            recipient: 'RepairHub Receiving',
             line1: '123 Wholesale Ave',
             city: 'Miami',
             state: 'FL',
@@ -78,7 +78,7 @@ async function main() {
           },
           {
             label: 'Oficina admin',
-            recipient: 'Acme Office',
+            recipient: 'RepairHub Office',
             line1: '500 Business Blvd, Suite 200',
             city: 'Miami',
             state: 'FL',
@@ -177,7 +177,7 @@ async function main() {
     }),
   ])
 
-  // CustomerPrice override: Acme has cheaper crema facial
+  // CustomerPrice override: RepairHub has cheaper crema facial
   await prisma.customerPrice.create({
     data: {
       organizationId: acme.id,
@@ -187,7 +187,7 @@ async function main() {
     },
   })
 
-  // CustomerPrice override: papel toalla mejor para Acme
+  // CustomerPrice override: papel toalla mejor para RepairHub
   await prisma.customerPrice.create({
     data: {
       organizationId: acme.id,
@@ -282,7 +282,7 @@ async function main() {
   const acmeAddress = await prisma.organizationAddress.findFirst({
     where: { organizationId: acme.id, isDefaultBilling: true },
   })
-  if (!acmeAddress) throw new Error('Acme default address missing')
+  if (!acmeAddress) throw new Error('RepairHub default address missing')
   const demoOrder = await prisma.order.create({
     data: {
       orderNumber: 'ORD-DEMO-INV-001',
@@ -361,7 +361,7 @@ async function main() {
 
   console.log('seed complete:')
   console.log(`  - admin user: ${admin.email}`)
-  console.log('  - buyer users: buyer1@acme.com, buyer2@acme.com')
+  console.log('  - buyer users: buyer1@repairhub.com, buyer2@repairhub.com')
   console.log(`  - org: ${acme.slug}`)
   console.log(`  - ${products.length} products, 2 customer prices`)
   console.log(`  - search index queue: ${products.length} UPSERT enqueued`)

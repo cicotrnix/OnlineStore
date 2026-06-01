@@ -10,6 +10,7 @@ import { isFeatureEnabled } from '@/lib/features'
 import { getLocale } from '@/lib/i18n'
 import { cartService } from '@/modules/cart'
 import storeConfig from '@/store.config'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -44,8 +45,15 @@ export default async function StorefrontLayout({
       {impersonatingName && <ImpersonationBanner orgName={impersonatingName} />}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="font-semibold tracking-tight">
-            {storeConfig.identity.name}
+          <Link href="/" aria-label={storeConfig.identity.name} className="block shrink-0">
+            <Image
+              src={storeConfig.identity.logo}
+              alt={storeConfig.identity.name}
+              width={160}
+              height={36}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
           <div className="hidden md:block flex-1 mx-6 max-w-md">
             <SearchBar />

@@ -187,7 +187,7 @@ async function main() {
   let count = 0
   for (const it of items) {
     const description = `Pi-Power extended-capacity replacement battery cell for ${it.model}. Wholesale.`
-    const imageUrl = `/products/pi-battery-iphone-${it.modelSlug}.webp`
+    const imageUrl = `/products/iphone-${it.modelSlug}.png`
     await prisma.product.upsert({
       where: { sku: it.sku },
       update: {

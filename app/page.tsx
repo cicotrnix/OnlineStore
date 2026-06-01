@@ -2,6 +2,7 @@ import { SearchBar } from '@/components/commerce/SearchBar'
 import { FeaturedGrid } from '@/components/storefront/FeaturedGrid'
 import { auth } from '@/lib/auth/config'
 import storeConfig from '@/store.config'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -13,8 +14,15 @@ export default async function HomePage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="font-semibold tracking-tight">
-            {storeConfig.identity.name}
+          <Link href="/" aria-label={storeConfig.identity.name} className="block">
+            <Image
+              src={storeConfig.identity.logo}
+              alt={storeConfig.identity.name}
+              width={160}
+              height={36}
+              priority
+              className="h-8 w-auto"
+            />
           </Link>
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/catalog" className="text-gray-700 hover:text-gray-900">
@@ -35,15 +43,31 @@ export default async function HomePage() {
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-16">
         <section className="text-center">
-          <h1
-            className="text-4xl md:text-5xl font-medium tracking-tight"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            {storeConfig.identity.name}
-          </h1>
+          <h1 className="sr-only">{storeConfig.identity.name}</h1>
+          <div className="flex justify-center">
+            <Image
+              src={storeConfig.identity.logo}
+              alt={storeConfig.identity.name}
+              width={1600}
+              height={900}
+              priority
+              className="h-24 md:h-32 w-auto"
+            />
+          </div>
           {storeConfig.identity.tagline && (
-            <p className="mt-3 text-lg text-gray-600">{storeConfig.identity.tagline}</p>
+            <p
+              className="mt-4 text-lg text-gray-600"
+              // Motif π: acento de marca debajo del tagline.
+              style={{ borderColor: 'var(--color-accent)' }}
+            >
+              {storeConfig.identity.tagline}
+            </p>
           )}
+          <div
+            aria-hidden
+            className="mt-4 mx-auto h-1 w-16 rounded-full"
+            style={{ background: 'var(--color-accent)' }}
+          />
           <div className="mt-8 flex justify-center">
             <SearchBar size="lg" placeholder="Buscá productos por SKU, nombre o descripción" />
           </div>
