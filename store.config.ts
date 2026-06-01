@@ -6,10 +6,10 @@ import { defineStoreConfig } from './modules/config'
  */
 export default defineStoreConfig({
   identity: {
-    name: 'Acme Wholesale',
-    logo: '/brand/logo.svg',
-    supportEmail: 'support@acme.example',
-    tagline: 'Mayorista B2B · USA + LATAM',
+    name: 'PiPower',
+    logo: '/logo-pipower.png',
+    supportEmail: 'support@pipower.example',
+    tagline: 'Baterías mayoristas para iPhone · USA + LATAM',
     brandVoice: {
       audience:
         'Independent iPhone repair professionals and authorized service shops across USA and Latin America',

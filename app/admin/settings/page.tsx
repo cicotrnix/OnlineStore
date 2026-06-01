@@ -16,7 +16,7 @@ export default async function SettingsPage() {
           <input
             name="name"
             required
-            placeholder="Acme Wholesale"
+            placeholder="My Repair Shop Co"
             className="w-full border rounded-lg px-3 py-2 text-sm"
           />
           <input
