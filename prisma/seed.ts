@@ -363,6 +363,10 @@ async function main() {
     await enqueueIndex(p.id, 'UPSERT')
   }
 
+  // Fase 5 Corte 3: siembra plan de cuentas (upsert, idempotente)
+  const { seedChartOfAccounts } = await import('@/modules/accounting')
+  await seedChartOfAccounts()
+
   console.log('seed complete:')
   console.log(`  - admin user: ${admin.email}`)
   console.log('  - buyer users: buyer1@repairhub.com, buyer2@repairhub.com')

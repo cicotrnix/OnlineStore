@@ -106,6 +106,77 @@ Suite: `pnpm vitest run modules/payments` → **12/12 pass**.
 - [ ] DKIM/SPF para Resend (OTP delivery).
 - [ ] Rotación de `STRIPE_WEBHOOK_SECRET` documentada en runbook.
 
+## §12 — Contabilidad (Corte 3)
+
+### §12.1 — Doble partida (débitos = créditos)
+
+- [x] `postEntry` rechaza asientos donde `sum(debitCents) !== sum(creditCents)` → `UnbalancedEntryError`.
+- [x] Property test: 100 payloads aleatorios × 4 reglas (`invoice.issued`, `payment.captured`, `payment.reconciled`, `payment.refunded`) → todas balancean.
+- [x] Línea no puede tener debit Y credit simultáneamente.
+- [x] BIGINT centavos en todo el ledger (`Prisma BigInt`). Cero `Decimal` en `JournalLine`.
+
+### §12.2 — Append-only enforcement
+
+- [x] Guard de Prisma `lib/db/client.ts` bloquea `update/updateMany/delete/deleteMany/upsert` en `JournalEntry`, `JournalLine`, `PaymentEvent`.
+- [x] Correcciones via **asientos reversores** (`JournalEntry.reversesId`), NO via UPDATE/DELETE.
+- [x] Test (`__tests__/posting.test.ts`) verifica que el constraint impide modificar.
+- [x] Hardening DB pendiente (Herney): rol Postgres `app_rw` sin `UPDATE`/`DELETE` grants en estas tablas.
+
+### §12.3 — Idempotencia por eventId
+
+- [x] `JournalEntry.eventId` UNIQUE.
+- [x] Re-postear el mismo `eventId` retorna `{ alreadyPosted: true }` — no se crean líneas duplicadas.
+- [x] Test: replay del mismo `payment.captured` via bus → único asiento.
+
+### §12.4 — Períodos contables (cierre/bloqueo)
+
+- [x] `AccountingPeriod(year, month, status)` UNIQUE por (year, month).
+- [x] `ensureOpenPeriod` upserta el período del mes; si está `CLOSED` → throw.
+- [x] `closePeriod` marca como CLOSED + audit (`closedBy`, `closedAt`).
+- [x] Test: posteo en período cerrado falla con `Error /CLOSED/`.
+- [x] **Acción sensible**: el caller de `closePeriod` debe pasar step-up auth (mismo mecanismo de refunds).
+
+### §12.5 — Reglas de posteo
+
+| Evento | Débito | Crédito |
+|--------|--------|---------|
+| `invoice.issued` | CxC (1100) | Ventas (4000) |
+| `payment.captured` | Stripe-clearing (1200) + COGS (5000) | CxC (1100) + Inventario (1300) |
+| `payment.reconciled` | Banco (1010) + COGS (5000) | CxC (1100) + Inventario (1300) |
+| `payment.refunded` | CxC (1100) + Inventario (1300) | Stripe-clearing (1200) + COGS (5000) |
+
+- [x] Cada regla emite líneas balanceadas por construcción (test paramétrico cubre 100 valores).
+- [x] Inventario/COGS solo se postean si el payload trae `cogsCents > 0` (no obliga al productor a calcularlos si no aplica).
+
+### §12.6 — Integración con bus
+
+- [x] `accountingSubscriber` registrado en `modules/events/subscribers.ts` boot-time.
+- [x] Maneja: `invoice.issued`, `payment.captured`, `payment.reconciled`, `payment.refunded`.
+- [x] Despachador entrega *at-least-once* + idempotency en posteo → seguro contra replay.
+- [x] Falla del subscriber NO bloquea a otros (per Corte 0): retry hasta `MAX_ATTEMPTS=5` + `FAILED`.
+
+### §12.7 — Reportes
+
+- [x] `trialBalance({from?, to?})` agrupa por cuenta, retorna `{rows, totalDebits, totalCredits}`.
+- [x] Property garantiza `totalDebits === totalCredits` siempre.
+
+### §12.8 — Tests cobertura Corte 3
+
+Suite: `pnpm vitest run modules/accounting`.
+
+1. [x] `postEntry rechaza asiento desbalanceado`
+2. [x] `postEntry rechaza línea con debit Y credit`
+3. [x] `postEntry idempotente por eventId`
+4. [x] `postEntry bloquea posteo en período CLOSED`
+5. [x] `POSTING_RULES property: débitos = créditos para 100 inputs aleatorios`
+6. [x] `POSTING_RULES invoice.issued montos correctos`
+7. [x] `POSTING_RULES payment.captured con cogs: 4 líneas`
+8. [x] `POSTING_RULES payment.refunded sin restock: 2 líneas`
+9. [x] `accountingSubscriber end-to-end via bus: invoice.issued → asiento posteado`
+10. [x] `replay del mismo evento via dispatcher no duplica asientos`
+
+**10/10 tests pass.**
+
 ## §11 — Sustitución del FakeStripe en producción
 
 `getStripeClient()` en `lib/stripe/index.ts` retorna `FakeStripe` actualmente.

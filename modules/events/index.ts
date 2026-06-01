@@ -1,7 +1,7 @@
 export { EVENT_TYPES } from './contract'
 export type { DomainEventType, DomainEventInput, DomainEventRecord } from './contract'
 export { emitEvent } from './outbox'
-export { registerSubscriber, getSubscribersFor } from './registry'
+export { registerSubscriber, getSubscribersFor, _resetSubscribers } from './registry'
 export type { Subscriber } from './registry'
 export { dispatchPending } from './dispatcher'
 export type { DispatchResult } from './dispatcher'

@@ -848,3 +848,91 @@ model SensitiveActionToken {
 
   @@index([userId, action])
 }
+
+// ===== Fase 5 Corte 3: Contabilidad doble partida (BIGINT cents, append-only) =====
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+  COGS
+}
+
+enum NormalSide {
+  DEBIT
+  CREDIT
+}
+
+enum AccountingPeriodStatus {
+  OPEN
+  CLOSED
+}
+
+model LedgerAccount {
+  id         String      @id @default(cuid())
+  code       String      @unique // ej: '1100', '4000'
+  name       String
+  type       AccountType
+  normalSide NormalSide
+  isActive   Boolean     @default(true)
+  parentId   String?
+  parent     LedgerAccount? @relation("AccountTree", fields: [parentId], references: [id])
+  children   LedgerAccount[] @relation("AccountTree")
+  lines      JournalLine[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([type])
+}
+
+model AccountingPeriod {
+  id        String                 @id @default(cuid())
+  year      Int
+  month     Int                    // 1..12
+  status    AccountingPeriodStatus @default(OPEN)
+  closedAt  DateTime?
+  closedBy  String?
+  entries   JournalEntry[]
+  createdAt DateTime               @default(now())
+
+  @@unique([year, month])
+}
+
+model JournalEntry {
+  id          String           @id @default(cuid())
+  // Idempotency: el mismo eventId nunca produce 2 asientos.
+  eventId     String           @unique
+  eventType   String           // ej: 'invoice.issued', 'payment.captured'
+  description String?
+  occurredAt  DateTime
+  periodId    String
+  period      AccountingPeriod @relation(fields: [periodId], references: [id])
+  // Reversales: enlaza el asiento original.
+  reversesId  String?          @unique
+  reverses    JournalEntry?    @relation("JournalReverse", fields: [reversesId], references: [id])
+  reversedBy  JournalEntry?    @relation("JournalReverse")
+  lines       JournalLine[]
+  createdAt   DateTime         @default(now())
+
+  @@index([eventType])
+  @@index([occurredAt])
+}
+
+model JournalLine {
+  id          String        @id @default(cuid())
+  entryId     String
+  entry       JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     LedgerAccount @relation(fields: [accountId], references: [id])
+  // BIGINT centavos — uno de los dos siempre 0, el otro positivo.
+  debitCents  BigInt        @default(0)
+  creditCents BigInt        @default(0)
+  currency    String        @default("USD")
+  memo        String?
+  createdAt   DateTime      @default(now())
+
+  @@index([entryId])
+  @@index([accountId])
+}
