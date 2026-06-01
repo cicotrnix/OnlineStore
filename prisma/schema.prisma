@@ -964,6 +964,50 @@ enum ShipmentStatus {
   CANCELLED
 }
 
+// ===== Fase 5 Corte 7: Webhooks salientes (HMAC + replay) =====
+
+enum WebhookDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+model WebhookEndpoint {
+  id          String   @id @default(cuid())
+  organizationId String?
+  url         String
+  secret      String   // HMAC sha256 secret (env-grade rotation recomendado)
+  isActive    Boolean  @default(true)
+  // Subset suscrito del contrato (whitelist por tipo).
+  events      String[]
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deliveries  WebhookDelivery[]
+
+  @@index([isActive])
+  @@index([organizationId])
+}
+
+model WebhookDelivery {
+  id           String                @id @default(cuid())
+  endpointId   String
+  endpoint     WebhookEndpoint       @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  eventId      String                // DomainEvent.id
+  eventType    String
+  payload      String                @db.Text
+  signature    String                // hex sha256 hmac
+  status       WebhookDeliveryStatus @default(PENDING)
+  attempts     Int                   @default(0)
+  lastError    String?               @db.Text
+  responseStatus Int?
+  deliveredAt  DateTime?
+  createdAt    DateTime              @default(now())
+
+  @@unique([endpointId, eventId])
+  @@index([status])
+}
+
 model Shipment {
   id              String          @id @default(cuid())
   orderId         String          @unique
