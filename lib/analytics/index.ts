@@ -1,5 +1,5 @@
 /**
- * Cliente analytics server-side. Producción: PostHog (SDK posthog-node) + GA4
+ * Cliente analytics server-side. Producción: PostHog (HTTP /capture/) + GA4
  * Measurement Protocol (HTTP); dev/test/CI: FakeAnalytics in-memory.
  *
  * Env vars (cualquiera activa parte del cliente real):
@@ -8,20 +8,12 @@
  *
  * Sin ninguna de las dos backends → FakeAnalytics. La app sigue funcionando.
  * Si solo PostHog está configurado, GA4 queda inerte; viceversa.
+ *
+ * No usamos posthog-node SDK porque carga worker_threads y rompe el bundling
+ * server-side de Next. El endpoint /capture/ acepta el mismo payload via POST
+ * y nuestros volúmenes server-side son bajos (batching no es crítico).
  */
 import { logger } from '@/lib/observability/logger'
-
-// Type-only import — posthog-node carga worker_threads y rompe en CI cuando
-// se importa al nivel de módulo. Cargamos dinámico sólo cuando hay claves.
-type PostHogInstance = {
-  capture(event: {
-    distinctId: string
-    event: string
-    properties?: Record<string, unknown>
-    timestamp?: Date
-  }): void
-  shutdown(): Promise<void>
-}
 
 export interface AnalyticsEvent {
   name: string
@@ -50,42 +42,24 @@ class FakeAnalytics implements AnalyticsClient {
  * (un analytics caído no debe romper el bus de eventos).
  */
 class PosthogGa4Analytics implements AnalyticsClient {
-  private posthog: PostHogInstance | null = null
-  private posthogPromise: Promise<PostHogInstance | null> | null = null
-
   constructor(
-    private readonly posthogCfg: { apiKey: string; host: string } | null,
+    private readonly posthog: { apiKey: string; host: string } | null,
     private readonly ga4: { measurementId: string; apiSecret: string } | null
   ) {}
 
-  private async getPosthog(): Promise<PostHogInstance | null> {
-    if (this.posthog) return this.posthog
-    if (!this.posthogCfg) return null
-    if (!this.posthogPromise) {
-      const cfg = this.posthogCfg
-      this.posthogPromise = (async () => {
-        const mod = await import('posthog-node')
-        const client = new mod.PostHog(cfg.apiKey, {
-          host: cfg.host,
-          flushAt: 1,
-          flushInterval: 0,
-        }) as unknown as PostHogInstance
-        this.posthog = client
-        return client
-      })()
-    }
-    return this.posthogPromise
-  }
-
   async capture(event: AnalyticsEvent): Promise<void> {
-    if (this.posthogCfg) {
+    if (this.posthog) {
       try {
-        const ph = await this.getPosthog()
-        ph?.capture({
-          distinctId: event.distinctId ?? 'anonymous',
-          event: event.name,
-          properties: event.properties,
-          timestamp: event.timestamp,
+        await fetch(`${this.posthog.host}/capture/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            api_key: this.posthog.apiKey,
+            event: event.name,
+            distinct_id: event.distinctId ?? 'anonymous',
+            properties: event.properties,
+            timestamp: (event.timestamp ?? new Date()).toISOString(),
+          }),
         })
       } catch (err) {
         logger.error({ err, event: event.name }, 'posthog capture failed')
@@ -111,10 +85,6 @@ class PosthogGa4Analytics implements AnalyticsClient {
       }
     }
   }
-
-  async shutdown(): Promise<void> {
-    if (this.posthog) await this.posthog.shutdown()
-  }
 }
 
 let cached: AnalyticsClient | null = null
@@ -137,7 +107,7 @@ export function getAnalyticsClient(): AnalyticsClient {
       posthogKey
         ? {
             apiKey: posthogKey,
-            host: process.env.POSTHOG_HOST ?? 'https://us.i.posthog.com',
+            host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
           }
         : null,
       ga4Id && ga4Secret ? { measurementId: ga4Id, apiSecret: ga4Secret } : null

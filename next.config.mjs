@@ -2,11 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // posthog-node usa worker_threads; sin esto Next bundlea mal el chunk en
-  // serverless/dev (Cannot find module 'lib/worker.js'). También aplica a
-  // stripe + aws-sdk que se cargan dinámicamente.
+  // stripe + aws-sdk se cargan dinámicamente con require interno; quedan
+  // como externos para evitar bundling de tree-shake mal-comportado.
   experimental: {
-    serverComponentsExternalPackages: ['posthog-node', 'stripe', '@aws-sdk/client-s3'],
+    serverComponentsExternalPackages: ['stripe', '@aws-sdk/client-s3'],
   },
 }
 
