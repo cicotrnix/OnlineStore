@@ -109,6 +109,8 @@ type MessageKey =
   | 'pdp.relatedTitle.related'
   | 'pdp.disabled.impersonating'
   | 'pdp.disabled.outOfStock'
+  | 'pdp.noImage'
+  | 'pdp.privateBadge'
   // Cart
   | 'cart.title'
   | 'cart.empty.title'
@@ -120,6 +122,13 @@ type MessageKey =
   | 'cart.update'
   | 'cart.remove'
   | 'cart.checkout'
+  | 'cart.summary'
+  | 'cart.taxNote'
+  | 'cart.proceedCheckout'
+  | 'cart.continueShopping'
+  | 'cart.noLongerAvailable'
+  | 'cart.skuLabel'
+  | 'cart.noImage'
   // Checkout
   | 'checkout.title'
   | 'checkout.subtitle'
@@ -278,6 +287,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'pdp.relatedTitle.related': 'Related products',
     'pdp.disabled.impersonating': "You can't place orders while impersonating",
     'pdp.disabled.outOfStock': 'Out of stock',
+    'pdp.noImage': 'No image',
+    'pdp.privateBadge': 'Private product for your organization',
     // Cart
     'cart.title': 'Cart',
     'cart.empty.title': 'Your cart is empty',
@@ -289,6 +300,13 @@ export const MESSAGES: Record<Locale, Dict> = {
     'cart.update': 'Update',
     'cart.remove': 'Remove',
     'cart.checkout': 'Checkout',
+    'cart.summary': 'Summary',
+    'cart.taxNote': 'Taxes and shipping calculated at checkout.',
+    'cart.proceedCheckout': 'Proceed to checkout · {amount}',
+    'cart.continueShopping': 'Continue shopping',
+    'cart.noLongerAvailable': 'No longer available',
+    'cart.skuLabel': 'SKU',
+    'cart.noImage': 'No image',
     // Checkout
     'checkout.title': 'Checkout',
     'checkout.subtitle': 'Review and confirm your order.',
@@ -450,6 +468,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'pdp.relatedTitle.related': 'Productos relacionados',
     'pdp.disabled.impersonating': 'No puedes colocar órdenes mientras impersonas',
     'pdp.disabled.outOfStock': 'Sin stock',
+    'pdp.noImage': 'Sin imagen',
+    'pdp.privateBadge': 'Producto privado para tu organización',
     // Cart
     'cart.title': 'Carrito',
     'cart.empty.title': 'Tu carrito está vacío',
@@ -461,6 +481,13 @@ export const MESSAGES: Record<Locale, Dict> = {
     'cart.update': 'Actualizar',
     'cart.remove': 'Quitar',
     'cart.checkout': 'Ir al checkout',
+    'cart.summary': 'Resumen',
+    'cart.taxNote': 'Impuestos y envío se calcularán en el checkout.',
+    'cart.proceedCheckout': 'Proceder al checkout · {amount}',
+    'cart.continueShopping': 'Continuar comprando',
+    'cart.noLongerAvailable': 'Ya no disponible',
+    'cart.skuLabel': 'SKU',
+    'cart.noImage': 'Sin imagen',
     // Checkout
     'checkout.title': 'Checkout',
     'checkout.subtitle': 'Revisá y confirmá tu pedido.',

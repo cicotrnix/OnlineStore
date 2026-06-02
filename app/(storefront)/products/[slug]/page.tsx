@@ -53,6 +53,8 @@ export default async function ProductPage({ params }: Props) {
   // PDP queda público (SEO) — el anónimo ve specs/contenido sin precio.
   const { getCustomerState } = await import('@/lib/auth/customer')
   const customerState = await getCustomerState()
+  const { getLocale, t } = await import('@/lib/i18n')
+  const locale = await getLocale({ userId: session?.user?.id ?? null })
   const verifiedOrgId = customerState.kind === 'verified' ? customerState.orgId : null
   const orgId = verifiedOrgId
   const isImpersonating = customerState.kind === 'verified' ? customerState.isImpersonating : false
@@ -83,7 +85,10 @@ export default async function ProductPage({ params }: Props) {
       ? personalized
       : await getRelatedProducts({ productId: product.id, orgId, limit: 8 }).catch(() => [])
     : []
-  const relatedTitle = personalized.length > 0 ? 'Recomendado para ti' : 'Productos relacionados'
+  const relatedTitle =
+    personalized.length > 0
+      ? t(locale, 'pdp.relatedTitle.recommended')
+      : t(locale, 'pdp.relatedTitle.related')
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 grid gap-10 md:grid-cols-2">
@@ -91,7 +96,7 @@ export default async function ProductPage({ params }: Props) {
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
         ) : (
-          <span className="text-sm text-gray-400">Sin imagen</span>
+          <span className="text-sm text-gray-400">{t(locale, 'pdp.noImage')}</span>
         )}
       </div>
       <div>
@@ -102,7 +107,9 @@ export default async function ProductPage({ params }: Props) {
           {product.category.name}
         </Link>
         <h1 className="mt-1 text-3xl font-medium tracking-tight">{product.name}</h1>
-        <p className="mt-1 text-xs text-gray-500 font-mono">SKU {product.sku}</p>
+        <p className="mt-1 text-xs text-gray-500 font-mono">
+          {t(locale, 'pdp.viewLabel.sku')} {product.sku}
+        </p>
         {isTagOn && (
           <div className="mt-2">
             <Badge variant="info">Tag-On Flex</Badge>
@@ -125,7 +132,7 @@ export default async function ProductPage({ params }: Props) {
               href="/sign-in"
               className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
             >
-              Iniciá sesión o registrá tu negocio para ver precios mayoristas →
+              {t(locale, 'pdp.signInForPriceLong')}
             </Link>
           )}
         </div>
@@ -152,9 +159,9 @@ export default async function ProductPage({ params }: Props) {
               disabled={isImpersonating || product.stockQuantity === 0}
               disabledReason={
                 isImpersonating
-                  ? 'No puedes colocar órdenes mientras impersonas'
+                  ? t(locale, 'pdp.disabled.impersonating')
                   : product.stockQuantity === 0
-                    ? 'Out of stock'
+                    ? t(locale, 'pdp.disabled.outOfStock')
                     : undefined
               }
             />
@@ -166,7 +173,7 @@ export default async function ProductPage({ params }: Props) {
           )}
           {showPrivateBadge && (
             <div className="mt-3">
-              <Badge variant="info">Producto privado para tu organización</Badge>
+              <Badge variant="info">{t(locale, 'pdp.privateBadge')}</Badge>
             </div>
           )}
         </div>
