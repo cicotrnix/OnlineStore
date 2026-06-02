@@ -1,14 +1,41 @@
 /**
  * HTML inline para la respuesta 503 de mantenimiento. Edge-safe (sin
  * importar componentes React). Marca PiPower + verde #88D810 + noindex.
+ *
+ * Bilingüe: default inglés. Detección por query `?lang=es|en`, cookie
+ * `locale`, o Accept-Language. Link al alternate language en el footer.
  */
-export const MAINTENANCE_HTML = `<!DOCTYPE html>
-<html lang="es">
+
+type Lang = 'en' | 'es'
+
+const COPY = {
+  en: {
+    title: 'PiPower — Coming soon',
+    heading: 'We are getting the wholesale store ready',
+    body: 'Check back soon. If you have an early-access link, open it to enter.',
+    altLink: 'Español',
+    altUrl: '/?lang=es',
+    langCode: 'en',
+  },
+  es: {
+    title: 'PiPower — Próximamente',
+    heading: 'Estamos preparando la tienda mayorista',
+    body: 'Volvé pronto. Si tenés un link de acceso anticipado, abrilo para entrar.',
+    altLink: 'English',
+    altUrl: '/?lang=en',
+    langCode: 'es',
+  },
+} as const
+
+export function buildMaintenanceHtml(lang: Lang): string {
+  const c = COPY[lang]
+  return `<!DOCTYPE html>
+<html lang="${c.langCode}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>PiPower — Próximamente</title>
+  <title>${c.title}</title>
   <style>
     :root { --accent: #88D810; }
     * { box-sizing: border-box; }
@@ -20,6 +47,8 @@ export const MAINTENANCE_HTML = `<!DOCTYPE html>
     .accent { display: block; width: 64px; height: 4px; border-radius: 999px; background: var(--accent); margin: 20px auto; }
     h1 { font-size: 22px; font-weight: 500; margin: 16px 0 8px; letter-spacing: -0.01em; }
     p { font-size: 14px; color: #4b5563; line-height: 1.55; margin: 0; }
+    .lang { margin-top: 20px; font-size: 12px; }
+    .lang a { color: #4b5563; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -29,9 +58,31 @@ export const MAINTENANCE_HTML = `<!DOCTYPE html>
         <img src="/logo-pipower.png" alt="PiPower" />
       </div>
       <span class="accent" aria-hidden="true"></span>
-      <h1>Estamos preparando la tienda mayorista</h1>
-      <p>Volvé pronto. Si tenés un link de acceso anticipado, abrilo para entrar.</p>
+      <h1>${c.heading}</h1>
+      <p>${c.body}</p>
+      <div class="lang"><a href="${c.altUrl}">${c.altLink}</a></div>
     </section>
   </main>
 </body>
 </html>`
+}
+
+/** Locale detection edge-safe. Cookie `locale=es-419` o query `?lang=es`. */
+export function resolveMaintenanceLang(req: Request): Lang {
+  try {
+    const url = new URL(req.url)
+    const queryLang = url.searchParams.get('lang')
+    if (queryLang === 'es' || queryLang === 'en') return queryLang
+    const cookie = req.headers.get('cookie') ?? ''
+    if (/(?:^|;\s*)locale=es-419/.test(cookie)) return 'es'
+    if (/(?:^|;\s*)locale=en-US/.test(cookie)) return 'en'
+    const accept = req.headers.get('accept-language') ?? ''
+    if (accept.toLowerCase().startsWith('es')) return 'es'
+  } catch {
+    /* fall through */
+  }
+  return 'en'
+}
+
+/** @deprecated retro-compat con tests previos. */
+export const MAINTENANCE_HTML = buildMaintenanceHtml('en')

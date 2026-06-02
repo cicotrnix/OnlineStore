@@ -139,6 +139,21 @@ type MessageKey =
   | 'checkout.poNumber'
   | 'checkout.notes'
   | 'checkout.placeOrder'
+  | 'checkout.subtitle2'
+  | 'checkout.step1'
+  | 'checkout.step2'
+  | 'checkout.step3'
+  | 'checkout.step4'
+  | 'checkout.skuLabel'
+  | 'checkout.qtyLabel'
+  | 'checkout.issue.inactive'
+  | 'checkout.issue.stock'
+  | 'checkout.issue.priceChanged'
+  | 'checkout.noAddresses'
+  | 'checkout.poPlaceholder'
+  | 'checkout.notesPlaceholder'
+  | 'checkout.blockingIssue'
+  | 'checkout.total'
   // Orders list
   | 'orders.title'
   | 'orders.empty'
@@ -171,6 +186,19 @@ type MessageKey =
   | 'notifications.title'
   | 'notifications.empty'
   | 'notifications.markAllRead'
+  // Admin nav
+  | 'admin.label'
+  | 'admin.platformAdmin'
+  | 'admin.nav.dashboard'
+  | 'admin.nav.products'
+  | 'admin.nav.categories'
+  | 'admin.nav.orders'
+  | 'admin.nav.quotes'
+  | 'admin.nav.invoices'
+  | 'admin.nav.approvals'
+  | 'admin.nav.customers'
+  | 'admin.nav.search'
+  | 'admin.nav.settings'
 
 type Dict = Record<MessageKey, string>
 
@@ -317,6 +345,23 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.poNumber': 'PO number (optional)',
     'checkout.notes': 'Notes (optional)',
     'checkout.placeOrder': 'Place order',
+    'checkout.subtitle2': 'Review your order and confirm addresses to place it.',
+    'checkout.step1': '1. Review items',
+    'checkout.step2': '2. Addresses',
+    'checkout.step3': '3. PO + notes',
+    'checkout.step4': '4. Confirm',
+    'checkout.skuLabel': 'SKU',
+    'checkout.qtyLabel': 'qty',
+    'checkout.issue.inactive': 'Inactive',
+    'checkout.issue.stock': 'Stock {n}',
+    'checkout.issue.priceChanged': 'Price changed to {price}',
+    'checkout.noAddresses':
+      'No addresses on file. Add one in the admin panel first.',
+    'checkout.poPlaceholder': 'PO-2026-001',
+    'checkout.notesPlaceholder': 'Special instructions, delivery windows, etc.',
+    'checkout.blockingIssue':
+      "You can't place the order until the flagged issues are resolved. Go back to cart.",
+    'checkout.total': 'Total',
     // Orders
     'orders.title': 'Orders',
     'orders.empty': 'No orders yet.',
@@ -352,6 +397,19 @@ export const MESSAGES: Record<Locale, Dict> = {
     'notifications.title': 'Notifications',
     'notifications.empty': 'No notifications.',
     'notifications.markAllRead': 'Mark all as read',
+    // Admin nav
+    'admin.label': 'Admin',
+    'admin.platformAdmin': 'Platform admin',
+    'admin.nav.dashboard': 'Dashboard',
+    'admin.nav.products': 'Products',
+    'admin.nav.categories': 'Categories',
+    'admin.nav.orders': 'Orders',
+    'admin.nav.quotes': 'Quotes',
+    'admin.nav.invoices': 'Invoices',
+    'admin.nav.approvals': 'Approvals',
+    'admin.nav.customers': 'Customers',
+    'admin.nav.search': 'Search',
+    'admin.nav.settings': 'Settings',
   },
   'es-419': {
     'localeSwitch.label': 'Idioma',
@@ -498,6 +556,23 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.poNumber': 'Número de PO (opcional)',
     'checkout.notes': 'Notas (opcional)',
     'checkout.placeOrder': 'Colocar pedido',
+    'checkout.subtitle2': 'Revisa tu pedido y confirma las direcciones para colocar la orden.',
+    'checkout.step1': '1. Revisar items',
+    'checkout.step2': '2. Direcciones',
+    'checkout.step3': '3. PO y notas',
+    'checkout.step4': '4. Confirmar',
+    'checkout.skuLabel': 'SKU',
+    'checkout.qtyLabel': 'cant',
+    'checkout.issue.inactive': 'Inactivo',
+    'checkout.issue.stock': 'Stock {n}',
+    'checkout.issue.priceChanged': 'Precio cambió a {price}',
+    'checkout.noAddresses':
+      'No hay direcciones registradas. Agregá una en el panel admin primero.',
+    'checkout.poPlaceholder': 'PO-2026-001',
+    'checkout.notesPlaceholder': 'Instrucciones especiales, ventanas de entrega, etc.',
+    'checkout.blockingIssue':
+      'No puedes colocar la orden hasta resolver los issues marcados arriba. Volvé al carrito para ajustar.',
+    'checkout.total': 'Total',
     // Orders
     'orders.title': 'Órdenes',
     'orders.empty': 'Aún no hay órdenes.',
@@ -533,6 +608,19 @@ export const MESSAGES: Record<Locale, Dict> = {
     'notifications.title': 'Notificaciones',
     'notifications.empty': 'No hay notificaciones.',
     'notifications.markAllRead': 'Marcar todo como leído',
+    // Admin nav
+    'admin.label': 'Admin',
+    'admin.platformAdmin': 'Platform admin',
+    'admin.nav.dashboard': 'Dashboard',
+    'admin.nav.products': 'Productos',
+    'admin.nav.categories': 'Categorías',
+    'admin.nav.orders': 'Órdenes',
+    'admin.nav.quotes': 'Cotizaciones',
+    'admin.nav.invoices': 'Facturas',
+    'admin.nav.approvals': 'Aprobaciones',
+    'admin.nav.customers': 'Clientes',
+    'admin.nav.search': 'Búsqueda',
+    'admin.nav.settings': 'Settings',
   },
 }
 
