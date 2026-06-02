@@ -24,7 +24,7 @@ Antes de tocar código, leer en este orden:
 
 ## Estado actual del proyecto
 
-**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0). Fase 2 cerrada (v2.0.0). Fase 3 cerrada (v3.0.0). Fase 4 cerrada (v4.0.0, 2026-05-30).**
+**Fase 0 cerrada (v0.1.0). Fase 1 cerrada (v1.0.0). Fase 2 cerrada (v2.0.0). Fase 3 cerrada (v3.0.0). Fase 4 cerrada (v4.0.0, 2026-05-30). Fase 5 cerrada (v5.0.0, 2026-06-01).**
 
 **Fase 0 entregado (v0.1.0, 2026-05-25):**
 - Next.js 14 + TypeScript estricto + Tailwind + Biome + Vitest + Playwright.
@@ -87,6 +87,20 @@ Antes de tocar código, leer en este orden:
 - Vitest: 208/208 passing (+ 6 skipped). Lint+typecheck+build limpios.
 - ADRs 0020-0025 (provider+model split, attrs JSON, ProductContent multilingual, chatbot tool-use, recommendations pgvector, i18n cookie). Runbooks: ai-content, ai-chat, ai-recommendations.
 - Flags `ai.content`, `ai.chat`, `ai.recommendations` activos por default en `store.config.ts` (inertes sin `ANTHROPIC_API_KEY`).
+
+**Fase 5 entregado (v5.0.0, 2026-06-01):**
+- **Corte 0 — Bus de eventos:** `DomainEvent` + `EventDelivery` (transactional outbox + FOR UPDATE SKIP LOCKED). Registro tipado boot-time (`registerSubscriber` idempotente por name). `dispatchPending` con MAX_ATTEMPTS=5 + EventDelivery por suscriptor. Contrato v1 congelado: 11 tipos. Scripts `process-domain-events`/`cleanup-domain-events`.
+- **Corte 1 — Verificación B2B:** `Organization.{verificationStatus, country, taxExempt, verifiedAt}` + `TaxDocument` + 3 enums. `modules/verification` con auto-aprobación al cargar certificado (transaccional: upload R2 → TaxDocument APPROVED → Organization VERIFIED + taxExempt → emit `customer.verified`). Gate en `checkout.confirm()` bloquea orgs no verificadas. Seed RepairHub Co migrado a PREPAID + pre-verificado para demo. `lib/storage` con `FakeStorage` in-memory (R2/Hetzner-ready interface).
+- **Corte 2 — Pagos PSDD:** Stripe Checkout + wire/ACH. `Payment` + `PaymentEvent` (append-only) + `SensitiveActionToken` + 3 enums. `FakeStripe` con HMAC sha256 verify. `handleStripeWebhook` = única fuente de verdad: dedup por eventId UNIQUE → mismatch detection → NEEDS_REVIEW + auto-refund + audit | happy: tx con row lock + atomic stock decrement + CAPTURED + emit `payment.captured`. `reconcileWire` idempotente por `wire-${ref}` eventId. Refunds gated por step-up email-OTP (SHA-256 hashes + TTL 10min + single-use + scope userId+action+subjectId). `docs/psa-checklist.md` §1-§11.
+- **Corte 3 — Contabilidad doble partida:** `LedgerAccount` + `AccountingPeriod` + `JournalEntry` (append-only, eventId UNIQUE) + `JournalLine` (BIGINT centavos) + 3 enums. Chart of accounts (12 cuentas, dominio-como-datos). `postEntry` valida débitos=créditos, XOR debit/credit por línea. `POSTING_RULES` para invoice.issued + payment.captured + payment.reconciled + payment.refunded. Property test 100 inputs × 4 reglas. `closePeriod` con guard (posteo en CLOSED → throw). `trialBalance` report. Append-only guard en `lib/db/client.ts` bloquea UPDATE/DELETE en JournalEntry/JournalLine/PaymentEvent (`APPEND_ONLY_GUARD=off` en tests). `accountingSubscriber` registrado boot-time. `docs/psa-checklist.md` §12.
+- **Corte 4 — Envíos FedEx + Miami forwarder:** `Shipment` + 3 enums. `lib/fedex` `FakeFedex` (Ground-only, US-only, idempotent labels). `quoteShipment`: destino US → FedEx Ground; no-US → marca isExport (manual forwarder). HAZMAT_LIMITS (maxCells=100, maxWattHours=300). `dispatchShipment` compra etiqueta + emite `shipment.dispatched`.
+- **Corte 5 — Email transaccional outbox-driven:** `NotificationType` extendido (5 nuevos: ORDER_PLACED, PAYMENT_CAPTURED, PAYMENT_RECONCILED, INVOICE_ISSUED, SHIPMENT_DISPATCHED). 5 plantillas react-email (CTA wrap sobre BaseTemplate). `emailSubscriber` mapea evento → NotificationType + recipients + dispatch(). Idempotente vía EventDelivery `(eventId, subscriber)`. Las 14 plantillas Fase 2 se conservan sin duplicar.
+- **Corte 6 — Analytics PostHog + GA4 server-side:** `lib/analytics` `AnalyticsClient` interface + `FakeAnalytics` + `PosthogGa4Analytics`. Noop-safe sin `POSTHOG_API_KEY`/`GA4_MEASUREMENT_ID`. `analyticsSubscriber` captura 8 event types. `getInternalKpis` derivado del ledger (revenueCents, receivableCents cuenta 1100, topProducts).
+- **Corte 7 — Webhooks salientes HMAC:** `WebhookEndpoint` + `WebhookDelivery` + `WebhookDeliveryStatus`. HMAC sha256 + timingSafeEqual. `enqueueDeliveries` idempotente por `(endpointId, eventId)`. `processPendingDeliveries` FOR UPDATE SKIP LOCKED + MAX_ATTEMPTS=5. `replayDelivery`. Subset público curado: 8 tipos (no payment.failed/authorized). `scripts/process-webhook-deliveries.ts`.
+- Vitest: 270/270 passing (+ 6 skipped). Lint+typecheck+build limpios.
+- ADRs 0026-0033: event bus outbox, payments PSDD, ledger BIGINT, doble partida append-only, R2 storage, multimoneda informativa, step-up auth, append-only enforcement.
+- Runbooks: event-bus, payments, accounting, shipments, outbound-webhooks.
+- Pendientes ops (Herney provisiona): Stripe live keys, FedEx API, Cloudflare R2, PostHog/GA4, rol Postgres `app_rw` (hardening append-only DB), staging Coolify con Stripe test-mode.
 
 ## Decisiones de stack (no abrir sin ADR nuevo)
 

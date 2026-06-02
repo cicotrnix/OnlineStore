@@ -268,7 +268,7 @@ Plugin `online-store-toolkit` con:
 | 2 — Especialización B2B | ✅ Cerrada (v2.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-2-especializacion-b2b.md`](docs/specs/2026-05-26-fase-2-especializacion-b2b.md) | [`docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md`](docs/plans/2026-05-26-fase-2-especializacion-b2b-plan.md) | RFQ, crédito, aprobaciones, catálogos privados, descuentos por volumen, notifications |
 | 3 — Búsqueda | ✅ Cerrada (v3.0.0, 2026-05-26) | [`docs/specs/2026-05-26-fase-3-busqueda-descubrimiento.md`](docs/specs/2026-05-26-fase-3-busqueda-descubrimiento.md) | [`docs/plans/2026-05-26-fase-3-busqueda-descubrimiento-plan.md`](docs/plans/2026-05-26-fase-3-busqueda-descubrimiento-plan.md) | Meilisearch + Voyage semántico + RRF + filtros facetados + homepage real + admin search panel |
 | 4 — IA aplicada | ✅ Cerrada (v4.0.0, 2026-05-30) | [`docs/specs/2026-05-30-fase-4-ia-aplicada.md`](docs/specs/2026-05-30-fase-4-ia-aplicada.md) | [`docs/plans/2026-05-30-fase-4-fundacion-plan.md`](docs/plans/2026-05-30-fase-4-fundacion-plan.md) + cortes 0.5/1/2/3 | AIProvider + i18n + content gen bilingüe + chatbot tool-use + recos pgvector |
-| 5 — Integraciones | Pendiente | — | — | — |
+| 5 — Integraciones + Contabilidad | ✅ Cerrada (v5.0.0, 2026-06-01) | [`docs/specs/2026-06-01-fase-5-integraciones.md`](docs/specs/2026-06-01-fase-5-integraciones.md) | [`docs/plans/2026-06-01-fase-5-corte-0-eventos-plan.md`](docs/plans/2026-06-01-fase-5-corte-0-eventos-plan.md) | Bus de eventos (outbox) + verificación B2B + Stripe PSDD + wire + step-up + doble partida BIGINT + FedEx Ground + Miami forwarder + email outbox-driven + analytics PostHog/GA4 + webhooks salientes HMAC. ADRs 0026-0033. 270/270 tests. |
 | 6 — Multi-tenant | Pendiente | — | — | — |
 
 ---

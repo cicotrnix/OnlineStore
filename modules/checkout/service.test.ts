@@ -15,6 +15,9 @@ async function seed() {
   await prisma.quote.deleteMany()
   await prisma.invoice.deleteMany()
   await prisma.approvalRequest.deleteMany()
+  await prisma.shipment.deleteMany()
+  await prisma.paymentEvent.deleteMany()
+  await prisma.payment.deleteMany()
   await prisma.order.deleteMany()
   await prisma.cartItem.deleteMany()
   await prisma.cart.deleteMany()
@@ -32,6 +35,11 @@ async function seed() {
     name: 'Co Org',
     slug: 'co-org',
     ownerUserId: user.id,
+  })
+  // Fase 5 gate: checkout exige org VERIFIED.
+  await prisma.organization.update({
+    where: { id: org.id },
+    data: { verificationStatus: 'VERIFIED', verifiedAt: new Date(), taxExempt: true },
   })
   const cat = await catalogService.createCategory({ slug: 'co-cat', name: 'C' })
   const product = await catalogService.createProduct({

@@ -34,7 +34,34 @@ export const storeConfigSchema = z.object({
   payments: z.object({
     stripe: z.object({ enabled: z.boolean() }),
     mercadopago: z.object({ enabled: z.boolean() }),
+    // Fase 5: extensión del bloque (no reemplazo). Opcional para retrocompat.
+    wire: z.object({ enabled: z.boolean() }).optional(),
+    netTerms: z.boolean().optional(), // Fase 2 dormido por flag (default false)
+    card: z.object({ enabled: z.boolean() }).optional(),
   }),
+  shipping: z
+    .object({
+      fedex: z.object({ enabled: z.boolean() }).default({ enabled: true }),
+      export: z.object({ forwarderRequired: z.boolean() }).default({ forwarderRequired: true }),
+    })
+    .optional(),
+  accounting: z
+    .object({
+      basis: z.enum(['accrual', 'cash']).default('accrual'),
+      baseCurrency: z.enum(['USD']).default('USD'),
+    })
+    .optional(),
+  analytics: z
+    .object({
+      posthog: z.object({ enabled: z.boolean() }).default({ enabled: false }),
+      ga4: z.object({ enabled: z.boolean() }).default({ enabled: false }),
+    })
+    .optional(),
+  webhooks: z
+    .object({
+      enabled: z.boolean().default(true),
+    })
+    .optional(),
   ui: z.object({
     defaultView: z.enum(['cards', 'list']),
     allowToggle: z.boolean(),

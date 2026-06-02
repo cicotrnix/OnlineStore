@@ -125,8 +125,14 @@ model Organization {
   paymentTerms      PaymentTerms   @default(PREPAID)
   approvalThreshold Decimal?       @db.Decimal(12, 2)
   approvalRoles     ApprovalRole[] @default([OWNER, ADMIN])
+  // ─── Fase 5: verificación B2B ───
+  verificationStatus VerificationStatus @default(PENDING)
+  country            String?
+  taxExempt          Boolean            @default(false)
+  verifiedAt         DateTime?
 
   members               OrganizationMember[]
+  taxDocuments          TaxDocument[]
   invitations           Invitation[]
   addresses             OrganizationAddress[]
   customerPrices        CustomerPrice[]
@@ -218,6 +224,7 @@ model Product {
   name               String
   description        String?
   basePrice          Decimal                     @db.Decimal(12, 2)
+  unitCostCents      BigInt?                     // Fase 5 review: costo de proveedor para COGS. Nullable: si no se conoce, no se postea COGS.
   stockQuantity      Int                         @default(0)
   imageUrl           String?
   isActive           Boolean                     @default(true)
@@ -360,6 +367,8 @@ model Order {
   shippingAddress   OrganizationAddress @relation("OrderShipping", fields: [shippingAddressId], references: [id])
   lines             OrderLine[]
   invoice           Invoice?
+  payment           Payment?
+  shipment          Shipment?
   approvedFromQuote Quote?              @relation("QuoteConvertedOrder")
 
   @@index([organizationId])
@@ -570,6 +579,11 @@ enum NotificationType {
   INVOICE_PAID
   CREDIT_LIMIT_WARNING
   CREDIT_BLOCKED
+  ORDER_PLACED
+  PAYMENT_CAPTURED
+  PAYMENT_RECONCILED
+  INVOICE_ISSUED
+  SHIPMENT_DISPATCHED
 }
 
 model Notification {
@@ -688,4 +702,358 @@ model AiContentJob {
 
   @@index([status, enqueuedAt])
   @@index([productId])
+}
+
+// ===== Fase 5: bus de eventos (outbox) =====
+
+enum DomainEventStatus {
+  PENDING
+  PROCESSING
+  DONE
+}
+
+enum EventDeliveryStatus {
+  PENDING
+  DONE
+  FAILED
+}
+
+model DomainEvent {
+  id            String            @id @default(cuid())
+  type          String
+  aggregateType String
+  aggregateId   String
+  payload       Json
+  status        DomainEventStatus @default(PENDING)
+  occurredAt    DateTime          @default(now())
+  createdAt     DateTime          @default(now())
+  deliveries    EventDelivery[]
+
+  @@index([status, occurredAt])
+  @@index([aggregateType, aggregateId])
+}
+
+model EventDelivery {
+  id          String              @id @default(cuid())
+  eventId     String
+  event       DomainEvent         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  subscriber  String
+  status      EventDeliveryStatus @default(PENDING)
+  attempts    Int                 @default(0)
+  lastError   String?             @db.Text
+  processedAt DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@unique([eventId, subscriber])
+  @@index([status])
+}
+
+// ===== Fase 5: verificación B2B =====
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum TaxDocumentType {
+  US_RESALE_CERT
+  FOREIGN_EQUIV
+}
+
+enum TaxDocumentStatus {
+  UPLOADED
+  APPROVED
+  REJECTED
+}
+
+model TaxDocument {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type           TaxDocumentType
+  number         String
+  jurisdiction   String
+  fileKey        String
+  status         TaxDocumentStatus @default(UPLOADED)
+  uploadedAt     DateTime          @default(now())
+  reviewedAt     DateTime?
+  reviewedById   String?
+
+  @@index([organizationId])
+}
+
+// ===== Fase 5 Corte 2: Pagos =====
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  REFUND_PENDING
+  REFUNDED
+  FAILED
+  NEEDS_REVIEW
+}
+
+enum PaymentMethodType {
+  STRIPE_CARD
+  WIRE
+  ACH
+}
+
+model Payment {
+  id              String            @id @default(cuid())
+  orderId         String            @unique
+  order           Order             @relation(fields: [orderId], references: [id])
+  method          PaymentMethodType
+  status          PaymentStatus     @default(PENDING)
+  amountCents     BigInt
+  currency        String
+  // referencias externas
+  stripeSessionId String?           @unique
+  stripeIntentId  String?           @unique
+  idempotencyKey  String?           @unique
+  // wire
+  wireReference   String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  events          PaymentEvent[]
+
+  @@index([status])
+}
+
+model PaymentEvent {
+  id        String   @id @default(cuid())
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  eventId   String   @unique // Stripe event.id o uuid del wire
+  type      String   // ej: checkout.session.completed
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([paymentId])
+}
+
+// ===== Fase 5: Step-up auth (sensitive actions) =====
+
+enum SensitiveActionStatus {
+  ISSUED
+  USED
+  EXPIRED
+  BLOCKED // Fase 5 review: tras MAX_OTP_ATTEMPTS=5 fallidos
+}
+
+model SensitiveActionToken {
+  id          String                @id @default(cuid())
+  userId      String
+  action      String                // ej: 'payment.refund'
+  subjectId   String                // ej: paymentId
+  tokenHash   String                @unique
+  otpHash     String
+  status      SensitiveActionStatus @default(ISSUED)
+  otpAttempts Int                   @default(0) // Fase 5 review: contador anti-brute-force
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime              @default(now())
+
+  @@index([userId, action])
+}
+
+// ===== Fase 5 review: AuditLog append-only para evidencia forense =====
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  category  String   // ej: 'payment.mismatch', 'period.closed'
+  subjectId String?
+  actorId   String?
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([category, createdAt])
+  @@index([subjectId])
+}
+
+// ===== Fase 5 Corte 3: Contabilidad doble partida (BIGINT cents, append-only) =====
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+  COGS
+}
+
+enum NormalSide {
+  DEBIT
+  CREDIT
+}
+
+enum AccountingPeriodStatus {
+  OPEN
+  CLOSED
+}
+
+model LedgerAccount {
+  id         String      @id @default(cuid())
+  code       String      @unique // ej: '1100', '4000'
+  name       String
+  type       AccountType
+  normalSide NormalSide
+  isActive   Boolean     @default(true)
+  parentId   String?
+  parent     LedgerAccount? @relation("AccountTree", fields: [parentId], references: [id])
+  children   LedgerAccount[] @relation("AccountTree")
+  lines      JournalLine[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([type])
+}
+
+model AccountingPeriod {
+  id        String                 @id @default(cuid())
+  year      Int
+  month     Int                    // 1..12
+  status    AccountingPeriodStatus @default(OPEN)
+  closedAt  DateTime?
+  closedBy  String?
+  entries   JournalEntry[]
+  createdAt DateTime               @default(now())
+
+  @@unique([year, month])
+}
+
+model JournalEntry {
+  id          String           @id @default(cuid())
+  // Idempotency: el mismo eventId nunca produce 2 asientos.
+  eventId     String           @unique
+  eventType   String           // ej: 'invoice.issued', 'payment.captured'
+  description String?
+  occurredAt  DateTime
+  periodId    String
+  period      AccountingPeriod @relation(fields: [periodId], references: [id])
+  // Reversales: enlaza el asiento original.
+  reversesId  String?          @unique
+  reverses    JournalEntry?    @relation("JournalReverse", fields: [reversesId], references: [id])
+  reversedBy  JournalEntry?    @relation("JournalReverse")
+  lines       JournalLine[]
+  createdAt   DateTime         @default(now())
+
+  @@index([eventType])
+  @@index([occurredAt])
+}
+
+model JournalLine {
+  id          String        @id @default(cuid())
+  entryId     String
+  entry       JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     LedgerAccount @relation(fields: [accountId], references: [id])
+  // BIGINT centavos — uno de los dos siempre 0, el otro positivo.
+  debitCents  BigInt        @default(0)
+  creditCents BigInt        @default(0)
+  currency    String        @default("USD")
+  memo        String?
+  createdAt   DateTime      @default(now())
+
+  @@index([entryId])
+  @@index([accountId])
+}
+
+// ===== Fase 5 Corte 4: Envíos (FedEx Ground + Miami forwarder) =====
+
+enum ShipmentCarrier {
+  FEDEX
+  PICKUP
+}
+
+enum ShipmentService {
+  FEDEX_GROUND
+  FEDEX_HOME_DELIVERY
+}
+
+enum ShipmentStatus {
+  PENDING
+  RATE_QUOTED
+  LABEL_PURCHASED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+// ===== Fase 5 Corte 7: Webhooks salientes (HMAC + replay) =====
+
+enum WebhookDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+model WebhookEndpoint {
+  id          String   @id @default(cuid())
+  organizationId String?
+  url         String
+  secret      String   // HMAC sha256 secret (env-grade rotation recomendado)
+  isActive    Boolean  @default(true)
+  // Subset suscrito del contrato (whitelist por tipo).
+  events      String[]
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deliveries  WebhookDelivery[]
+
+  @@index([isActive])
+  @@index([organizationId])
+}
+
+model WebhookDelivery {
+  id           String                @id @default(cuid())
+  endpointId   String
+  endpoint     WebhookEndpoint       @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  eventId      String                // DomainEvent.id
+  eventType    String
+  payload      String                @db.Text
+  signature    String                // hex sha256 hmac
+  status       WebhookDeliveryStatus @default(PENDING)
+  attempts     Int                   @default(0)
+  lastError    String?               @db.Text
+  responseStatus Int?
+  deliveredAt  DateTime?
+  createdAt    DateTime              @default(now())
+
+  @@unique([endpointId, eventId])
+  @@index([status])
+}
+
+model Shipment {
+  id              String          @id @default(cuid())
+  orderId         String          @unique
+  order           Order           @relation(fields: [orderId], references: [id])
+  carrier         ShipmentCarrier @default(FEDEX)
+  service         ShipmentService @default(FEDEX_GROUND)
+  status          ShipmentStatus  @default(PENDING)
+  // Forwarder Miami para export — guardamos dirección destino real (cliente final extranjero) en `notes`.
+  isExport        Boolean         @default(false)
+  forwarderRef    String?         // ej: cuenta del forwarder en Miami
+  // Hazmat clase 9 (litio): Ground-only es enforced; flag se captura por orden.
+  hazmat          Boolean         @default(false)
+  hazmatCells     Int?
+  hazmatWattHours Int?
+  // Cotización (centavos).
+  rateCents       BigInt?
+  rateCurrency    String          @default("USD")
+  rateQuotedAt    DateTime?
+  // Etiqueta.
+  trackingNumber  String?         @unique
+  labelUrl        String?
+  labelPurchasedAt DateTime?
+  dispatchedAt    DateTime?
+  deliveredAt     DateTime?
+  notes           String?         @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([status])
+  @@index([orderId])
 }

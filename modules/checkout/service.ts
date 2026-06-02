@@ -73,6 +73,11 @@ export const checkoutService = {
 
   async confirm(input: ConfirmCheckoutInput) {
     const parsed = confirmCheckoutSchema.parse(input)
+    // Fase 5: gate de verificación B2B. Sólo orgs VERIFIED pueden cerrar checkout.
+    const { isVerified } = await import('@/modules/verification')
+    if (!(await isVerified(parsed.orgId))) {
+      throw new Error('ORG_NOT_VERIFIED')
+    }
     return ordersService.placeOrder({
       userId: parsed.userId,
       orgId: parsed.orgId,

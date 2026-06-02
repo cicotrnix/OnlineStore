@@ -54,8 +54,12 @@ async function main() {
       name: 'RepairHub Co',
       slug: 'repairhub-co',
       creditLimit: new Decimal('5000.00'),
-      paymentTerms: 'NET_30',
+      paymentTerms: 'PREPAID',
       approvalThreshold: new Decimal('1000.00'),
+      verificationStatus: 'VERIFIED',
+      verifiedAt: new Date(),
+      country: 'US',
+      taxExempt: true,
       members: {
         create: [
           { userId: buyer1.id, role: 'OWNER' },
@@ -358,6 +362,10 @@ async function main() {
   for (const p of products) {
     await enqueueIndex(p.id, 'UPSERT')
   }
+
+  // Fase 5 Corte 3: siembra plan de cuentas (upsert, idempotente)
+  const { seedChartOfAccounts } = await import('@/modules/accounting')
+  await seedChartOfAccounts()
 
   console.log('seed complete:')
   console.log(`  - admin user: ${admin.email}`)

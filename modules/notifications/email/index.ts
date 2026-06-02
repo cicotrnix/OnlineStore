@@ -8,14 +8,19 @@ import {
   CreditBlockedEmail,
   CreditWarningEmail,
   InvoiceDueSoonEmail,
+  InvoiceIssuedEmail,
   InvoiceOverdueEmail,
   InvoicePaidEmail,
+  OrderPlacedEmail,
+  PaymentCapturedEmail,
+  PaymentReconciledEmail,
   QuoteAcceptedEmail,
   QuoteExpiringEmail,
   QuoteQuotedEmail,
   QuoteRejectedEmail,
   QuoteRevisedEmail,
   QuoteSubmittedEmail,
+  ShipmentDispatchedEmail,
 } from './templates'
 import type { BaseTemplateProps } from './templates/_base'
 
@@ -36,6 +41,11 @@ const TEMPLATES: Record<NotificationType, (p: BaseTemplateProps) => JSX.Element>
   INVOICE_PAID: InvoicePaidEmail,
   CREDIT_LIMIT_WARNING: CreditWarningEmail,
   CREDIT_BLOCKED: CreditBlockedEmail,
+  ORDER_PLACED: OrderPlacedEmail,
+  PAYMENT_CAPTURED: PaymentCapturedEmail,
+  PAYMENT_RECONCILED: PaymentReconciledEmail,
+  INVOICE_ISSUED: InvoiceIssuedEmail,
+  SHIPMENT_DISPATCHED: ShipmentDispatchedEmail,
 }
 
 export async function renderEmailFor(type: NotificationType, vars: RenderVars): Promise<string> {
