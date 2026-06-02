@@ -10,7 +10,18 @@
  * Si solo PostHog está configurado, GA4 queda inerte; viceversa.
  */
 import { logger } from '@/lib/observability/logger'
-import { PostHog } from 'posthog-node'
+
+// Type-only import — posthog-node carga worker_threads y rompe en CI cuando
+// se importa al nivel de módulo. Cargamos dinámico sólo cuando hay claves.
+type PostHogInstance = {
+  capture(event: {
+    distinctId: string
+    event: string
+    properties?: Record<string, unknown>
+    timestamp?: Date
+  }): void
+  shutdown(): Promise<void>
+}
 
 export interface AnalyticsEvent {
   name: string
@@ -39,21 +50,38 @@ class FakeAnalytics implements AnalyticsClient {
  * (un analytics caído no debe romper el bus de eventos).
  */
 class PosthogGa4Analytics implements AnalyticsClient {
-  private posthog: PostHog | null
+  private posthog: PostHogInstance | null = null
+  private posthogPromise: Promise<PostHogInstance | null> | null = null
 
   constructor(
-    posthogCfg: { apiKey: string; host: string } | null,
+    private readonly posthogCfg: { apiKey: string; host: string } | null,
     private readonly ga4: { measurementId: string; apiSecret: string } | null
-  ) {
-    this.posthog = posthogCfg
-      ? new PostHog(posthogCfg.apiKey, { host: posthogCfg.host, flushAt: 1, flushInterval: 0 })
-      : null
+  ) {}
+
+  private async getPosthog(): Promise<PostHogInstance | null> {
+    if (this.posthog) return this.posthog
+    if (!this.posthogCfg) return null
+    if (!this.posthogPromise) {
+      const cfg = this.posthogCfg
+      this.posthogPromise = (async () => {
+        const mod = await import('posthog-node')
+        const client = new mod.PostHog(cfg.apiKey, {
+          host: cfg.host,
+          flushAt: 1,
+          flushInterval: 0,
+        }) as unknown as PostHogInstance
+        this.posthog = client
+        return client
+      })()
+    }
+    return this.posthogPromise
   }
 
   async capture(event: AnalyticsEvent): Promise<void> {
-    if (this.posthog) {
+    if (this.posthogCfg) {
       try {
-        this.posthog.capture({
+        const ph = await this.getPosthog()
+        ph?.capture({
           distinctId: event.distinctId ?? 'anonymous',
           event: event.name,
           properties: event.properties,
