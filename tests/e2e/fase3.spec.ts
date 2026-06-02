@@ -1,15 +1,16 @@
 import { expect, test } from '@playwright/test'
 
-test.describe('Fase 3 — homepage', () => {
-  test('renders hero, search input, featured grid', async ({ page }) => {
+test.describe('Fase 3 — homepage (post Onboarding B2B 2026-06-02)', () => {
+  // La home pasó a ser landing pública; el search bar quedó solo en
+  // el header del storefront (/catalog, /products, /search).
+  test('landing renders CTAs de Onboarding', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByLabel('Buscar productos').first()).toBeVisible()
-    await expect(page.getByRole('heading', { name: /productos destacados/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Registrá tu negocio/i }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /Explorar catálogo/i }).first()).toBeVisible()
   })
 
-  test('search submit navigates to /search?q=', async ({ page }) => {
-    await page.goto('/')
+  test('search desde /catalog navega a /search?q=', async ({ page }) => {
+    await page.goto('/catalog')
     await page.getByLabel('Buscar productos').first().fill('tornillo')
     await page
       .getByRole('button', { name: /buscar/i })
