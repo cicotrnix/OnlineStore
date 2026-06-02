@@ -8,7 +8,7 @@ import { auth } from '@/lib/auth/config'
 import { maintainCurrentSession } from '@/lib/auth/maintain'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
-import { getLocale } from '@/lib/i18n'
+import { getLocale, t } from '@/lib/i18n'
 import { cartService } from '@/modules/cart'
 import storeConfig from '@/store.config'
 import Image from 'next/image'
@@ -61,15 +61,15 @@ export default async function StorefrontLayout({
           </div>
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/catalog" className="text-gray-700 hover:text-gray-900">
-              Catálogo
+              {t(locale, 'storefront.nav.catalog')}
             </Link>
             {showQuotes && (
               <Link href="/quotes" className="text-gray-700 hover:text-gray-900">
-                Cotizaciones
+                {t(locale, 'storefront.nav.quotes')}
               </Link>
             )}
             <Link href="/cart" className="text-gray-700 hover:text-gray-900 relative">
-              Carrito
+              {t(locale, 'storefront.nav.cart')}
               {cartCount > 0 && (
                 <span
                   className="absolute -top-2 -right-4 text-[10px] font-medium rounded-full w-4 h-4 flex items-center justify-center text-white"
@@ -81,17 +81,17 @@ export default async function StorefrontLayout({
             </Link>
             {userId && (
               <Link href="/orders" className="text-gray-700 hover:text-gray-900">
-                Órdenes
+                {t(locale, 'storefront.nav.orders')}
               </Link>
             )}
             {showInvoices && (
               <Link href="/invoices" className="text-gray-700 hover:text-gray-900">
-                Facturas
+                {t(locale, 'storefront.nav.invoices')}
               </Link>
             )}
             {showApprovals && (
               <Link href="/approvals" className="text-gray-700 hover:text-gray-900">
-                Aprobaciones
+                {t(locale, 'storefront.nav.approvals')}
               </Link>
             )}
             <LocaleSwitch current={locale} />
@@ -102,7 +102,7 @@ export default async function StorefrontLayout({
               </>
             ) : (
               <Link href="/sign-in" className="text-gray-700 hover:text-gray-900">
-                Entrar
+                {t(locale, 'storefront.nav.signIn')}
               </Link>
             )}
           </nav>

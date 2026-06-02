@@ -4,6 +4,7 @@ import { ProductListRow } from '@/components/commerce/ProductListRow'
 import { auth } from '@/lib/auth/config'
 import { getCustomerState } from '@/lib/auth/customer'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { catalogService } from '@/modules/catalog'
 import { pricingService } from '@/modules/pricing'
 import storeConfig from '@/store.config'
@@ -22,6 +23,7 @@ export default async function CatalogPage({ searchParams }: Props) {
   const verifiedOrgId = customerState.kind === 'verified' ? customerState.orgId : null
   const orgId = verifiedOrgId
   const isImpersonating = customerState.kind === 'verified' ? customerState.isImpersonating : false
+  const locale = await getLocale({ userId: session?.user?.id ?? null })
 
   const view: 'CARDS' | 'LIST' = await (async () => {
     if (!session?.user?.id) return 'CARDS'
@@ -51,15 +53,15 @@ export default async function CatalogPage({ searchParams }: Props) {
 
   const canAddToCart = customerState.kind === 'verified' && !isImpersonating
   const disabledReason = isImpersonating
-    ? 'No puedes colocar órdenes mientras impersonas'
+    ? t(locale, 'catalog.disabled.impersonating')
     : customerState.kind === 'anonymous'
-      ? 'Iniciá sesión para ver precios y comprar'
+      ? t(locale, 'catalog.disabled.anon')
       : customerState.kind === 'no-org'
-        ? 'Completá el registro de tu negocio'
+        ? t(locale, 'catalog.disabled.noOrg')
         : customerState.kind === 'pending'
-          ? 'Tu cuenta está en revisión'
+          ? t(locale, 'catalog.disabled.pending')
           : customerState.kind === 'rejected'
-            ? 'Tu cuenta fue rechazada — revisá el motivo'
+            ? t(locale, 'catalog.disabled.rejected')
             : undefined
 
   return (
@@ -67,10 +69,12 @@ export default async function CatalogPage({ searchParams }: Props) {
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">
-            {activeCat ? activeCat.name : 'Catálogo'}
+            {activeCat ? activeCat.name : t(locale, 'catalog.title')}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            {products.length} producto{products.length === 1 ? '' : 's'}
+            {products.length === 1
+              ? t(locale, 'catalog.countOne')
+              : t(locale, 'catalog.countMany', { count: products.length })}
           </p>
         </div>
         <CatalogToggle current={view} />
@@ -85,7 +89,7 @@ export default async function CatalogPage({ searchParams }: Props) {
               : 'bg-white text-gray-700 border-gray-200'
           }`}
         >
-          Todos
+          {t(locale, 'catalog.allCategories')}
         </Link>
         {categories.map((c) => (
           <Link
@@ -103,7 +107,7 @@ export default async function CatalogPage({ searchParams }: Props) {
       </nav>
 
       {products.length === 0 ? (
-        <p className="mt-12 text-center text-sm text-gray-500">No hay productos disponibles.</p>
+        <p className="mt-12 text-center text-sm text-gray-500">{t(locale, 'catalog.empty')}</p>
       ) : view === 'CARDS' ? (
         <div className="mt-8 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((p) => (
@@ -115,6 +119,7 @@ export default async function CatalogPage({ searchParams }: Props) {
               canAddToCart={canAddToCart}
               disabledReason={disabledReason}
               showPrice={customerState.kind === 'verified'}
+              signInLinkLabel={`${t(locale, 'product.signInForPrice')} →`}
             />
           ))}
         </div>
@@ -123,12 +128,12 @@ export default async function CatalogPage({ searchParams }: Props) {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="px-3 py-2 text-left">SKU</th>
-                <th className="px-3 py-2 text-left">Producto</th>
-                <th className="px-3 py-2 text-left">Categoría</th>
-                <th className="px-3 py-2 text-left">Stock</th>
-                <th className="px-3 py-2 text-left">Precio</th>
-                <th className="px-3 py-2 text-right">Acción</th>
+                <th className="px-3 py-2 text-left">{t(locale, 'catalog.tableHead.sku')}</th>
+                <th className="px-3 py-2 text-left">{t(locale, 'catalog.tableHead.product')}</th>
+                <th className="px-3 py-2 text-left">{t(locale, 'catalog.tableHead.category')}</th>
+                <th className="px-3 py-2 text-left">{t(locale, 'catalog.tableHead.stock')}</th>
+                <th className="px-3 py-2 text-left">{t(locale, 'catalog.tableHead.price')}</th>
+                <th className="px-3 py-2 text-right">{t(locale, 'catalog.tableHead.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -141,6 +146,7 @@ export default async function CatalogPage({ searchParams }: Props) {
                   canAddToCart={canAddToCart}
                   disabledReason={disabledReason}
                   showPrice={customerState.kind === 'verified'}
+                  signInLabel={t(locale, 'catalog.signInLinkShort')}
                 />
               ))}
             </tbody>

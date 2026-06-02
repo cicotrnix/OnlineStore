@@ -76,6 +76,92 @@ type MessageKey =
   | 'onboarding.rejected.intro'
   | 'onboarding.rejected.resubmitNote'
   | 'onboarding.rejected.submit'
+  // Storefront nav
+  | 'storefront.nav.catalog'
+  | 'storefront.nav.quotes'
+  | 'storefront.nav.cart'
+  | 'storefront.nav.orders'
+  | 'storefront.nav.invoices'
+  | 'storefront.nav.approvals'
+  | 'storefront.nav.signIn'
+  // Catalog
+  | 'catalog.title'
+  | 'catalog.countOne'
+  | 'catalog.countMany'
+  | 'catalog.allCategories'
+  | 'catalog.empty'
+  | 'catalog.tableHead.sku'
+  | 'catalog.tableHead.product'
+  | 'catalog.tableHead.category'
+  | 'catalog.tableHead.stock'
+  | 'catalog.tableHead.price'
+  | 'catalog.tableHead.action'
+  | 'catalog.disabled.impersonating'
+  | 'catalog.disabled.anon'
+  | 'catalog.disabled.noOrg'
+  | 'catalog.disabled.pending'
+  | 'catalog.disabled.rejected'
+  | 'catalog.signInLinkShort'
+  // PDP
+  | 'pdp.signInForPriceLong'
+  | 'pdp.viewLabel.sku'
+  | 'pdp.relatedTitle.recommended'
+  | 'pdp.relatedTitle.related'
+  | 'pdp.disabled.impersonating'
+  | 'pdp.disabled.outOfStock'
+  // Cart
+  | 'cart.title'
+  | 'cart.empty.title'
+  | 'cart.empty.body'
+  | 'cart.empty.goCatalog'
+  | 'cart.subtotal'
+  | 'cart.unitPrice'
+  | 'cart.quantity'
+  | 'cart.update'
+  | 'cart.remove'
+  | 'cart.checkout'
+  // Checkout
+  | 'checkout.title'
+  | 'checkout.subtitle'
+  | 'checkout.section.review'
+  | 'checkout.section.addresses'
+  | 'checkout.billing'
+  | 'checkout.shipping'
+  | 'checkout.poNumber'
+  | 'checkout.notes'
+  | 'checkout.placeOrder'
+  // Orders list
+  | 'orders.title'
+  | 'orders.empty'
+  | 'orders.selectOrg'
+  // Order detail
+  | 'orderDetail.placedOn'
+  | 'orderDetail.linesHeading'
+  | 'orderDetail.addressesHeading'
+  | 'orderDetail.billing'
+  | 'orderDetail.shipping'
+  | 'orderDetail.poNumber'
+  | 'orderDetail.notes'
+  | 'orderDetail.subtotal'
+  | 'orderDetail.total'
+  | 'orderDetail.payWithCardCardTitle'
+  | 'orderDetail.payWithCardCardBody'
+  | 'orderDetail.payWithCardButton'
+  | 'orderDetail.payment.pendingTitle'
+  | 'orderDetail.payment.confirmedTitle'
+  | 'orderDetail.payment.processingBody'
+  | 'orderDetail.payment.confirmedBody'
+  | 'orderDetail.payment.backLink'
+  // Quotes, Invoices, Approvals, Notifications
+  | 'quotes.title'
+  | 'quotes.empty'
+  | 'invoices.title'
+  | 'invoices.empty'
+  | 'approvals.title'
+  | 'approvals.empty'
+  | 'notifications.title'
+  | 'notifications.empty'
+  | 'notifications.markAllRead'
 
 type Dict = Record<MessageKey, string>
 
@@ -159,6 +245,95 @@ export const MESSAGES: Record<Locale, Dict> = {
     'onboarding.rejected.resubmitNote':
       'You can submit the updated certificate. The account will go back to PENDING for review.',
     'onboarding.rejected.submit': 'Resubmit for review',
+    // Storefront nav
+    'storefront.nav.catalog': 'Catalog',
+    'storefront.nav.quotes': 'Quotes',
+    'storefront.nav.cart': 'Cart',
+    'storefront.nav.orders': 'Orders',
+    'storefront.nav.invoices': 'Invoices',
+    'storefront.nav.approvals': 'Approvals',
+    'storefront.nav.signIn': 'Sign in',
+    // Catalog
+    'catalog.title': 'Catalog',
+    'catalog.countOne': '1 product',
+    'catalog.countMany': '{count} products',
+    'catalog.allCategories': 'All',
+    'catalog.empty': 'No products available.',
+    'catalog.tableHead.sku': 'SKU',
+    'catalog.tableHead.product': 'Product',
+    'catalog.tableHead.category': 'Category',
+    'catalog.tableHead.stock': 'Stock',
+    'catalog.tableHead.price': 'Price',
+    'catalog.tableHead.action': 'Action',
+    'catalog.disabled.impersonating': "You can't place orders while impersonating",
+    'catalog.disabled.anon': 'Sign in to see prices and buy',
+    'catalog.disabled.noOrg': 'Complete your business registration',
+    'catalog.disabled.pending': 'Your account is under review',
+    'catalog.disabled.rejected': 'Your account was rejected — see the reason',
+    'catalog.signInLinkShort': 'Sign in',
+    // PDP
+    'pdp.signInForPriceLong': 'Sign in or register your business to see wholesale pricing →',
+    'pdp.viewLabel.sku': 'SKU',
+    'pdp.relatedTitle.recommended': 'Recommended for you',
+    'pdp.relatedTitle.related': 'Related products',
+    'pdp.disabled.impersonating': "You can't place orders while impersonating",
+    'pdp.disabled.outOfStock': 'Out of stock',
+    // Cart
+    'cart.title': 'Cart',
+    'cart.empty.title': 'Your cart is empty',
+    'cart.empty.body': 'Browse the catalog and add products.',
+    'cart.empty.goCatalog': 'Go to catalog',
+    'cart.subtotal': 'Subtotal',
+    'cart.unitPrice': 'Unit price',
+    'cart.quantity': 'Qty',
+    'cart.update': 'Update',
+    'cart.remove': 'Remove',
+    'cart.checkout': 'Checkout',
+    // Checkout
+    'checkout.title': 'Checkout',
+    'checkout.subtitle': 'Review and confirm your order.',
+    'checkout.section.review': 'Review',
+    'checkout.section.addresses': 'Addresses',
+    'checkout.billing': 'Billing',
+    'checkout.shipping': 'Shipping',
+    'checkout.poNumber': 'PO number (optional)',
+    'checkout.notes': 'Notes (optional)',
+    'checkout.placeOrder': 'Place order',
+    // Orders
+    'orders.title': 'Orders',
+    'orders.empty': 'No orders yet.',
+    'orders.selectOrg': 'Select an organization first.',
+    // Order detail
+    'orderDetail.placedOn': 'Placed by {user} · {date}',
+    'orderDetail.linesHeading': 'Lines',
+    'orderDetail.addressesHeading': 'Addresses',
+    'orderDetail.billing': 'Billing',
+    'orderDetail.shipping': 'Shipping',
+    'orderDetail.poNumber': 'PO',
+    'orderDetail.notes': 'Notes',
+    'orderDetail.subtotal': 'Subtotal',
+    'orderDetail.total': 'Total',
+    'orderDetail.payWithCardCardTitle': 'Pay with card',
+    'orderDetail.payWithCardCardBody':
+      'We redirect you to Stripe Checkout (hosted). Payment is confirmed via signed webhook — never from the return URL.',
+    'orderDetail.payWithCardButton': 'Pay {amount}',
+    'orderDetail.payment.pendingTitle': 'Processing payment',
+    'orderDetail.payment.confirmedTitle': 'Thanks! Payment confirmed',
+    'orderDetail.payment.processingBody':
+      'We received your payment at Stripe. We are waiting for the signed confirmation from the processor (usually seconds).',
+    'orderDetail.payment.confirmedBody':
+      'We received the confirmation. You will get an email with the receipt and next steps. Shipment tracking will appear here soon.',
+    'orderDetail.payment.backLink': 'Back to order details',
+    // Quotes, invoices, approvals, notifications
+    'quotes.title': 'Quotes',
+    'quotes.empty': 'No quotes yet.',
+    'invoices.title': 'Invoices',
+    'invoices.empty': 'No invoices yet.',
+    'approvals.title': 'Approvals',
+    'approvals.empty': 'No approvals pending.',
+    'notifications.title': 'Notifications',
+    'notifications.empty': 'No notifications.',
+    'notifications.markAllRead': 'Mark all as read',
   },
   'es-419': {
     'localeSwitch.label': 'Idioma',
@@ -241,6 +416,96 @@ export const MESSAGES: Record<Locale, Dict> = {
     'onboarding.rejected.resubmitNote':
       'Podés volver a enviar el certificado actualizado. La cuenta volverá a estado PENDING hasta nueva revisión.',
     'onboarding.rejected.submit': 'Re-enviar para revisión',
+    // Storefront nav
+    'storefront.nav.catalog': 'Catálogo',
+    'storefront.nav.quotes': 'Cotizaciones',
+    'storefront.nav.cart': 'Carrito',
+    'storefront.nav.orders': 'Órdenes',
+    'storefront.nav.invoices': 'Facturas',
+    'storefront.nav.approvals': 'Aprobaciones',
+    'storefront.nav.signIn': 'Entrar',
+    // Catalog
+    'catalog.title': 'Catálogo',
+    'catalog.countOne': '1 producto',
+    'catalog.countMany': '{count} productos',
+    'catalog.allCategories': 'Todos',
+    'catalog.empty': 'No hay productos disponibles.',
+    'catalog.tableHead.sku': 'SKU',
+    'catalog.tableHead.product': 'Producto',
+    'catalog.tableHead.category': 'Categoría',
+    'catalog.tableHead.stock': 'Stock',
+    'catalog.tableHead.price': 'Precio',
+    'catalog.tableHead.action': 'Acción',
+    'catalog.disabled.impersonating': 'No puedes colocar órdenes mientras impersonas',
+    'catalog.disabled.anon': 'Iniciá sesión para ver precios y comprar',
+    'catalog.disabled.noOrg': 'Completá el registro de tu negocio',
+    'catalog.disabled.pending': 'Tu cuenta está en revisión',
+    'catalog.disabled.rejected': 'Tu cuenta fue rechazada — revisá el motivo',
+    'catalog.signInLinkShort': 'Iniciá sesión',
+    // PDP
+    'pdp.signInForPriceLong':
+      'Iniciá sesión o registrá tu negocio para ver precios mayoristas →',
+    'pdp.viewLabel.sku': 'SKU',
+    'pdp.relatedTitle.recommended': 'Recomendado para ti',
+    'pdp.relatedTitle.related': 'Productos relacionados',
+    'pdp.disabled.impersonating': 'No puedes colocar órdenes mientras impersonas',
+    'pdp.disabled.outOfStock': 'Sin stock',
+    // Cart
+    'cart.title': 'Carrito',
+    'cart.empty.title': 'Tu carrito está vacío',
+    'cart.empty.body': 'Explora el catálogo y agrega productos.',
+    'cart.empty.goCatalog': 'Ir al catálogo',
+    'cart.subtotal': 'Subtotal',
+    'cart.unitPrice': 'Precio unitario',
+    'cart.quantity': 'Cant.',
+    'cart.update': 'Actualizar',
+    'cart.remove': 'Quitar',
+    'cart.checkout': 'Ir al checkout',
+    // Checkout
+    'checkout.title': 'Checkout',
+    'checkout.subtitle': 'Revisá y confirmá tu pedido.',
+    'checkout.section.review': 'Revisión',
+    'checkout.section.addresses': 'Direcciones',
+    'checkout.billing': 'Facturación',
+    'checkout.shipping': 'Envío',
+    'checkout.poNumber': 'Número de PO (opcional)',
+    'checkout.notes': 'Notas (opcional)',
+    'checkout.placeOrder': 'Colocar pedido',
+    // Orders
+    'orders.title': 'Órdenes',
+    'orders.empty': 'Aún no hay órdenes.',
+    'orders.selectOrg': 'Selecciona una organización primero.',
+    // Order detail
+    'orderDetail.placedOn': 'Colocada por {user} · {date}',
+    'orderDetail.linesHeading': 'Líneas',
+    'orderDetail.addressesHeading': 'Direcciones',
+    'orderDetail.billing': 'Facturación',
+    'orderDetail.shipping': 'Envío',
+    'orderDetail.poNumber': 'PO',
+    'orderDetail.notes': 'Notas',
+    'orderDetail.subtotal': 'Subtotal',
+    'orderDetail.total': 'Total',
+    'orderDetail.payWithCardCardTitle': 'Pagar con tarjeta',
+    'orderDetail.payWithCardCardBody':
+      'Te redirigimos a Stripe Checkout (hosted). El pago se confirma vía webhook firmado — nunca desde la URL de retorno.',
+    'orderDetail.payWithCardButton': 'Pagar {amount}',
+    'orderDetail.payment.pendingTitle': 'Procesando pago',
+    'orderDetail.payment.confirmedTitle': '¡Gracias! Pago confirmado',
+    'orderDetail.payment.processingBody':
+      'Recibimos tu pago en Stripe. Estamos esperando la confirmación firmada del procesador para acreditarlo (suele tardar segundos).',
+    'orderDetail.payment.confirmedBody':
+      'Recibimos la confirmación del procesador. Te enviamos un email con el recibo y los próximos pasos. Pronto verás el tracking del envío acá.',
+    'orderDetail.payment.backLink': 'Volver al detalle de la orden',
+    // Quotes, invoices, approvals, notifications
+    'quotes.title': 'Cotizaciones',
+    'quotes.empty': 'Aún no hay cotizaciones.',
+    'invoices.title': 'Facturas',
+    'invoices.empty': 'Aún no hay facturas.',
+    'approvals.title': 'Aprobaciones',
+    'approvals.empty': 'No hay aprobaciones pendientes.',
+    'notifications.title': 'Notificaciones',
+    'notifications.empty': 'No hay notificaciones.',
+    'notifications.markAllRead': 'Marcar todo como leído',
   },
 }
 

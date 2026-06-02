@@ -21,6 +21,7 @@ type Props = {
   canAddToCart: boolean
   disabledReason?: string
   showPrice?: boolean
+  signInLabel?: string
 }
 
 export function ProductListRow({
@@ -30,6 +31,7 @@ export function ProductListRow({
   canAddToCart,
   disabledReason,
   showPrice = true,
+  signInLabel = 'Sign in',
 }: Props) {
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
@@ -53,7 +55,7 @@ export function ProductListRow({
           />
         ) : (
           <Link href="/sign-in" className="text-xs text-blue-700 hover:underline">
-            Iniciá sesión
+            {signInLabel}
           </Link>
         )}
       </td>
