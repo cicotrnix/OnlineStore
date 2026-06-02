@@ -1,7 +1,12 @@
-import { cancelOrderAction, transitionOrderStatusAction } from '@/app/admin/_actions'
+import {
+  cancelOrderAction,
+  reconcileWireAction,
+  transitionOrderStatusAction,
+} from '@/app/admin/_actions'
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { notFound } from 'next/navigation'
@@ -24,6 +29,15 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   if (!order) notFound()
 
   const nextStatuses = TRANSITIONS[order.status] ?? []
+
+  // Pago existente (si lo hay) — Fase 5: para decidir si exponer reconcileWire.
+  const payment = await prisma.payment.findUnique({
+    where: { orderId: order.id },
+    select: { id: true, status: true, method: true, wireReference: true },
+  })
+  const canReconcileWire =
+    order.status === 'PENDING_PAYMENT' &&
+    (!payment || (payment.status === 'PENDING' && payment.method !== 'STRIPE_CARD'))
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -91,6 +105,75 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   Cancelar orden
                 </Button>
               </form>
+            )}
+          </CardBody>
+        </Card>
+      )}
+
+      {canReconcileWire && (
+        <Card>
+          <CardHeader>
+            <h2 className="font-medium">Conciliar wire / ACH</h2>
+            <p className="mt-1 text-xs text-gray-500">
+              Para confirmar pago vía transferencia bancaria. El monto debe coincidir exactamente
+              con el total. Mismatch lanza error y no se postea.
+            </p>
+          </CardHeader>
+          <CardBody>
+            <form action={reconcileWireAction} className="space-y-3 max-w-sm">
+              <input type="hidden" name="orderId" value={order.id} />
+              <div>
+                <label htmlFor="amount" className="block text-xs text-gray-500 mb-1">
+                  Monto recibido (USD)
+                </label>
+                <input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  required
+                  defaultValue={order.total.toString()}
+                  className="block w-full rounded border border-gray-300 px-3 py-2 text-sm font-mono tabular-nums"
+                />
+              </div>
+              <div>
+                <label htmlFor="wireReference" className="block text-xs text-gray-500 mb-1">
+                  Referencia del wire
+                </label>
+                <input
+                  id="wireReference"
+                  name="wireReference"
+                  type="text"
+                  required
+                  placeholder="ej: WR-2026-06-001"
+                  className="block w-full rounded border border-gray-300 px-3 py-2 text-sm font-mono"
+                />
+              </div>
+              <Button type="submit">Conciliar wire</Button>
+            </form>
+          </CardBody>
+        </Card>
+      )}
+
+      {payment && (
+        <Card>
+          <CardHeader>
+            <h2 className="font-medium">Pago</h2>
+          </CardHeader>
+          <CardBody className="text-sm space-y-1">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Método</span>
+              <span className="font-mono">{payment.method}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Estado</span>
+              <span className="font-mono">{payment.status}</span>
+            </div>
+            {payment.wireReference && (
+              <div className="flex justify-between">
+                <span className="text-gray-500">Referencia wire</span>
+                <span className="font-mono">{payment.wireReference}</span>
+              </div>
             )}
           </CardBody>
         </Card>

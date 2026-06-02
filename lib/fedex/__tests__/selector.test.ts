@@ -92,7 +92,10 @@ describe('lib/fedex — adapter selection', () => {
               {
                 masterTrackingNumber: 'FX999',
                 pieceResponses: [
-                  { trackingNumber: 'FX999', packageDocuments: [{ url: 'https://l.example/x.pdf' }] },
+                  {
+                    trackingNumber: 'FX999',
+                    packageDocuments: [{ url: 'https://l.example/x.pdf' }],
+                  },
                 ],
               },
             ],
@@ -119,7 +122,9 @@ describe('lib/fedex — adapter selection', () => {
     expect(trackingNumber).toBe('FX999')
     expect(labelUrl).toBe('https://l.example/x.pdf')
     const labelOpts = fetchMock.mock.calls[1]![1]! as RequestInit
-    expect((labelOpts.headers as Record<string, string>)['x-customer-transaction-id']).toBe('ship-1')
+    expect((labelOpts.headers as Record<string, string>)['x-customer-transaction-id']).toBe(
+      'ship-1'
+    )
 
     // Export rechazado.
     await expect(

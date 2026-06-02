@@ -93,6 +93,22 @@ export async function cancelOrderAction(formData: FormData) {
   revalidatePath('/admin/orders')
 }
 
+export async function reconcileWireAction(formData: FormData) {
+  const user = await requirePlatformAdmin()
+  const orderId = String(formData.get('orderId'))
+  const amountStr = String(formData.get('amount'))
+  const wireReference = String(formData.get('wireReference')).trim()
+  if (!wireReference) throw new Error('wireReference es obligatorio')
+  // amount viene en USD; el módulo de pagos trabaja en cents.
+  const amount = Number(amountStr)
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Monto inválido')
+  const amountCents = Math.round(amount * 100)
+  const { reconcileWire } = await import('@/modules/payments')
+  await reconcileWire({ orderId, amountCents, wireReference, adminUserId: user.id })
+  revalidatePath('/admin/orders')
+  revalidatePath(`/admin/orders/${orderId}`)
+}
+
 export async function setCustomerPriceAction(formData: FormData) {
   await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))

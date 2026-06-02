@@ -122,7 +122,7 @@ class RealStripe implements StripeClient {
     private readonly webhookSecret: string
   ) {
     this.sdk = new Stripe(secretKey, {
-      apiVersion: '2025-09-30.clover',
+      apiVersion: '2026-05-27.dahlia',
       typescript: true,
     })
   }

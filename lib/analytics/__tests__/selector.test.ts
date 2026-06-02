@@ -24,11 +24,12 @@ beforeEach(() => {
     delete process.env[k]
   }
   // Force non-test mode para verificar el selector real.
-  process.env.NODE_ENV = 'production'
+  vi.stubEnv('NODE_ENV', 'production')
   globalThis.fetch = fetchMock as unknown as typeof fetch
 })
 
 afterEach(() => {
+  vi.unstubAllEnvs()
   process.env = { ...ORIG }
   globalThis.fetch = realFetch
 })
@@ -82,7 +83,7 @@ describe('lib/analytics — adapter selection', () => {
   })
 
   it('NODE_ENV=test ignora env vars y siempre da Fake', async () => {
-    process.env.NODE_ENV = 'test'
+    vi.stubEnv('NODE_ENV', 'test')
     process.env.POSTHOG_API_KEY = 'phc_should_be_ignored'
     const { getAnalyticsClient, _getFakeAnalytics } = await import('../index')
     expect(getAnalyticsClient()).toBe(_getFakeAnalytics())

@@ -70,9 +70,7 @@ class FakeFedex implements FedexClient {
     const baseCents = 1200n
     const perLbCents = BigInt(Math.ceil(req.weightLbs * 50))
     const total = baseCents + perLbCents
-    return [
-      { service: 'FEDEX_GROUND', amountCents: total, currency: 'USD', transitDays: 4 },
-    ]
+    return [{ service: 'FEDEX_GROUND', amountCents: total, currency: 'USD', transitDays: 4 }]
   }
 
   async buyLabel(req: LabelRequest): Promise<Label> {
@@ -270,8 +268,7 @@ class RealFedex implements FedexClient {
       }
     }
     const ts = json.output?.transactionShipments?.[0]
-    const trackingNumber =
-      ts?.masterTrackingNumber ?? ts?.pieceResponses?.[0]?.trackingNumber ?? ''
+    const trackingNumber = ts?.masterTrackingNumber ?? ts?.pieceResponses?.[0]?.trackingNumber ?? ''
     const labelUrl = ts?.pieceResponses?.[0]?.packageDocuments?.[0]?.url ?? ''
     if (!trackingNumber || !labelUrl) {
       throw new Error('FedEx label response missing tracking or url')
