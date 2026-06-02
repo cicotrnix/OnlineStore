@@ -7,6 +7,8 @@ import {
   ApprovalRequestedEmail,
   CreditBlockedEmail,
   CreditWarningEmail,
+  CustomerApprovedEmail,
+  CustomerRejectedEmail,
   InvoiceDueSoonEmail,
   InvoiceIssuedEmail,
   InvoiceOverdueEmail,
@@ -46,6 +48,8 @@ const TEMPLATES: Record<NotificationType, (p: BaseTemplateProps) => JSX.Element>
   PAYMENT_RECONCILED: PaymentReconciledEmail,
   INVOICE_ISSUED: InvoiceIssuedEmail,
   SHIPMENT_DISPATCHED: ShipmentDispatchedEmail,
+  CUSTOMER_APPROVED: CustomerApprovedEmail,
+  CUSTOMER_REJECTED: CustomerRejectedEmail,
 }
 
 export async function renderEmailFor(type: NotificationType, vars: RenderVars): Promise<string> {

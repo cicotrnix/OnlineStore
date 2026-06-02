@@ -126,10 +126,13 @@ model Organization {
   approvalThreshold Decimal?       @db.Decimal(12, 2)
   approvalRoles     ApprovalRole[] @default([OWNER, ADMIN])
   // ─── Fase 5: verificación B2B ───
-  verificationStatus VerificationStatus @default(PENDING)
-  country            String?
-  taxExempt          Boolean            @default(false)
-  verifiedAt         DateTime?
+  verificationStatus      VerificationStatus @default(PENDING)
+  country                 String?
+  taxExempt               Boolean            @default(false)
+  verifiedAt              DateTime?
+  // Onboarding B2B: revisión manual del admin (no auto-aprobación).
+  verificationSubmittedAt DateTime?
+  rejectionReason         String?
 
   members               OrganizationMember[]
   taxDocuments          TaxDocument[]
@@ -584,6 +587,8 @@ enum NotificationType {
   PAYMENT_RECONCILED
   INVOICE_ISSUED
   SHIPMENT_DISPATCHED
+  CUSTOMER_APPROVED
+  CUSTOMER_REJECTED
 }
 
 model Notification {

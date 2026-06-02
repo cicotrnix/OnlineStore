@@ -28,3 +28,7 @@ export const PaymentCapturedEmail = make('Ver recibo')
 export const PaymentReconciledEmail = make('Ver recibo')
 export const InvoiceIssuedEmail = make('Pagar via wire')
 export const ShipmentDispatchedEmail = make('Rastrear envío')
+
+// Onboarding B2B (2026-06-02): aprobación / rechazo manual del admin.
+export const CustomerApprovedEmail = make('Ver catálogo con precios')
+export const CustomerRejectedEmail = make('Revisar y re-enviar')
