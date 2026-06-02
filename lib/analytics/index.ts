@@ -1,8 +1,16 @@
 /**
- * Cliente analytics server-side. Noop-safe sin claves (POSTHOG_API_KEY +
- * GA4_MEASUREMENT_ID + GA4_API_SECRET). En tests usa FakeAnalytics in-memory.
+ * Cliente analytics server-side. Producción: PostHog (SDK posthog-node) + GA4
+ * Measurement Protocol (HTTP); dev/test/CI: FakeAnalytics in-memory.
+ *
+ * Env vars (cualquiera activa parte del cliente real):
+ *   - POSTHOG_API_KEY (+ POSTHOG_HOST opcional, default https://us.i.posthog.com)
+ *   - GA4_MEASUREMENT_ID + GA4_API_SECRET (ambos requeridos para GA4)
+ *
+ * Sin ninguna de las dos backends → FakeAnalytics. La app sigue funcionando.
+ * Si solo PostHog está configurado, GA4 queda inerte; viceversa.
  */
 import { logger } from '@/lib/observability/logger'
+import { PostHog } from 'posthog-node'
 
 export interface AnalyticsEvent {
   name: string
@@ -13,6 +21,7 @@ export interface AnalyticsEvent {
 
 export interface AnalyticsClient {
   capture(event: AnalyticsEvent): Promise<void>
+  shutdown?(): Promise<void>
 }
 
 class FakeAnalytics implements AnalyticsClient {
@@ -25,38 +34,44 @@ class FakeAnalytics implements AnalyticsClient {
   }
 }
 
+/**
+ * Multiplexor PostHog + GA4. Errores de cada backend se logean pero no propagan
+ * (un analytics caído no debe romper el bus de eventos).
+ */
 class PosthogGa4Analytics implements AnalyticsClient {
+  private posthog: PostHog | null
+
   constructor(
-    private posthog: { apiKey: string; host: string } | null,
-    private ga4: { measurementId: string; apiSecret: string } | null
-  ) {}
+    posthogCfg: { apiKey: string; host: string } | null,
+    private readonly ga4: { measurementId: string; apiSecret: string } | null
+  ) {
+    this.posthog = posthogCfg
+      ? new PostHog(posthogCfg.apiKey, { host: posthogCfg.host, flushAt: 1, flushInterval: 0 })
+      : null
+  }
 
   async capture(event: AnalyticsEvent): Promise<void> {
-    // PostHog
     if (this.posthog) {
       try {
-        await fetch(`${this.posthog.host}/capture/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            api_key: this.posthog.apiKey,
-            event: event.name,
-            distinct_id: event.distinctId ?? 'anonymous',
-            properties: event.properties,
-            timestamp: (event.timestamp ?? new Date()).toISOString(),
-          }),
+        this.posthog.capture({
+          distinctId: event.distinctId ?? 'anonymous',
+          event: event.name,
+          properties: event.properties,
+          timestamp: event.timestamp,
         })
       } catch (err) {
         logger.error({ err, event: event.name }, 'posthog capture failed')
       }
     }
-    // GA4 Measurement Protocol
     if (this.ga4) {
       try {
         await fetch(
-          `https://www.google-analytics.com/mp/collect?measurement_id=${this.ga4.measurementId}&api_secret=${this.ga4.apiSecret}`,
+          `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(
+            this.ga4.measurementId
+          )}&api_secret=${encodeURIComponent(this.ga4.apiSecret)}`,
           {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               client_id: event.distinctId ?? 'anonymous',
               events: [{ name: event.name.replace(/\./g, '_'), params: event.properties ?? {} }],
@@ -68,42 +83,55 @@ class PosthogGa4Analytics implements AnalyticsClient {
       }
     }
   }
+
+  async shutdown(): Promise<void> {
+    if (this.posthog) await this.posthog.shutdown()
+  }
 }
 
+let cached: AnalyticsClient | null = null
 let fakeInstance: FakeAnalytics | null = null
-let prodInstance: PosthogGa4Analytics | null = null
 
 export function getAnalyticsClient(): AnalyticsClient {
-  if (
-    process.env.NODE_ENV === 'test' ||
-    (!process.env.POSTHOG_API_KEY && !process.env.GA4_MEASUREMENT_ID)
-  ) {
+  if (cached) return cached
+  // Tests siempre Fake.
+  if (process.env.NODE_ENV === 'test') {
     if (!fakeInstance) fakeInstance = new FakeAnalytics()
-    return fakeInstance
+    cached = fakeInstance
+    return cached
   }
-  if (!prodInstance) {
-    prodInstance = new PosthogGa4Analytics(
-      process.env.POSTHOG_API_KEY
+  const posthogKey = process.env.POSTHOG_API_KEY
+  const ga4Id = process.env.GA4_MEASUREMENT_ID
+  const ga4Secret = process.env.GA4_API_SECRET
+  const hasReal = !!posthogKey || (!!ga4Id && !!ga4Secret)
+  if (hasReal) {
+    cached = new PosthogGa4Analytics(
+      posthogKey
         ? {
-            apiKey: process.env.POSTHOG_API_KEY,
+            apiKey: posthogKey,
             host: process.env.POSTHOG_HOST ?? 'https://us.i.posthog.com',
           }
         : null,
-      process.env.GA4_MEASUREMENT_ID && process.env.GA4_API_SECRET
-        ? {
-            measurementId: process.env.GA4_MEASUREMENT_ID,
-            apiSecret: process.env.GA4_API_SECRET,
-          }
-        : null
+      ga4Id && ga4Secret ? { measurementId: ga4Id, apiSecret: ga4Secret } : null
     )
+  } else {
+    if (!fakeInstance) fakeInstance = new FakeAnalytics()
+    cached = fakeInstance
   }
-  return prodInstance
+  return cached
 }
 
 export function _resetAnalytics(): void {
   if (fakeInstance) fakeInstance._reset()
+  cached = null
 }
 
 export function _getFakeAnalytics(): FakeAnalytics {
-  return getAnalyticsClient() as FakeAnalytics
+  if (!fakeInstance) fakeInstance = new FakeAnalytics()
+  return fakeInstance
+}
+
+/** Solo para tests. */
+export function _setAnalyticsClient(client: AnalyticsClient | null): void {
+  cached = client
 }

@@ -1,9 +1,12 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
+import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { requireAuth } from '@/lib/auth/helpers'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
+import storeConfig from '@/store.config'
 import { notFound } from 'next/navigation'
+import { startCardCheckoutAction } from '../_actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +19,8 @@ export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params
   const order = await ordersService.findById(id)
   if (!order) notFound()
+
+  const canPayWithCard = storeConfig.payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
@@ -132,6 +137,24 @@ export default async function OrderDetailPage({ params }: Props) {
           </dl>
         </CardBody>
       </Card>
+
+      {canPayWithCard && (
+        <Card className="mt-6">
+          <CardHeader>
+            <h2 className="font-medium">Pagar con tarjeta</h2>
+            <p className="mt-1 text-xs text-gray-500">
+              Te redirigimos a Stripe Checkout (hosted). El pago se confirma vía webhook firmado —
+              nunca desde la URL de retorno.
+            </p>
+          </CardHeader>
+          <CardBody>
+            <form action={startCardCheckoutAction}>
+              <input type="hidden" name="orderId" value={order.id} />
+              <Button type="submit">Pagar {formatMoney(order.total, order.currency)}</Button>
+            </form>
+          </CardBody>
+        </Card>
+      )}
     </div>
   )
 }

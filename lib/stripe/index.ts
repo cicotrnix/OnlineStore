@@ -1,8 +1,17 @@
 /**
  * Stripe abstraction. Producción: SDK real cuando STRIPE_SECRET_KEY exista.
  * Dev/test/CI: Fake in-memory + verificación de firma simulada.
+ *
+ * Env vars:
+ *   - STRIPE_SECRET_KEY → activa cliente real
+ *   - STRIPE_WEBHOOK_SECRET → necesario en ambos modos (Fake usa 'whsec_fake'
+ *     por default; real lo usa el SDK para Stripe.webhooks.constructEvent).
+ *
+ * PSDD (ADR 0027) preservado en ambos modos: webhook firmado = única fuente
+ * de verdad; idempotencia por eventId; refund con key estable.
  */
 import { createHmac } from 'node:crypto'
+import Stripe from 'stripe'
 
 export interface StripeCheckoutSessionInput {
   orderId: string
@@ -32,6 +41,8 @@ export interface StripeClient {
   verifyWebhook(rawBody: string, signature: string): StripeWebhookEvent | null
 }
 
+// ─── Fake ─────────────────────────────────────────────────────────────────
+
 class FakeStripe implements StripeClient {
   private sessions = new Map<
     string,
@@ -41,7 +52,6 @@ class FakeStripe implements StripeClient {
   private signingSecret = process.env.STRIPE_WEBHOOK_SECRET ?? 'whsec_fake'
 
   async createCheckoutSession(input: StripeCheckoutSessionInput): Promise<StripeCheckoutSession> {
-    // Idempotencia: misma key → mismo session id.
     const cached = this.idempotency.get(input.idempotencyKey)
     if (cached) {
       const s = this.sessions.get(cached)
@@ -62,7 +72,6 @@ class FakeStripe implements StripeClient {
   private refundsByKey = new Map<string, string>()
 
   async refund(_paymentIntentId: string, idempotencyKey: string): Promise<{ id: string }> {
-    // Idempotente: misma key → mismo refund id (espejo de la API real).
     const cached = this.refundsByKey.get(idempotencyKey)
     if (cached) return { id: cached }
     const id = `re_${createHmac('sha256', this.signingSecret)
@@ -83,7 +92,6 @@ class FakeStripe implements StripeClient {
     }
   }
 
-  // Helpers solo para tests:
   _signPayload(event: StripeWebhookEvent): { body: string; signature: string } {
     const body = JSON.stringify(event)
     const signature = createHmac('sha256', this.signingSecret).update(body).digest('hex')
@@ -101,11 +109,89 @@ class FakeStripe implements StripeClient {
   }
 }
 
+// ─── Real ─────────────────────────────────────────────────────────────────
+
+/**
+ * Adaptador real sobre el SDK de Stripe. Sin claves → no se instancia (selector
+ * cae al Fake). Mismo contrato.
+ */
+class RealStripe implements StripeClient {
+  private sdk: Stripe
+  constructor(
+    secretKey: string,
+    private readonly webhookSecret: string
+  ) {
+    this.sdk = new Stripe(secretKey, {
+      apiVersion: '2026-05-27.dahlia',
+      typescript: true,
+    })
+  }
+
+  async createCheckoutSession(input: StripeCheckoutSessionInput): Promise<StripeCheckoutSession> {
+    const session = await this.sdk.checkout.sessions.create(
+      {
+        mode: 'payment',
+        success_url: input.successUrl,
+        cancel_url: input.cancelUrl,
+        customer_email: input.customerEmail,
+        client_reference_id: input.orderId,
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: input.currency.toLowerCase(),
+              unit_amount: input.amountCents,
+              product_data: { name: `Order ${input.orderId}` },
+            },
+          },
+        ],
+        payment_intent_data: {
+          metadata: { orderId: input.orderId },
+        },
+      },
+      { idempotencyKey: input.idempotencyKey }
+    )
+    if (!session.url) throw new Error('stripe checkout session has no url')
+    const paymentIntentId =
+      typeof session.payment_intent === 'string'
+        ? session.payment_intent
+        : (session.payment_intent?.id ?? '')
+    return { id: session.id, url: session.url, paymentIntentId }
+  }
+
+  async refund(paymentIntentId: string, idempotencyKey: string): Promise<{ id: string }> {
+    const refund = await this.sdk.refunds.create(
+      { payment_intent: paymentIntentId },
+      { idempotencyKey }
+    )
+    return { id: refund.id }
+  }
+
+  verifyWebhook(rawBody: string, signature: string): StripeWebhookEvent | null {
+    try {
+      const event = this.sdk.webhooks.constructEvent(rawBody, signature, this.webhookSecret)
+      return event as unknown as StripeWebhookEvent
+    } catch {
+      return null
+    }
+  }
+}
+
+// ─── Selector ─────────────────────────────────────────────────────────────
+
+let cached: StripeClient | null = null
 const fakeSingleton = new FakeStripe()
 
 export function getStripeClient(): StripeClient {
-  // Cuando exista process.env.STRIPE_SECRET_KEY, instanciar SDK real.
-  return fakeSingleton
+  if (cached) return cached
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (secretKey && webhookSecret) {
+    cached = new RealStripe(secretKey, webhookSecret)
+  } else {
+    cached = fakeSingleton
+  }
+  return cached
 }
 
 export function _getFakeStripe(): FakeStripe {
@@ -114,4 +200,10 @@ export function _getFakeStripe(): FakeStripe {
 
 export function _resetStripe(): void {
   fakeSingleton._reset()
+  cached = null
+}
+
+/** Solo para tests: fuerza el client. */
+export function _setStripeClient(client: StripeClient | null): void {
+  cached = client
 }

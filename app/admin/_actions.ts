@@ -93,6 +93,58 @@ export async function cancelOrderAction(formData: FormData) {
   revalidatePath('/admin/orders')
 }
 
+export async function uploadTaxCertificateAction(formData: FormData) {
+  await requirePlatformAdmin()
+  const organizationId = String(formData.get('organizationId'))
+  const type = String(formData.get('type')) as 'US_RESALE_CERT' | 'FOREIGN_EQUIV'
+  const number = String(formData.get('number')).trim()
+  const jurisdiction = String(formData.get('jurisdiction')).trim()
+  const country = String(formData.get('country') ?? '').trim() || undefined
+  if (!number || !jurisdiction) throw new Error('number y jurisdiction obligatorios')
+  const file = formData.get('file') as File | null
+  if (!file || file.size === 0) throw new Error('archivo obligatorio')
+  if (file.size > 10 * 1024 * 1024) throw new Error('archivo > 10 MB')
+  const fileBytes = new Uint8Array(await file.arrayBuffer())
+  const { uploadAndAutoApprove } = await import('@/modules/verification')
+  await uploadAndAutoApprove({
+    organizationId,
+    type,
+    number,
+    jurisdiction,
+    fileName: file.name,
+    fileBytes,
+    country,
+  })
+  revalidatePath(`/admin/customers/${organizationId}`)
+}
+
+export async function getTaxCertificateUrlAction(formData: FormData): Promise<string> {
+  await requirePlatformAdmin()
+  const taxDocumentId = String(formData.get('taxDocumentId'))
+  const doc = await prisma.taxDocument.findUniqueOrThrow({
+    where: { id: taxDocumentId },
+    select: { fileKey: true },
+  })
+  const { getStorage } = await import('@/lib/storage')
+  return getStorage().signedUrl(doc.fileKey, 900) // 15 min
+}
+
+export async function reconcileWireAction(formData: FormData) {
+  const user = await requirePlatformAdmin()
+  const orderId = String(formData.get('orderId'))
+  const amountStr = String(formData.get('amount'))
+  const wireReference = String(formData.get('wireReference')).trim()
+  if (!wireReference) throw new Error('wireReference es obligatorio')
+  // amount viene en USD; el módulo de pagos trabaja en cents.
+  const amount = Number(amountStr)
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Monto inválido')
+  const amountCents = Math.round(amount * 100)
+  const { reconcileWire } = await import('@/modules/payments')
+  await reconcileWire({ orderId, amountCents, wireReference, adminUserId: user.id })
+  revalidatePath('/admin/orders')
+  revalidatePath(`/admin/orders/${orderId}`)
+}
+
 export async function setCustomerPriceAction(formData: FormData) {
   await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))

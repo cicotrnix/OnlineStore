@@ -41,8 +41,9 @@ Herney activa cada capacidad gradualmente con su propia ventana de validación.
    - El `lib/storage` real (a implementar al reemplazar FakeStorage) detecta y
      usa el client S3-compatible.
 4. Smoke test: admin sube un certificado de prueba en `/admin/customers/<id>`
-   → flujo emite `customer.verified` → ver fila en `JournalEntry`? (todavía no,
-   porque verified no postea contabilidad).
+   (form de verificación B2B: tipo + número + jurisdicción + país + archivo) →
+   flujo emite `customer.verified`. Verifica con "Ver certificado" → genera
+   URL firmada R2.
 5. Coordinar con cada cliente B2B existente para que cargue su certificado real
    en `/admin` (Herney sigue siendo platform admin; los buyers no).
 
@@ -59,8 +60,8 @@ Herney activa cada capacidad gradualmente con su propia ventana de validación.
    disparar `order.placed` + `invoice.issued` → email → asiento Dr CxC / Cr
    Ventas en el ledger.
 4. Coordinar reconciliación: admin recibe extracto bancario, abre
-   `/admin/orders/<id>`, ejecuta `reconcileWire` (UI a desarrollar o script
-   manual).
+   `/admin/orders/<id>`, completa el form "Conciliar wire / ACH" (monto +
+   referencia) y submitea.
 5. Validar **trial balance** `pnpm tsx scripts/trial-balance.ts` (a crear si
    no existe) — débitos = créditos.
 
@@ -118,8 +119,12 @@ limits enforced).
      4100 / clearing 1200.
 6. **Solo entonces**: live mode keys en prod. Repetir suite mínima en prod con
    un cargo real bajo de prueba (refundeado).
-7. Activar `store.config.ts` payments.stripe.enabled = true (cosmético — el
-   storefront empieza a mostrar el botón "Pagar con tarjeta").
+7. Activar `store.config.ts` `payments.stripe.enabled = true` — el storefront
+   empieza a mostrar el botón "Pagar con tarjeta" en `/orders/<id>` (gate por
+   `canPayWithCard = flag + status PENDING_PAYMENT`). El botón dispara la
+   server action `startCardCheckoutAction` → `createCardCheckout` → redirect a
+   Stripe Checkout hosted. success_url → `/orders/<id>/payment-pending` (PSDD:
+   no confirma pago, solo "procesando").
 8. Documentar el primer cargo live en el sistema + verificar el
    primer asiento contable real.
 

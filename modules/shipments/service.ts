@@ -3,12 +3,34 @@ import { type FedexClient, getFedexClient } from '@/lib/fedex'
 import { emitEvent } from '@/modules/events'
 
 /**
- * Límites hazmat litio (config dominio-como-datos; valores a fijar con ops).
- * Por paquete: máx cantidad de celdas + máx watt-hours totales.
+ * Límites hazmat litio (UN3480 / UN3481) por paquete para FedEx Ground.
+ *
+ * Régimen aplicable a PiPower (baterías de reemplazo iPhone, single-cell
+ * Li-ion ~10 Wh c/u): **IATA PI966 Section II / 49 CFR 173.185 Section II**,
+ * que permite envío sin Declaración de Mercancías Peligrosas (DGD/DGN) ni
+ * etiqueta Class 9, siempre que se cumplan:
+ *
+ *   - ≤8 cells o ≤2 batteries por paquete (categoría "light"), o
+ *   - ≤100 Wh por batería individual, ≤2.7 Wh por celda
+ *   - ≤5 kg gross weight por paquete (UN3480 standalone)
+ *   - Etiqueta "lithium battery handling label" en el paquete (manual).
+ *
+ * Para PiPower (batería iPhone single-cell, ~10 Wh):
+ *   - maxCells = 8   (umbral Section II light, sin DG paperwork)
+ *   - maxWattHours = 80 (8 cells × ~10 Wh ≈ 80 Wh)
+ *
+ * Pedidos que excedan estos límites → throw HAZMAT_LIMIT_*. La org debe partir
+ * el pedido en múltiples paquetes o coordinar manualmente con ops para DGD
+ * (PI966 Section IB) — flujo no automatizado en v1.
+ *
+ * Ops debe revalidar estos valores en cada actualización de regulaciones
+ * IATA / 49 CFR (anual). Fuente: 49 CFR 173.185 + IATA DGR 2026.
+ *
+ * Referencia: docs/runbooks/shipments.md "Hazmat / batería de litio".
  */
 export const HAZMAT_LIMITS = {
-  maxCells: 100,
-  maxWattHours: 300,
+  maxCells: 8,
+  maxWattHours: 80,
 } as const
 
 export interface QuoteShipmentInput {
