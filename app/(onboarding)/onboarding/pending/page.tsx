@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { resubmitCertificateAction } from '../_actions'
@@ -12,6 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function OnboardingPendingPage() {
   const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const member = await prisma.organizationMember.findFirst({
     where: { userId: user.id },
     select: {
@@ -44,13 +46,12 @@ export default async function OnboardingPendingPage() {
         <CardBody className="space-y-4 text-sm text-gray-700">
           {org.verificationStatus === 'PENDING' && (
             <>
-              <p>
-                Tu cuenta está en revisión. Te enviamos un email cuando esté aprobada. Esto suele
-                tardar 1 día hábil.
-              </p>
+              <p>{t(locale, 'onboarding.pending.body')}</p>
               {org.verificationSubmittedAt && (
                 <p className="text-xs text-gray-500">
-                  Enviada el {org.verificationSubmittedAt.toLocaleString()}.
+                  {t(locale, 'onboarding.pending.submittedOn', {
+                    date: org.verificationSubmittedAt.toLocaleString(),
+                  })}
                 </p>
               )}
             </>
@@ -58,14 +59,11 @@ export default async function OnboardingPendingPage() {
 
           {org.verificationStatus === 'REJECTED' && (
             <>
-              <p>Tu solicitud fue rechazada con el siguiente motivo:</p>
+              <p>{t(locale, 'onboarding.rejected.intro')}</p>
               <p className="rounded border border-red-200 bg-red-50 p-3 text-red-800">
-                {org.rejectionReason ?? 'Sin motivo especificado'}
+                {org.rejectionReason ?? '—'}
               </p>
-              <p>
-                Podés volver a enviar el certificado actualizado. La cuenta volverá a estado{' '}
-                <strong>PENDING</strong> hasta nueva revisión.
-              </p>
+              <p>{t(locale, 'onboarding.rejected.resubmitNote')}</p>
               <form
                 action={resubmitCertificateAction}
                 className="space-y-3 border-t border-gray-200 pt-4 mt-4"
@@ -73,7 +71,7 @@ export default async function OnboardingPendingPage() {
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="type" className="block text-xs text-gray-500 mb-1">
-                      Tipo
+                      {t(locale, 'onboarding.cert.type')}
                     </label>
                     <select
                       id="type"
@@ -81,25 +79,32 @@ export default async function OnboardingPendingPage() {
                       required
                       className="block w-full rounded border border-gray-300 px-3 py-2 text-sm"
                     >
-                      <option value="US_RESALE_CERT">US Resale Certificate</option>
-                      <option value="FOREIGN_EQUIV">Equivalente extranjero</option>
+                      <option value="US_RESALE_CERT">{t(locale, 'onboarding.cert.type.us')}</option>
+                      <option value="FOREIGN_EQUIV">
+                        {t(locale, 'onboarding.cert.type.foreign')}
+                      </option>
                     </select>
                   </div>
                   <div>
                     <label htmlFor="jurisdiction" className="block text-xs text-gray-500 mb-1">
-                      Jurisdicción
+                      {t(locale, 'onboarding.cert.jurisdiction')}
                     </label>
-                    <Input id="jurisdiction" name="jurisdiction" required placeholder="TX, FL, …" />
+                    <Input
+                      id="jurisdiction"
+                      name="jurisdiction"
+                      required
+                      placeholder={t(locale, 'onboarding.cert.jurisdictionPlaceholder')}
+                    />
                   </div>
                   <div>
                     <label htmlFor="number" className="block text-xs text-gray-500 mb-1">
-                      Número del certificado
+                      {t(locale, 'onboarding.cert.number')}
                     </label>
                     <Input id="number" name="number" required />
                   </div>
                   <div>
                     <label htmlFor="file" className="block text-xs text-gray-500 mb-1">
-                      Archivo (PDF / imagen, ≤ 10 MB)
+                      {t(locale, 'onboarding.cert.file')} ({t(locale, 'onboarding.cert.fileHint')})
                     </label>
                     <input
                       id="file"
@@ -111,14 +116,14 @@ export default async function OnboardingPendingPage() {
                     />
                   </div>
                 </div>
-                <Button type="submit">Re-enviar para revisión</Button>
+                <Button type="submit">{t(locale, 'onboarding.rejected.submit')}</Button>
               </form>
             </>
           )}
 
           <div className="mt-4 pt-4 border-t border-gray-200">
             <Link href="/catalog" className="text-blue-700 hover:underline">
-              Mientras tanto, explorá el catálogo →
+              {t(locale, 'onboarding.pending.exploreLink')}
             </Link>
           </div>
         </CardBody>
