@@ -21,11 +21,12 @@ beforeEach(() => {
   refundsCreate.mockReset()
   constructEvent.mockReset()
   vi.resetModules()
-  delete process.env.STRIPE_SECRET_KEY
-  delete process.env.STRIPE_WEBHOOK_SECRET
+  vi.stubEnv('STRIPE_SECRET_KEY', '')
+  vi.stubEnv('STRIPE_WEBHOOK_SECRET', '')
 })
 
 afterEach(() => {
+  vi.unstubAllEnvs()
   process.env = { ...ORIG }
 })
 

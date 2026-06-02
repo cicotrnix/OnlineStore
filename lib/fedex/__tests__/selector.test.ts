@@ -15,12 +15,13 @@ beforeEach(() => {
     'FEDEX_FROM_ZIP',
     'FEDEX_BASE_URL',
   ]) {
-    delete process.env[k]
+    vi.stubEnv(k, '')
   }
   globalThis.fetch = fetchMock as unknown as typeof fetch
 })
 
 afterEach(() => {
+  vi.unstubAllEnvs()
   process.env = { ...ORIG }
   globalThis.fetch = realFetch
 })

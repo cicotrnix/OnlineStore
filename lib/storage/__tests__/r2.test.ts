@@ -33,13 +33,13 @@ beforeEach(() => {
   sendMock.mockReset()
   getSignedUrlMock.mockReset()
   vi.resetModules()
-  // Limpiar env vars de R2 entre tests.
   for (const k of ['R2_BUCKET', 'R2_ACCOUNT_ID', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY']) {
-    delete process.env[k]
+    vi.stubEnv(k, '')
   }
 })
 
 afterEach(() => {
+  vi.unstubAllEnvs()
   process.env = { ...ORIG }
 })
 

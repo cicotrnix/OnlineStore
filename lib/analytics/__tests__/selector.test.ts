@@ -8,7 +8,6 @@ vi.mock('posthog-node', () => ({
   PostHog: class {
     capture = posthogCapture
     shutdown = posthogShutdown
-    constructor(_apiKey: string, _opts: unknown) {}
   },
 }))
 
@@ -21,7 +20,7 @@ beforeEach(() => {
   fetchMock.mockReset()
   vi.resetModules()
   for (const k of ['POSTHOG_API_KEY', 'POSTHOG_HOST', 'GA4_MEASUREMENT_ID', 'GA4_API_SECRET']) {
-    delete process.env[k]
+    vi.stubEnv(k, '')
   }
   // Force non-test mode para verificar el selector real.
   vi.stubEnv('NODE_ENV', 'production')

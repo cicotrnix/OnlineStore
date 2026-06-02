@@ -31,7 +31,7 @@ const ENV_KEYS = [
 ]
 
 beforeEach(() => {
-  for (const k of ENV_KEYS) delete process.env[k]
+  for (const k of ENV_KEYS) vi.stubEnv(k, '')
   // Importante: force NODE_ENV=production para que el selector real corra su
   // lógica con env vars (sino siempre devuelve Fake por shortcut de test mode).
   vi.stubEnv('NODE_ENV', 'production')
