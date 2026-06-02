@@ -23,9 +23,7 @@ test.describe('Onboarding B2B — público vs gated (2026-06-02)', () => {
     const count = await firstProduct.count()
     if (count === 0) test.skip(true, 'seed vacío')
     // Navegar al primer link de producto encontrado en el listado.
-    const productLinks = page
-      .locator('a[href^="/products/"]')
-      .filter({ hasNotText: /^$/ })
+    const productLinks = page.locator('a[href^="/products/"]').filter({ hasNotText: /^$/ })
     if ((await productLinks.count()) === 0) test.skip(true, 'sin PDPs públicos')
     await productLinks.first().click()
     await expect(page).toHaveURL(/\/products\//)

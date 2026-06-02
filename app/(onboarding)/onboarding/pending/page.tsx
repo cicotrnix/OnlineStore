@@ -45,8 +45,8 @@ export default async function OnboardingPendingPage() {
           {org.verificationStatus === 'PENDING' && (
             <>
               <p>
-                Tu cuenta está en revisión. Te enviamos un email cuando esté aprobada.
-                Esto suele tardar 1 día hábil.
+                Tu cuenta está en revisión. Te enviamos un email cuando esté aprobada. Esto suele
+                tardar 1 día hábil.
               </p>
               {org.verificationSubmittedAt && (
                 <p className="text-xs text-gray-500">
@@ -63,8 +63,8 @@ export default async function OnboardingPendingPage() {
                 {org.rejectionReason ?? 'Sin motivo especificado'}
               </p>
               <p>
-                Podés volver a enviar el certificado actualizado. La cuenta volverá a
-                estado <strong>PENDING</strong> hasta nueva revisión.
+                Podés volver a enviar el certificado actualizado. La cuenta volverá a estado{' '}
+                <strong>PENDING</strong> hasta nueva revisión.
               </p>
               <form
                 action={resubmitCertificateAction}
@@ -89,12 +89,7 @@ export default async function OnboardingPendingPage() {
                     <label htmlFor="jurisdiction" className="block text-xs text-gray-500 mb-1">
                       Jurisdicción
                     </label>
-                    <Input
-                      id="jurisdiction"
-                      name="jurisdiction"
-                      required
-                      placeholder="TX, FL, …"
-                    />
+                    <Input id="jurisdiction" name="jurisdiction" required placeholder="TX, FL, …" />
                   </div>
                   <div>
                     <label htmlFor="number" className="block text-xs text-gray-500 mb-1">

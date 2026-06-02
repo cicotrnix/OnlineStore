@@ -26,9 +26,9 @@ export default async function OnboardingPage() {
     <div className="max-w-2xl mx-auto px-6 py-12">
       <h1 className="text-2xl font-medium tracking-tight">Registrá tu negocio</h1>
       <p className="mt-2 text-sm text-gray-600">
-        Para acceder a precios mayoristas y comprar, necesitamos los datos básicos de tu
-        negocio y el certificado de reventa (o equivalente extranjero). Lo revisamos
-        manualmente y te avisamos por email en cuanto esté aprobado.
+        Para acceder a precios mayoristas y comprar, necesitamos los datos básicos de tu negocio y
+        el certificado de reventa (o equivalente extranjero). Lo revisamos manualmente y te avisamos
+        por email en cuanto esté aprobado.
       </p>
 
       <form action={submitOnboardingAction} className="mt-8 space-y-6">
@@ -93,8 +93,7 @@ export default async function OnboardingPage() {
           <CardHeader>
             <h2 className="font-medium">Certificado de reventa</h2>
             <p className="mt-1 text-xs text-gray-500">
-              Resale Certificate (USA) o documento equivalente del país. PDF o imagen, ≤
-              10 MB.
+              Resale Certificate (USA) o documento equivalente del país. PDF o imagen, ≤ 10 MB.
             </p>
           </CardHeader>
           <CardBody className="grid sm:grid-cols-2 gap-4">

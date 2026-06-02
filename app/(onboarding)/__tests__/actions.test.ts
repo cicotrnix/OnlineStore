@@ -90,9 +90,7 @@ describe('submitOnboardingAction', () => {
   it('country no ISO-2 → throw', async () => {
     await makeUser()
     const { submitOnboardingAction } = await import('../onboarding/_actions')
-    await expect(submitOnboardingAction(buildForm({ country: 'USA' }))).rejects.toThrow(
-      /ISO-2/
-    )
+    await expect(submitOnboardingAction(buildForm({ country: 'USA' }))).rejects.toThrow(/ISO-2/)
   })
 })
 

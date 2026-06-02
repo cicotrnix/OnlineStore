@@ -41,7 +41,8 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
   if (!name) throw new Error('name obligatorio')
   if (country.length !== 2) throw new Error('country debe ser ISO-2')
   if (!addressLine1 || !city || !postalCode) throw new Error('dirección incompleta')
-  if (!docNumber || !jurisdiction) throw new Error('certificado: número y jurisdicción obligatorios')
+  if (!docNumber || !jurisdiction)
+    throw new Error('certificado: número y jurisdicción obligatorios')
   if (!file || file.size === 0) throw new Error('archivo del certificado obligatorio')
   if (file.size > 10 * 1024 * 1024) throw new Error('archivo > 10 MB')
 

@@ -77,9 +77,7 @@ export default async function LandingPage() {
             className="h-24 md:h-32 w-auto mx-auto"
           />
           {storeConfig.identity.tagline && (
-            <p className="mt-6 text-xl md:text-2xl text-gray-700">
-              {storeConfig.identity.tagline}
-            </p>
+            <p className="mt-6 text-xl md:text-2xl text-gray-700">{storeConfig.identity.tagline}</p>
           )}
           <div
             aria-hidden
@@ -87,8 +85,8 @@ export default async function LandingPage() {
             style={{ background: 'var(--color-accent)' }}
           />
           <p className="mt-8 max-w-2xl mx-auto text-base md:text-lg text-gray-600">
-            Catálogo mayorista de baterías de reemplazo para iPhone. Precios y compras
-            disponibles para negocios verificados.
+            Catálogo mayorista de baterías de reemplazo para iPhone. Precios y compras disponibles
+            para negocios verificados.
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-3 flex-wrap">
