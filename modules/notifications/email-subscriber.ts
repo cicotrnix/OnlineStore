@@ -84,6 +84,25 @@ const MAPPERS: Partial<Record<DomainEventType, MailMapper>> = {
     link: `/orders/${String(e.payload.orderId ?? '')}`,
     recipients: await recipientsForShipment(e.aggregateId),
   }),
+  'invoice.overdue': async (e) => {
+    const invoiceId = e.aggregateId
+    const inv = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      select: {
+        number: true,
+        amount: true,
+        organization: { select: { members: { select: { userId: true } } } },
+      },
+    })
+    if (!inv) return null
+    return {
+      type: 'INVOICE_OVERDUE' as const,
+      title: `Factura ${inv.number} vencida`,
+      body: `La factura por $${inv.amount.toFixed(2)} pasó su fecha de vencimiento.`,
+      link: `/invoices/${invoiceId}`,
+      recipients: inv.organization.members.map((m) => m.userId),
+    }
+  },
 }
 
 export const emailSubscriber: Subscriber = {
@@ -93,6 +112,7 @@ export const emailSubscriber: Subscriber = {
     'payment.captured',
     'payment.reconciled',
     'invoice.issued',
+    'invoice.overdue',
     'shipment.dispatched',
   ],
   async handle(event: DomainEventRecord): Promise<void> {
