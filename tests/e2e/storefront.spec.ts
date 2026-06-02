@@ -23,10 +23,13 @@ test.describe('storefront — anonymous browsing', () => {
     await expect(page.getByText(/Jabón líquido/i).first()).toBeVisible()
   })
 
-  test('product detail page renders with price', async ({ page }) => {
+  test('product detail page renders (anónimo ve CTA en vez de precio — Onboarding B2B)', async ({
+    page,
+  }) => {
     await page.goto('/products/crema-facial-hidratante')
     await expect(page.getByRole('heading', { name: /Crema facial hidratante/i })).toBeVisible()
-    await expect(page.getByText(/\$\d+\.\d{2}/)).toBeVisible()
+    // Onboarding B2B 2026-06-02: el anónimo ve specs/contenido pero NO precio.
+    await expect(page.getByText(/ver precios mayoristas/i).first()).toBeVisible()
   })
 
   test('anonymous user redirected to sign-in when accessing cart', async ({ page }) => {
