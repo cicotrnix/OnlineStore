@@ -14,6 +14,10 @@ export const cartService = {
 
   async addItem(input: AddCartItemInput) {
     const { userId, productId, quantity, orgId } = addCartItemSchema.parse(input)
+    // Onboarding B2B (2026-06-02): defensa en profundidad. Sólo orgs VERIFIED
+    // pueden agregar al carrito; el botón también se oculta en el storefront.
+    const { isVerified } = await import('@/modules/verification')
+    if (!(await isVerified(orgId))) throw new Error('ORG_NOT_VERIFIED')
     const cart = await cartRepository.getOrCreateCart(userId)
     const unitPriceSnapshot = await pricingService.resolveForOrg(orgId, productId)
     await cartRepository.upsertItem(cart.id, productId, quantity, unitPriceSnapshot)

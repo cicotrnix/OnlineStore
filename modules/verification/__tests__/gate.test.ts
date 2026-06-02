@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/db/client'
-import { cartService } from '@/modules/cart'
 import { catalogService } from '@/modules/catalog'
 import { checkoutService } from '@/modules/checkout'
 import { customersService } from '@/modules/customers'
@@ -43,11 +42,16 @@ async function setupWithVerified(verified: boolean) {
     isDefaultBilling: true,
     isDefaultShipping: true,
   })
-  await cartService.addItem({
-    userId: user.id,
-    orgId: org.id,
-    productId: product.id,
-    quantity: 1,
+  // Bypass cart guard (cart.addItem ahora también rechaza orgs no-VERIFIED;
+  // este test verifica el gate de checkout.confirm como defensa en profundidad).
+  const cart = await prisma.cart.create({ data: { userId: user.id } })
+  await prisma.cartItem.create({
+    data: {
+      cartId: cart.id,
+      productId: product.id,
+      quantity: 1,
+      unitPriceSnapshot: 10,
+    },
   })
   return { user, org, addr }
 }

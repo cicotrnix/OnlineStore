@@ -49,8 +49,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
   const session = await auth()
-  const orgId = session?.impersonatingOrgId ?? session?.activeOrgId ?? null
-  const isImpersonating = !!session?.impersonatingOrgId
+  // Onboarding B2B (2026-06-02): solo orgs VERIFIED ven precio + botón comprar.
+  // PDP queda público (SEO) — el anónimo ve specs/contenido sin precio.
+  const { getCustomerState } = await import('@/lib/auth/customer')
+  const customerState = await getCustomerState()
+  const verifiedOrgId = customerState.kind === 'verified' ? customerState.orgId : null
+  const orgId = verifiedOrgId
+  const isImpersonating = customerState.kind === 'verified' ? customerState.isImpersonating : false
+  const showPrice = customerState.kind === 'verified'
   const product = await catalogService.findProductBySlugVisible(orgId, slug)
   if (!product || !product.isActive) notFound()
   const customerPrice = orgId ? await pricingService.resolveForOrg(orgId, product.id) : null
@@ -107,12 +113,21 @@ export default async function ProductPage({ params }: Props) {
         )}
 
         <div className="mt-5">
-          <PriceTag
-            basePrice={product.basePrice}
-            customerPrice={showOverride ? customerPrice : null}
-            currency={storeConfig.currency.base}
-            size="lg"
-          />
+          {showPrice ? (
+            <PriceTag
+              basePrice={product.basePrice}
+              customerPrice={showOverride ? customerPrice : null}
+              currency={storeConfig.currency.base}
+              size="lg"
+            />
+          ) : (
+            <Link
+              href="/sign-in"
+              className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+            >
+              Iniciá sesión o registrá tu negocio para ver precios mayoristas →
+            </Link>
+          )}
         </div>
 
         <div className="mt-3">
@@ -130,20 +145,20 @@ export default async function ProductPage({ params }: Props) {
         ) : null}
 
         <div className="mt-8">
-          <AddToCartButton
-            productId={product.id}
-            showQuantity
-            disabled={!session?.user || isImpersonating || product.stockQuantity === 0}
-            disabledReason={
-              isImpersonating
-                ? 'No puedes colocar órdenes mientras impersonas'
-                : !session?.user
-                  ? 'Inicia sesión para comprar'
+          {showPrice && (
+            <AddToCartButton
+              productId={product.id}
+              showQuantity
+              disabled={isImpersonating || product.stockQuantity === 0}
+              disabledReason={
+                isImpersonating
+                  ? 'No puedes colocar órdenes mientras impersonas'
                   : product.stockQuantity === 0
                     ? 'Out of stock'
                     : undefined
-            }
-          />
+              }
+            />
+          )}
           {showRfq && (
             <div className="mt-3">
               <AddToQuoteButton productId={product.id} />

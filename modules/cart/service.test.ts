@@ -34,6 +34,11 @@ async function seed() {
     slug: 'org-x',
     ownerUserId: user.id,
   })
+  // Onboarding B2B (2026-06-02): el gate de carrito exige VERIFIED.
+  await prisma.organization.update({
+    where: { id: org.id },
+    data: { verificationStatus: 'VERIFIED' },
+  })
   const cat = await catalogService.createCategory({ slug: 'c1', name: 'C1' })
   const product = await catalogService.createProduct({
     sku: 'S1',
