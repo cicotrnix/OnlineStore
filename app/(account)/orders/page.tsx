@@ -1,7 +1,6 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { Card, CardBody } from '@/components/ui/Card'
 import { auth } from '@/lib/auth/config'
-import { requireAuth } from '@/lib/auth/helpers'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import storeConfig from '@/store.config'
@@ -10,7 +9,8 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function OrdersListPage() {
-  await requireAuth()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  await requireVerifiedCustomer()
   const session = await auth()
   const orgId = session?.impersonatingOrgId ?? session?.activeOrgId
   if (!orgId) {

@@ -2,6 +2,7 @@ import { CatalogToggle } from '@/components/commerce/CatalogToggle'
 import { ProductCard } from '@/components/commerce/ProductCard'
 import { ProductListRow } from '@/components/commerce/ProductListRow'
 import { auth } from '@/lib/auth/config'
+import { getCustomerState } from '@/lib/auth/customer'
 import { prisma } from '@/lib/db/client'
 import { catalogService } from '@/modules/catalog'
 import { pricingService } from '@/modules/pricing'
@@ -15,8 +16,12 @@ type Props = {
 export default async function CatalogPage({ searchParams }: Props) {
   const session = await auth()
   const params = await searchParams
-  const orgId = session?.impersonatingOrgId ?? session?.activeOrgId ?? null
-  const isImpersonating = !!session?.impersonatingOrgId
+  // Onboarding B2B (2026-06-02): solo orgs VERIFIED ven precio/compra.
+  // Catálogo público: anónimo y orgs pending/rejected ven listado sin precio.
+  const customerState = await getCustomerState()
+  const verifiedOrgId = customerState.kind === 'verified' ? customerState.orgId : null
+  const orgId = verifiedOrgId
+  const isImpersonating = customerState.kind === 'verified' ? customerState.isImpersonating : false
 
   const view: 'CARDS' | 'LIST' = await (async () => {
     if (!session?.user?.id) return 'CARDS'
@@ -44,12 +49,18 @@ export default async function CatalogPage({ searchParams }: Props) {
       )
     : new Map()
 
-  const canAddToCart = !!session?.user && !isImpersonating
+  const canAddToCart = customerState.kind === 'verified' && !isImpersonating
   const disabledReason = isImpersonating
     ? 'No puedes colocar órdenes mientras impersonas'
-    : !session?.user
-      ? 'Inicia sesión para comprar'
-      : undefined
+    : customerState.kind === 'anonymous'
+      ? 'Iniciá sesión para ver precios y comprar'
+      : customerState.kind === 'no-org'
+        ? 'Completá el registro de tu negocio'
+        : customerState.kind === 'pending'
+          ? 'Tu cuenta está en revisión'
+          : customerState.kind === 'rejected'
+            ? 'Tu cuenta fue rechazada — revisá el motivo'
+            : undefined
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -103,6 +114,7 @@ export default async function CatalogPage({ searchParams }: Props) {
               currency={storeConfig.currency.base}
               canAddToCart={canAddToCart}
               disabledReason={disabledReason}
+              showPrice={customerState.kind === 'verified'}
             />
           ))}
         </div>
@@ -128,6 +140,7 @@ export default async function CatalogPage({ searchParams }: Props) {
                   currency={storeConfig.currency.base}
                   canAddToCart={canAddToCart}
                   disabledReason={disabledReason}
+                  showPrice={customerState.kind === 'verified'}
                 />
               ))}
             </tbody>

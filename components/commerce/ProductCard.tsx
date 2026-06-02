@@ -28,6 +28,8 @@ type Props = {
   currency: string
   canAddToCart: boolean
   disabledReason?: string
+  /** Onboarding B2B: si false, oculta precio y muestra CTA "registrate para ver precios". */
+  showPrice?: boolean
 }
 
 export function ProductCard({
@@ -36,6 +38,7 @@ export function ProductCard({
   currency,
   canAddToCart,
   disabledReason,
+  showPrice = true,
 }: Props) {
   return (
     <Card className="overflow-hidden flex flex-col">
@@ -64,14 +67,26 @@ export function ProductCard({
             </div>
           )}
         </div>
-        <PriceTag basePrice={product.basePrice} customerPrice={customerPrice} currency={currency} />
+        {showPrice ? (
+          <PriceTag
+            basePrice={product.basePrice}
+            customerPrice={customerPrice}
+            currency={currency}
+          />
+        ) : (
+          <Link href="/sign-in" className="text-sm text-blue-700 hover:underline">
+            Iniciá sesión para ver precios mayoristas →
+          </Link>
+        )}
         <div className="flex items-center justify-between mt-auto pt-2">
           <StockBadge stockQuantity={product.stockQuantity} />
-          <AddToCartButton
-            productId={product.id}
-            disabled={!canAddToCart || product.stockQuantity === 0}
-            disabledReason={disabledReason}
-          />
+          {showPrice && (
+            <AddToCartButton
+              productId={product.id}
+              disabled={!canAddToCart || product.stockQuantity === 0}
+              disabledReason={disabledReason}
+            />
+          )}
         </div>
       </CardBody>
     </Card>

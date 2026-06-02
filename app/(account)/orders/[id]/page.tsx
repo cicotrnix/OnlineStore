@@ -1,7 +1,6 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { requireAuth } from '@/lib/auth/helpers'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import storeConfig from '@/store.config'
@@ -15,7 +14,8 @@ type Props = {
 }
 
 export default async function OrderDetailPage({ params }: Props) {
-  await requireAuth()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  await requireVerifiedCustomer()
   const { id } = await params
   const order = await ordersService.findById(id)
   if (!order) notFound()

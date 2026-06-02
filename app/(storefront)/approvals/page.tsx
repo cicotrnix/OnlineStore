@@ -14,6 +14,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function ApprovalsPage() {
   if (!isFeatureEnabled('approvals')) notFound()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  await requireVerifiedCustomer()
   const session = await auth()
   if (!session?.user?.id || !session.activeOrgId) notFound()
   const allowed = await canApprove(session.user.id, session.activeOrgId)

@@ -1,7 +1,6 @@
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
-import { requireAuth } from '@/lib/auth/helpers'
 import { listForUser } from '@/modules/notifications'
 import Link from 'next/link'
 import { markAllReadAction, markOneReadAction } from './_actions'
@@ -11,7 +10,9 @@ export const dynamic = 'force-dynamic'
 type Props = { searchParams: Promise<{ unread?: string }> }
 
 export default async function NotificationsPage({ searchParams }: Props) {
-  const user = await requireAuth()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  const customer = await requireVerifiedCustomer()
+  const user = { id: customer.userId }
   const { unread } = await searchParams
   const items = await listForUser(user.id, { unreadOnly: unread === '1', limit: 100 })
 

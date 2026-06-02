@@ -20,6 +20,7 @@ type Props = {
   currency: string
   canAddToCart: boolean
   disabledReason?: string
+  showPrice?: boolean
 }
 
 export function ProductListRow({
@@ -28,6 +29,7 @@ export function ProductListRow({
   currency,
   canAddToCart,
   disabledReason,
+  showPrice = true,
 }: Props) {
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
@@ -42,20 +44,28 @@ export function ProductListRow({
         <StockBadge stockQuantity={product.stockQuantity} />
       </td>
       <td className="px-3 py-3">
-        <PriceTag
-          basePrice={product.basePrice}
-          customerPrice={customerPrice}
-          currency={currency}
-          size="sm"
-        />
+        {showPrice ? (
+          <PriceTag
+            basePrice={product.basePrice}
+            customerPrice={customerPrice}
+            currency={currency}
+            size="sm"
+          />
+        ) : (
+          <Link href="/sign-in" className="text-xs text-blue-700 hover:underline">
+            Iniciá sesión
+          </Link>
+        )}
       </td>
       <td className="px-3 py-3 text-right">
-        <AddToCartButton
-          productId={product.id}
-          showQuantity
-          disabled={!canAddToCart || product.stockQuantity === 0}
-          disabledReason={disabledReason}
-        />
+        {showPrice && (
+          <AddToCartButton
+            productId={product.id}
+            showQuantity
+            disabled={!canAddToCart || product.stockQuantity === 0}
+            disabledReason={disabledReason}
+          />
+        )}
       </td>
     </tr>
   )

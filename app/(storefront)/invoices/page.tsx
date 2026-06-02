@@ -18,6 +18,8 @@ const STATUS_VARIANT: Record<string, 'default' | 'info' | 'success' | 'warning' 
 
 export default async function InvoicesPage() {
   if (!isFeatureEnabled('credit')) notFound()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  await requireVerifiedCustomer()
   const session = await auth()
   if (!session?.user?.id || !session.activeOrgId) notFound()
 

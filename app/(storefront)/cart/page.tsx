@@ -2,15 +2,15 @@ import { removeCartItemAction, updateCartQuantityAction } from '@/app/(storefron
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
-import { requireAuth } from '@/lib/auth/helpers'
+import { requireVerifiedCustomer } from '@/lib/auth/customer'
 import { addMoney, formatMoney, multiplyMoney } from '@/lib/money'
 import { cartService } from '@/modules/cart'
 import storeConfig from '@/store.config'
 import Link from 'next/link'
 
 export default async function CartPage() {
-  const user = await requireAuth()
-  const cart = await cartService.get(user.id)
+  const customer = await requireVerifiedCustomer()
+  const cart = await cartService.get(customer.userId)
 
   if (cart.items.length === 0) {
     return (

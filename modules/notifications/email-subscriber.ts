@@ -84,6 +84,37 @@ const MAPPERS: Partial<Record<DomainEventType, MailMapper>> = {
     link: `/orders/${String(e.payload.orderId ?? '')}`,
     recipients: await recipientsForShipment(e.aggregateId),
   }),
+  'customer.verified': async (e) => {
+    const orgId = e.aggregateId
+    const org = await prisma.organization.findUnique({
+      where: { id: orgId },
+      select: { name: true, members: { select: { userId: true } } },
+    })
+    if (!org) return null
+    return {
+      type: 'CUSTOMER_APPROVED' as const,
+      title: '¡Tu cuenta fue aprobada!',
+      body: `${org.name} ya puede ver precios mayoristas y colocar órdenes.`,
+      link: '/catalog',
+      recipients: org.members.map((m) => m.userId),
+    }
+  },
+  'customer.rejected': async (e) => {
+    const orgId = e.aggregateId
+    const org = await prisma.organization.findUnique({
+      where: { id: orgId },
+      select: { name: true, members: { select: { userId: true } } },
+    })
+    if (!org) return null
+    const reason = String(e.payload.reason ?? 'Sin motivo especificado')
+    return {
+      type: 'CUSTOMER_REJECTED' as const,
+      title: 'Tu solicitud fue rechazada',
+      body: `Motivo: ${reason}. Podés volver a enviar el certificado actualizado.`,
+      link: '/onboarding/pending',
+      recipients: org.members.map((m) => m.userId),
+    }
+  },
   'invoice.overdue': async (e) => {
     const invoiceId = e.aggregateId
     const inv = await prisma.invoice.findUnique({
@@ -114,6 +145,8 @@ export const emailSubscriber: Subscriber = {
     'invoice.issued',
     'invoice.overdue',
     'shipment.dispatched',
+    'customer.verified',
+    'customer.rejected',
   ],
   async handle(event: DomainEventRecord): Promise<void> {
     const mapper = MAPPERS[event.type]

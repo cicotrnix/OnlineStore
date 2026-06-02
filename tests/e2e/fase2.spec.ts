@@ -1,22 +1,24 @@
 import { expect, test } from '@playwright/test'
 
-test.describe('Fase 2 — feature-gated routes (anonymous)', () => {
-  test('quotes inbox returns 404 when anonymous', async ({ page }) => {
-    const res = await page.goto('/quotes')
-    expect(res?.status()).toBe(404)
+test.describe('Fase 2 — feature-gated routes (anonymous, post Onboarding B2B)', () => {
+  // Onboarding B2B 2026-06-02: rutas gated ahora redirigen a /sign-in
+  // (vía requireVerifiedCustomer) en lugar de devolver 404.
+  test('quotes redirects to sign-in when anonymous', async ({ page }) => {
+    await page.goto('/quotes')
+    await expect(page).toHaveURL(/\/sign-in/)
   })
 
-  test('invoices inbox returns 404 when anonymous', async ({ page }) => {
-    const res = await page.goto('/invoices')
-    expect(res?.status()).toBe(404)
+  test('invoices redirects to sign-in when anonymous', async ({ page }) => {
+    await page.goto('/invoices')
+    await expect(page).toHaveURL(/\/sign-in/)
   })
 
-  test('approvals inbox returns 404 when anonymous', async ({ page }) => {
-    const res = await page.goto('/approvals')
-    expect(res?.status()).toBe(404)
+  test('approvals redirects to sign-in when anonymous', async ({ page }) => {
+    await page.goto('/approvals')
+    await expect(page).toHaveURL(/\/sign-in/)
   })
 
-  test('notifications inbox redirects to sign-in when anonymous', async ({ page }) => {
+  test('notifications redirects to sign-in when anonymous', async ({ page }) => {
     await page.goto('/notifications')
     await expect(page).toHaveURL(/\/sign-in/)
   })

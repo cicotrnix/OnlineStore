@@ -1,5 +1,7 @@
 import {
+  approveOrganizationAction,
   getTaxCertificateUrlAction,
+  rejectOrganizationAction,
   startImpersonationAction,
   uploadTaxCertificateAction,
 } from '@/app/admin/_actions'
@@ -107,12 +109,25 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h2 className="font-medium">Verificación B2B</h2>
-            <Badge variant={org.verificationStatus === 'VERIFIED' ? 'success' : 'warning'}>
+            <Badge
+              variant={
+                org.verificationStatus === 'VERIFIED'
+                  ? 'success'
+                  : org.verificationStatus === 'REJECTED'
+                    ? 'danger'
+                    : 'warning'
+              }
+            >
               {org.verificationStatus}
             </Badge>
             {org.taxExempt && <Badge variant="info">Tax exempt</Badge>}
+            {org.verificationSubmittedAt && org.verificationStatus === 'PENDING' && (
+              <span className="text-xs text-gray-500">
+                Submitted {org.verificationSubmittedAt.toLocaleString()}
+              </span>
+            )}
           </div>
         </CardHeader>
         <CardBody className="space-y-4">
@@ -120,6 +135,41 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
             <p className="text-xs text-gray-500">
               Verificada el {org.verifiedAt.toLocaleString()} · país {org.country ?? '?'}
             </p>
+          )}
+
+          {org.verificationStatus === 'REJECTED' && org.rejectionReason && (
+            <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+              <strong>Motivo de rechazo:</strong> {org.rejectionReason}
+            </p>
+          )}
+
+          {(org.verificationStatus === 'PENDING' || org.verificationStatus === 'REJECTED') && (
+            <div className="flex items-center gap-3 flex-wrap rounded border border-gray-200 bg-gray-50 p-3">
+              <form action={approveOrganizationAction}>
+                <input type="hidden" name="organizationId" value={org.id} />
+                <Button type="submit" variant="primary">
+                  Aprobar
+                </Button>
+              </form>
+              <form action={rejectOrganizationAction} className="flex items-end gap-2">
+                <input type="hidden" name="organizationId" value={org.id} />
+                <div>
+                  <label htmlFor="reason" className="block text-xs text-gray-500 mb-1">
+                    Motivo de rechazo
+                  </label>
+                  <Input
+                    id="reason"
+                    name="reason"
+                    required
+                    placeholder="Certificado vencido / ilegible / etc."
+                    className="w-72"
+                  />
+                </div>
+                <Button type="submit" variant="danger">
+                  Rechazar
+                </Button>
+              </form>
+            </div>
           )}
 
           {taxDocs.length > 0 && (

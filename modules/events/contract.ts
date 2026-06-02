@@ -1,6 +1,7 @@
 /** Contrato de eventos de dominio v1 (inmutable, versionado). */
 export const EVENT_TYPES = [
   'customer.verified',
+  'customer.rejected',
   'order.placed',
   'payment.authorized',
   'payment.captured',

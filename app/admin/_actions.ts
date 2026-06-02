@@ -93,6 +93,26 @@ export async function cancelOrderAction(formData: FormData) {
   revalidatePath('/admin/orders')
 }
 
+export async function approveOrganizationAction(formData: FormData) {
+  const admin = await requirePlatformAdmin()
+  const organizationId = String(formData.get('organizationId'))
+  const { approveOrganization } = await import('@/modules/verification')
+  await approveOrganization({ organizationId, byAdminId: admin.id })
+  revalidatePath('/admin/customers')
+  revalidatePath(`/admin/customers/${organizationId}`)
+}
+
+export async function rejectOrganizationAction(formData: FormData) {
+  const admin = await requirePlatformAdmin()
+  const organizationId = String(formData.get('organizationId'))
+  const reason = String(formData.get('reason') ?? '').trim()
+  if (!reason) throw new Error('motivo obligatorio')
+  const { rejectOrganization } = await import('@/modules/verification')
+  await rejectOrganization({ organizationId, byAdminId: admin.id, reason })
+  revalidatePath('/admin/customers')
+  revalidatePath(`/admin/customers/${organizationId}`)
+}
+
 export async function uploadTaxCertificateAction(formData: FormData) {
   await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))

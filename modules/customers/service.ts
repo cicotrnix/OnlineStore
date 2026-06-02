@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto'
+import { prisma } from '@/lib/db/client'
 import { customersRepository } from './repository'
 import {
   type CreateAddressInput,
@@ -17,6 +18,63 @@ export const customersService = {
       name: parsed.name,
       slug: parsed.slug,
       ownerUserId: input.ownerUserId,
+    })
+  },
+
+  /**
+   * Onboarding B2B: crea org PENDING + OWNER + dirección default-billing/shipping
+   * en una tx. Slug se autogenera del name (lowercased + dasherized + random
+   * suffix para evitar colisión).
+   */
+  async createOrganizationWithOwner(input: {
+    userId: string
+    name: string
+    country: string
+    address: {
+      recipient: string
+      line1: string
+      line2?: string
+      city: string
+      state?: string
+      postalCode: string
+    }
+  }) {
+    const baseSlug = input.name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{M}/gu, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 32)
+    const slug = `${baseSlug || 'org'}-${randomBytes(3).toString('hex')}`
+    return prisma.$transaction(async (tx) => {
+      const org = await tx.organization.create({
+        data: {
+          name: input.name.trim(),
+          slug,
+          country: input.country,
+          verificationStatus: 'PENDING',
+          members: {
+            create: { userId: input.userId, role: 'OWNER' },
+          },
+          addresses: {
+            create: {
+              label: 'Default',
+              recipient: input.address.recipient,
+              line1: input.address.line1,
+              line2: input.address.line2,
+              city: input.address.city,
+              state: input.address.state,
+              postalCode: input.address.postalCode,
+              country: input.country,
+              isDefaultBilling: true,
+              isDefaultShipping: true,
+            },
+          },
+        },
+        include: { addresses: true },
+      })
+      return org
     })
   },
 
