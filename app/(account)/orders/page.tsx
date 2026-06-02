@@ -10,7 +10,8 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function OrdersListPage() {
-  await requireAuth()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  await requireVerifiedCustomer()
   const session = await auth()
   const orgId = session?.impersonatingOrgId ?? session?.activeOrgId
   if (!orgId) {

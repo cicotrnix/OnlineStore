@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { auth } from '@/lib/auth/config'
-import { requireAuth } from '@/lib/auth/helpers'
+import { requireVerifiedCustomer } from '@/lib/auth/customer'
 import { addMoney, formatMoney, multiplyMoney } from '@/lib/money'
 import { cartService } from '@/modules/cart'
 import { checkoutService } from '@/modules/checkout'
@@ -13,13 +13,13 @@ import storeConfig from '@/store.config'
 import { redirect } from 'next/navigation'
 
 export default async function CheckoutPage() {
-  const user = await requireAuth()
+  const customer = await requireVerifiedCustomer()
+  const user = { id: customer.userId }
   const session = await auth()
   if (session?.impersonatingOrgId) {
     redirect('/cart')
   }
-  const orgId = session?.activeOrgId
-  if (!orgId) redirect('/account/select-org')
+  const orgId = customer.orgId
 
   const cart = await cartService.get(user.id)
   if (cart.items.length === 0) redirect('/cart')

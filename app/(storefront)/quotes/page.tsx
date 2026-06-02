@@ -42,6 +42,8 @@ type Props = { searchParams: Promise<{ status?: string }> }
 
 export default async function QuotesPage({ searchParams }: Props) {
   if (!isFeatureEnabled('rfq')) notFound()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  await requireVerifiedCustomer()
   const session = await auth()
   if (!session?.user?.id || !session.activeOrgId) notFound()
 

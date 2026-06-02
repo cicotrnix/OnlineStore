@@ -11,7 +11,9 @@ export const dynamic = 'force-dynamic'
 type Props = { searchParams: Promise<{ unread?: string }> }
 
 export default async function NotificationsPage({ searchParams }: Props) {
-  const user = await requireAuth()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  const customer = await requireVerifiedCustomer()
+  const user = { id: customer.userId }
   const { unread } = await searchParams
   const items = await listForUser(user.id, { unreadOnly: unread === '1', limit: 100 })
 

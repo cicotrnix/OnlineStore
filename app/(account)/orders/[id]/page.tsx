@@ -15,7 +15,8 @@ type Props = {
 }
 
 export default async function OrderDetailPage({ params }: Props) {
-  await requireAuth()
+  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
+  await requireVerifiedCustomer()
   const { id } = await params
   const order = await ordersService.findById(id)
   if (!order) notFound()
