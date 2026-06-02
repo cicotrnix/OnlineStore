@@ -84,7 +84,9 @@ describe('startCardCheckoutAction', () => {
     const { startCardCheckoutAction } = await import('../_actions')
     const fd = new FormData()
     fd.set('orderId', orderId)
-    await expect(startCardCheckoutAction(fd)).rejects.toThrow(/REDIRECT:https:\/\/stripe\.fake\/checkout\//)
+    await expect(startCardCheckoutAction(fd)).rejects.toThrow(
+      /REDIRECT:https:\/\/stripe\.fake\/checkout\//
+    )
     // Payment PENDING fue creado por createCardCheckout.
     const payment = await prisma.payment.findFirstOrThrow({ where: { orderId } })
     expect(payment.status).toBe('PENDING')

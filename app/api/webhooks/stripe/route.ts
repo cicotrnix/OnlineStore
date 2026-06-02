@@ -1,5 +1,9 @@
 import { logger } from '@/lib/observability/logger'
-import { PaymentMismatchError, PaymentWebhookInvalidError, handleStripeWebhook } from '@/modules/payments'
+import {
+  PaymentMismatchError,
+  PaymentWebhookInvalidError,
+  handleStripeWebhook,
+} from '@/modules/payments'
 import { NextResponse } from 'next/server'
 
 // Necesitamos body crudo + SDK Stripe → Node runtime obligatorio.
@@ -35,7 +39,10 @@ export async function POST(req: Request): Promise<NextResponse> {
       logger.warn({ err: err.message }, 'stripe webhook: mismatch handled')
       return NextResponse.json({ ok: true, reason: 'mismatch handled' }, { status: 200 })
     }
-    logger.error({ err: err instanceof Error ? err.message : err }, 'stripe webhook: unexpected error')
+    logger.error(
+      { err: err instanceof Error ? err.message : err },
+      'stripe webhook: unexpected error'
+    )
     return NextResponse.json({ ok: false }, { status: 500 })
   }
 }

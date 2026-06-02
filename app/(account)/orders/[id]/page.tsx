@@ -20,8 +20,7 @@ export default async function OrderDetailPage({ params }: Props) {
   const order = await ordersService.findById(id)
   if (!order) notFound()
 
-  const canPayWithCard =
-    storeConfig.payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
+  const canPayWithCard = storeConfig.payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
@@ -144,8 +143,8 @@ export default async function OrderDetailPage({ params }: Props) {
           <CardHeader>
             <h2 className="font-medium">Pagar con tarjeta</h2>
             <p className="mt-1 text-xs text-gray-500">
-              Te redirigimos a Stripe Checkout (hosted). El pago se confirma vía webhook
-              firmado — nunca desde la URL de retorno.
+              Te redirigimos a Stripe Checkout (hosted). El pago se confirma vía webhook firmado —
+              nunca desde la URL de retorno.
             </p>
           </CardHeader>
           <CardBody>

@@ -20,7 +20,8 @@ export default async function PaymentPendingPage({ params }: Props) {
   const order = await ordersService.findById(id)
   if (!order) notFound()
 
-  const confirmed = order.status === 'CONFIRMED' || order.status === 'SHIPPED' || order.status === 'DELIVERED'
+  const confirmed =
+    order.status === 'CONFIRMED' || order.status === 'SHIPPED' || order.status === 'DELIVERED'
 
   return (
     <div className="max-w-xl mx-auto px-6 py-16">
@@ -37,8 +38,8 @@ export default async function PaymentPendingPage({ params }: Props) {
         <CardBody className="space-y-3 text-sm text-gray-700">
           {confirmed ? (
             <p>
-              Recibimos la confirmación del procesador. Te enviamos un email con el recibo
-              y los próximos pasos. Pronto verás el tracking del envío acá.
+              Recibimos la confirmación del procesador. Te enviamos un email con el recibo y los
+              próximos pasos. Pronto verás el tracking del envío acá.
             </p>
           ) : (
             <>
@@ -47,8 +48,7 @@ export default async function PaymentPendingPage({ params }: Props) {
                 procesador para acreditarlo en tu orden (suele tardar segundos).
               </p>
               <p>
-                Podés refrescar esta página o volver al detalle de la orden en cualquier
-                momento.
+                Podés refrescar esta página o volver al detalle de la orden en cualquier momento.
               </p>
             </>
           )}

@@ -1,7 +1,7 @@
 'use server'
 
-import { prisma } from '@/lib/db/client'
 import { requireAuth } from '@/lib/auth/helpers'
+import { prisma } from '@/lib/db/client'
 import { createCardCheckout } from '@/modules/payments'
 import storeConfig from '@/store.config'
 import { redirect } from 'next/navigation'
