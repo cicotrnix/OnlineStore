@@ -136,6 +136,64 @@ describe('rejectOrganization', () => {
   })
 })
 
+describe('idempotency (fix admin doble-clic)', () => {
+  it('approve twice → customer.verified emitido una sola vez', async () => {
+    const org = await makeOrg({ status: 'PENDING' })
+    const admin = await makeAdmin()
+    const r1 = await approveOrganization({ organizationId: org.id, byAdminId: admin.id })
+    const r2 = await approveOrganization({ organizationId: org.id, byAdminId: admin.id })
+    expect(r1.changed).toBe(true)
+    expect(r2.changed).toBe(false)
+    const events = await prisma.domainEvent.findMany({
+      where: { type: 'customer.verified', aggregateId: org.id },
+    })
+    expect(events).toHaveLength(1)
+  })
+
+  it('reject 2x con MISMO motivo → customer.rejected una sola vez', async () => {
+    const org = await makeOrg({ status: 'PENDING' })
+    const admin = await makeAdmin()
+    const r1 = await rejectOrganization({
+      organizationId: org.id,
+      byAdminId: admin.id,
+      reason: 'Certificado vencido',
+    })
+    const r2 = await rejectOrganization({
+      organizationId: org.id,
+      byAdminId: admin.id,
+      reason: 'Certificado vencido',
+    })
+    expect(r1.changed).toBe(true)
+    expect(r2.changed).toBe(false)
+    const events = await prisma.domainEvent.findMany({
+      where: { type: 'customer.rejected', aggregateId: org.id },
+    })
+    expect(events).toHaveLength(1)
+  })
+
+  it('reject 2x con motivos DISTINTOS → customer.rejected 2 veces (cambio amerita notificación)', async () => {
+    const org = await makeOrg({ status: 'PENDING' })
+    const admin = await makeAdmin()
+    await rejectOrganization({
+      organizationId: org.id,
+      byAdminId: admin.id,
+      reason: 'Certificado vencido',
+    })
+    const r2 = await rejectOrganization({
+      organizationId: org.id,
+      byAdminId: admin.id,
+      reason: 'Documento ilegible',
+    })
+    expect(r2.changed).toBe(true)
+    const events = await prisma.domainEvent.findMany({
+      where: { type: 'customer.rejected', aggregateId: org.id },
+    })
+    expect(events).toHaveLength(2)
+    const updated = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
+    expect(updated.rejectionReason).toBe('Documento ilegible')
+  })
+})
+
 describe('uploadAndAutoApprove (compat admin-direct upload)', () => {
   it('compone uploadCertificate + approveOrganization → VERIFIED + customer.verified', async () => {
     const org = await makeOrg({ status: 'PENDING' })
