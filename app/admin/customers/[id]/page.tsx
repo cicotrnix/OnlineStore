@@ -56,10 +56,9 @@ export default async function AdminCustomerDetailPage({ params, searchParams }: 
   return (
     <div className="max-w-3xl space-y-6">
       {flashMsg && (
-        <div
-          role="status"
+        <output
           aria-live="polite"
-          className={`rounded-md border px-3 py-2 text-sm ${
+          className={`block rounded-md border px-3 py-2 text-sm ${
             flashMsg.tone === 'success'
               ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
               : flashMsg.tone === 'danger'
@@ -68,7 +67,7 @@ export default async function AdminCustomerDetailPage({ params, searchParams }: 
           }`}
         >
           {flashMsg.text}
-        </div>
+        </output>
       )}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
