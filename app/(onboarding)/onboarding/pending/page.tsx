@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { getLocale, t } from '@/lib/i18n'
@@ -116,7 +116,9 @@ export default async function OnboardingPendingPage() {
                     />
                   </div>
                 </div>
-                <Button type="submit">{t(locale, 'onboarding.rejected.submit')}</Button>
+                <SubmitButton pendingLabel={t(locale, 'onboarding.sending')}>
+                  {t(locale, 'onboarding.rejected.submit')}
+                </SubmitButton>
               </form>
             </>
           )}

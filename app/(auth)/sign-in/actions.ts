@@ -1,7 +1,7 @@
 'use server'
 
 import { signIn } from '@/lib/auth'
-import { type ActionResult } from '@/lib/feedback/action-result'
+import type { ActionResult } from '@/lib/feedback/action-result'
 import { isRedirectError } from 'next/dist/client/components/redirect'
 
 /**
@@ -11,10 +11,7 @@ import { isRedirectError } from 'next/dist/client/components/redirect'
  * NextAuth signIn() con `redirect: false` retorna sin throw. Si throws con
  * RedirectError lo dejamos pasar (la redirección es parte normal del flujo).
  */
-export async function signInAction(
-  _prev: ActionResult,
-  formData: FormData
-): Promise<ActionResult> {
+export async function signInAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   const email = String(formData.get('email') ?? '').trim()
   if (!email) return { ok: false, messageKey: 'auth.toast.linkFailed' }
   try {

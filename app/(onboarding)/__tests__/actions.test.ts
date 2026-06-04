@@ -50,7 +50,7 @@ describe('submitOnboardingAction', () => {
     const u = await makeUser()
     const { submitOnboardingAction } = await import('../onboarding/_actions')
     await expect(submitOnboardingAction(buildForm())).rejects.toThrow(
-      'REDIRECT:/onboarding/pending'
+      /REDIRECT:\/onboarding\/pending\?toast=success&msg=onboarding\.toast\.submitted/
     )
     const org = await prisma.organization.findFirstOrThrow({
       where: { members: { some: { userId: u.id } } },
@@ -68,7 +68,7 @@ describe('submitOnboardingAction', () => {
     expect(doc.status).toBe('UPLOADED')
   })
 
-  it('usuario que ya tiene org → throw ALREADY_HAS_ORG', async () => {
+  it('usuario que ya tiene org → redirect con toast alreadyHasOrg', async () => {
     const u = await makeUser()
     const org = await prisma.organization.create({
       data: { name: 'Existing', slug: `e-${Date.now()}` },
@@ -77,20 +77,26 @@ describe('submitOnboardingAction', () => {
       data: { organizationId: org.id, userId: u.id, role: 'OWNER' },
     })
     const { submitOnboardingAction } = await import('../onboarding/_actions')
-    await expect(submitOnboardingAction(buildForm())).rejects.toThrow('ALREADY_HAS_ORG')
+    await expect(submitOnboardingAction(buildForm())).rejects.toThrow(
+      /REDIRECT:\/onboarding\/pending\?toast=info&msg=onboarding\.toast\.alreadyHasOrg/
+    )
   })
 
-  it('archivo vacío → throw', async () => {
+  it('archivo vacío → redirect con toast fileMissing', async () => {
     await makeUser()
     const fd = buildForm({}, new File([], 'empty.pdf', { type: 'application/pdf' }))
     const { submitOnboardingAction } = await import('../onboarding/_actions')
-    await expect(submitOnboardingAction(fd)).rejects.toThrow(/archivo/i)
+    await expect(submitOnboardingAction(fd)).rejects.toThrow(
+      /REDIRECT:\/onboarding\?toast=error&msg=onboarding\.toast\.fileMissing/
+    )
   })
 
-  it('country no ISO-2 → throw', async () => {
+  it('country no ISO-2 → redirect con toast invalidCountry', async () => {
     await makeUser()
     const { submitOnboardingAction } = await import('../onboarding/_actions')
-    await expect(submitOnboardingAction(buildForm({ country: 'USA' }))).rejects.toThrow(/ISO-2/)
+    await expect(submitOnboardingAction(buildForm({ country: 'USA' }))).rejects.toThrow(
+      /REDIRECT:\/onboarding\?toast=error&msg=onboarding\.toast\.invalidCountry/
+    )
   })
 })
 
@@ -114,7 +120,9 @@ describe('resubmitCertificateAction', () => {
     fd.set('jurisdiction', 'TX')
     fd.set('file', new File([new Uint8Array([1])], 'r.pdf', { type: 'application/pdf' }))
     const { resubmitCertificateAction } = await import('../onboarding/_actions')
-    await expect(resubmitCertificateAction(fd)).rejects.toThrow('REDIRECT:/onboarding/pending')
+    await expect(resubmitCertificateAction(fd)).rejects.toThrow(
+      /REDIRECT:\/onboarding\/pending\?toast=success&msg=onboarding\.toast\.resubmitted/
+    )
     const o = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
     expect(o.verificationStatus).toBe('PENDING')
     expect(o.rejectionReason).toBeNull()
