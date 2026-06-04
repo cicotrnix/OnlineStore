@@ -355,8 +355,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.issue.inactive': 'Inactive',
     'checkout.issue.stock': 'Stock {n}',
     'checkout.issue.priceChanged': 'Price changed to {price}',
-    'checkout.noAddresses':
-      'No addresses on file. Add one in the admin panel first.',
+    'checkout.noAddresses': 'No addresses on file. Add one in the admin panel first.',
     'checkout.poPlaceholder': 'PO-2026-001',
     'checkout.notesPlaceholder': 'Special instructions, delivery windows, etc.',
     'checkout.blockingIssue':
@@ -519,8 +518,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'catalog.disabled.rejected': 'Tu cuenta fue rechazada — revisá el motivo',
     'catalog.signInLinkShort': 'Iniciá sesión',
     // PDP
-    'pdp.signInForPriceLong':
-      'Iniciá sesión o registrá tu negocio para ver precios mayoristas →',
+    'pdp.signInForPriceLong': 'Iniciá sesión o registrá tu negocio para ver precios mayoristas →',
     'pdp.viewLabel.sku': 'SKU',
     'pdp.relatedTitle.recommended': 'Recomendado para ti',
     'pdp.relatedTitle.related': 'Productos relacionados',
@@ -566,8 +564,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.issue.inactive': 'Inactivo',
     'checkout.issue.stock': 'Stock {n}',
     'checkout.issue.priceChanged': 'Precio cambió a {price}',
-    'checkout.noAddresses':
-      'No hay direcciones registradas. Agregá una en el panel admin primero.',
+    'checkout.noAddresses': 'No hay direcciones registradas. Agregá una en el panel admin primero.',
     'checkout.poPlaceholder': 'PO-2026-001',
     'checkout.notesPlaceholder': 'Instrucciones especiales, ventanas de entrega, etc.',
     'checkout.blockingIssue':
@@ -624,11 +621,7 @@ export const MESSAGES: Record<Locale, Dict> = {
   },
 }
 
-export function t(
-  locale: Locale,
-  key: MessageKey,
-  vars?: Record<string, string | number>
-): string {
+export function t(locale: Locale, key: MessageKey, vars?: Record<string, string | number>): string {
   let msg = MESSAGES[locale][key] ?? MESSAGES[DEFAULT_LOCALE][key] ?? ''
   if (vars) {
     for (const [k, v] of Object.entries(vars)) {

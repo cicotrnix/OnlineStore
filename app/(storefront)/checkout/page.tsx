@@ -54,8 +54,8 @@ export default async function CheckoutPage() {
                   <div>
                     <div className="font-medium text-sm">{item.name}</div>
                     <div className="text-xs text-gray-500 font-mono">
-                      {t(locale, 'checkout.skuLabel')} {item.sku} ·{' '}
-                      {t(locale, 'checkout.qtyLabel')} {item.quantity}
+                      {t(locale, 'checkout.skuLabel')} {item.sku} · {t(locale, 'checkout.qtyLabel')}{' '}
+                      {item.quantity}
                     </div>
                     {item.issues.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
