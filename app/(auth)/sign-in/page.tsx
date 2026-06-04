@@ -1,4 +1,5 @@
 import { auth, signIn } from '@/lib/auth'
+import { getLocale, t } from '@/lib/i18n'
 import storeConfig from '@/store.config'
 import { redirect } from 'next/navigation'
 
@@ -9,6 +10,7 @@ type Props = {
 export default async function SignInPage({ searchParams }: Props) {
   const params = await searchParams
   const checkInbox = params.check === 'email'
+  const locale = await getLocale({ userId: null })
 
   if (!checkInbox) {
     const session = await auth()
@@ -18,10 +20,8 @@ export default async function SignInPage({ searchParams }: Props) {
   if (checkInbox) {
     return (
       <div>
-        <h1 className="text-xl font-medium">Check your email</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          We sent a magic link to your inbox. Click it to sign in.
-        </p>
+        <h1 className="text-xl font-medium">{t(locale, 'auth.signIn.checkInbox.title')}</h1>
+        <p className="mt-2 text-sm text-gray-600">{t(locale, 'auth.signIn.checkInbox.body')}</p>
       </div>
     )
   }
@@ -33,16 +33,16 @@ export default async function SignInPage({ searchParams }: Props) {
 
   return (
     <div>
-      <h1 className="text-xl font-medium">Sign in to {storeConfig.identity.name}</h1>
-      <p className="mt-2 text-sm text-gray-600">
-        Enter your email and we will send you a magic link.
-      </p>
+      <h1 className="text-xl font-medium">
+        {t(locale, 'auth.signIn.title', { brand: storeConfig.identity.name })}
+      </h1>
+      <p className="mt-2 text-sm text-gray-600">{t(locale, 'auth.signIn.subtitle')}</p>
       <form action={handleSignIn} className="mt-6 space-y-3">
         <input
           name="email"
           type="email"
           required
-          placeholder="you@company.com"
+          placeholder={t(locale, 'auth.signIn.emailPlaceholder')}
           className="w-full border rounded-lg px-3 py-2 text-sm"
         />
         <button
@@ -50,7 +50,7 @@ export default async function SignInPage({ searchParams }: Props) {
           className="w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
           style={{ background: 'var(--color-primary)' }}
         >
-          Send magic link
+          {t(locale, 'auth.signIn.submit')}
         </button>
       </form>
     </div>

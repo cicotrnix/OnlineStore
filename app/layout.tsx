@@ -1,3 +1,7 @@
+import { ToastFlashReader } from '@/components/ui/ToastFlashReader'
+import { Toaster } from '@/components/ui/Toaster'
+import { auth } from '@/lib/auth/config'
+import { getLocale } from '@/lib/i18n'
 import { themeToCssVars } from '@/lib/theme/apply'
 import storeConfig from '@/store.config'
 import themeConfig from '@/theme.config'
@@ -11,13 +15,16 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic'
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+  const locale = await getLocale({ userId: session?.user?.id ?? null })
+
   return (
-    <html lang={storeConfig.locale.default}>
+    <html lang={locale}>
       <head>
         <style
           // biome-ignore lint/security/noDangerouslySetInnerHtml: theme tokens are statically generated from theme.config.ts
@@ -28,6 +35,8 @@ export default function RootLayout({
       </head>
       <body className="antialiased" style={{ fontFamily: 'var(--font-sans)' }}>
         {children}
+        <Toaster />
+        <ToastFlashReader locale={locale} />
       </body>
     </html>
   )

@@ -2,20 +2,20 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { switchActiveOrg } from '@/lib/auth/actions'
 import { requireAuth } from '@/lib/auth/helpers'
+import { getLocale, t } from '@/lib/i18n'
 import { customersService } from '@/modules/customers'
 import { redirect } from 'next/navigation'
 
 export default async function SelectOrgPage() {
   const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const orgs = await customersService.listForUser(user.id)
 
   if (orgs.length === 0) {
     return (
       <div className="max-w-md mx-auto mt-20 px-6 text-center">
-        <h1 className="text-xl font-medium">Sin organizaciones</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          No perteneces a ninguna organización. Pide a un admin que te invite.
-        </p>
+        <h1 className="text-xl font-medium">{t(locale, 'selectOrg.empty.title')}</h1>
+        <p className="mt-2 text-sm text-gray-600">{t(locale, 'selectOrg.empty.body')}</p>
       </div>
     )
   }
@@ -34,10 +34,8 @@ export default async function SelectOrgPage() {
 
   return (
     <div className="max-w-md mx-auto mt-20 px-6">
-      <h1 className="text-xl font-medium">Elige tu organización</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Cambiar de organización en el futuro vaciará tu carrito.
-      </p>
+      <h1 className="text-xl font-medium">{t(locale, 'selectOrg.title')}</h1>
+      <p className="mt-1 text-sm text-gray-500">{t(locale, 'selectOrg.subtitle')}</p>
       <div className="mt-6 space-y-3">
         {orgs.map((org) => (
           <Card key={org.id}>
@@ -49,7 +47,7 @@ export default async function SelectOrgPage() {
               <form action={chooseOrg}>
                 <input type="hidden" name="orgId" value={org.id} />
                 <Button type="submit" size="sm">
-                  Seleccionar
+                  {t(locale, 'selectOrg.select')}
                 </Button>
               </form>
             </CardBody>

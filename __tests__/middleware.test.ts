@@ -54,7 +54,8 @@ describe('middleware — maintenance ON', () => {
     expect(res.headers.get('retry-after')).toBe('3600')
     const body = await res.text()
     expect(body).toMatch(/PiPower/i)
-    expect(body).toMatch(/Estamos preparando/i)
+    // Default = EN; el ES también está disponible vía ?lang=es / cookie locale=es-419.
+    expect(body).toMatch(/getting the wholesale store ready/i)
   })
 
   it('anónimo en /catalog → 503', async () => {

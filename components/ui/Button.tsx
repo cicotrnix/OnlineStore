@@ -22,9 +22,10 @@ const buttonVariants = cva(
   }
 )
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants>
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants>
 
-export function Button({ className, variant, size, style, ...props }: Props) {
+export function Button({ className, variant, size, style, ...props }: ButtonProps) {
   const primaryStyle =
     variant === 'primary' || variant == null
       ? { background: 'var(--color-primary)', ...style }

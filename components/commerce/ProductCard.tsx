@@ -30,6 +30,8 @@ type Props = {
   disabledReason?: string
   /** Onboarding B2B: si false, oculta precio y muestra CTA "registrate para ver precios". */
   showPrice?: boolean
+  signInLinkLabel?: string
+  noImageLabel?: string
 }
 
 export function ProductCard({
@@ -39,6 +41,8 @@ export function ProductCard({
   canAddToCart,
   disabledReason,
   showPrice = true,
+  signInLinkLabel = 'Sign in to see prices →',
+  noImageLabel = 'No image',
 }: Props) {
   return (
     <Card className="overflow-hidden flex flex-col">
@@ -49,7 +53,7 @@ export function ProductCard({
         {product.imageUrl ? (
           <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
         ) : (
-          <span className="text-xs text-gray-400">Sin imagen</span>
+          <span className="text-xs text-gray-400">{noImageLabel}</span>
         )}
       </Link>
       <CardBody className="flex-1 flex flex-col gap-3">
@@ -75,7 +79,7 @@ export function ProductCard({
           />
         ) : (
           <Link href="/sign-in" className="text-sm text-blue-700 hover:underline">
-            Iniciá sesión para ver precios mayoristas →
+            {signInLinkLabel}
           </Link>
         )}
         <div className="flex items-center justify-between mt-auto pt-2">

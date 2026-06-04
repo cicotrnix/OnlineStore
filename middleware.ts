@@ -1,4 +1,4 @@
-import { MAINTENANCE_HTML } from '@/lib/maintenance/page-html'
+import { buildMaintenanceHtml, resolveMaintenanceLang } from '@/lib/maintenance/page-html'
 import { BYPASS_COOKIE_NAME, verifyBypassToken } from '@/lib/maintenance/token'
 import { type NextRequest, NextResponse } from 'next/server'
 
@@ -41,7 +41,8 @@ export default async function middleware(req: NextRequest) {
     const cookieValue = req.cookies.get(BYPASS_COOKIE_NAME)?.value
     const allowed = await verifyBypassToken(process.env.MAINTENANCE_BYPASS_KEY, cookieValue)
     if (!allowed) {
-      return new NextResponse(MAINTENANCE_HTML, {
+      const lang = resolveMaintenanceLang(req)
+      return new NextResponse(buildMaintenanceHtml(lang), {
         status: 503,
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
