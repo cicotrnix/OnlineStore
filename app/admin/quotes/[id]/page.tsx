@@ -1,8 +1,8 @@
 import { quoteOrReviseAction } from '@/app/admin/_actions-fase2'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
 import { notFound } from 'next/navigation'
@@ -132,7 +132,9 @@ export default async function AdminQuoteDetailPage({ params }: Props) {
                 />
               </div>
               <div className="flex justify-end">
-                <Button type="submit">{canRevise ? 'Revisar' : 'Cotizar'}</Button>
+                <SubmitButton pendingLabel="Enviando…">
+                  {canRevise ? 'Revisar' : 'Cotizar'}
+                </SubmitButton>
               </div>
             </form>
           ) : (

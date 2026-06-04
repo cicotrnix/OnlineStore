@@ -1,7 +1,7 @@
 import { setCustomerPriceAction } from '@/app/admin/_actions'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
 import { catalogService } from '@/modules/catalog'
@@ -65,9 +65,9 @@ export default async function AdminCustomerPricesPage({ params }: Props) {
                         placeholder="—"
                         className="w-28"
                       />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton variant="secondary" size="sm" pendingLabel="Guardando…">
                         Guardar
-                      </Button>
+                      </SubmitButton>
                     </form>
                   </td>
                 </tr>

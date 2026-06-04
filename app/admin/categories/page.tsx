@@ -1,8 +1,8 @@
 import { createCategoryAction } from '@/app/admin/_actions'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { catalogService } from '@/modules/catalog'
 
 export default async function AdminCategoriesPage() {
@@ -49,7 +49,7 @@ export default async function AdminCategoriesPage() {
               />
             </div>
             <div className="sm:col-span-3 flex justify-end">
-              <Button type="submit">Crear</Button>
+              <SubmitButton pendingLabel="Creando…">Crear</SubmitButton>
             </div>
           </form>
         </CardBody>

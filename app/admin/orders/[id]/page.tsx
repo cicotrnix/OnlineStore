@@ -4,8 +4,8 @@ import {
   transitionOrderStatusAction,
 } from '@/app/admin/_actions'
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
@@ -95,15 +95,19 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               <form key={s} action={transitionOrderStatusAction}>
                 <input type="hidden" name="orderId" value={order.id} />
                 <input type="hidden" name="newStatus" value={s} />
-                <Button type="submit">→ {s}</Button>
+                <SubmitButton pendingLabel="…">→ {s}</SubmitButton>
               </form>
             ))}
             {CAN_CANCEL.has(order.status) && (
               <form action={cancelOrderAction}>
                 <input type="hidden" name="orderId" value={order.id} />
-                <Button type="submit" variant="danger">
+                <SubmitButton
+                  variant="danger"
+                  pendingLabel="Cancelando…"
+                  confirmMessage="¿Cancelar esta orden? Se restaurará el stock."
+                >
                   Cancelar orden
-                </Button>
+                </SubmitButton>
               </form>
             )}
           </CardBody>
@@ -149,7 +153,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   className="block w-full rounded border border-gray-300 px-3 py-2 text-sm font-mono"
                 />
               </div>
-              <Button type="submit">Conciliar wire</Button>
+              <SubmitButton pendingLabel="Conciliando…">Conciliar wire</SubmitButton>
             </form>
           </CardBody>
         </Card>

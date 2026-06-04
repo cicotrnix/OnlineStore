@@ -3,9 +3,9 @@ import { toggleProductPrivateAction, upsertProductTierAction } from '@/app/admin
 import { enqueueBulkContentGenAction } from '@/app/admin/products/_ai-actions'
 import { StockBadge } from '@/components/commerce/StockBadge'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
@@ -60,9 +60,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
           </p>
         </div>
         <form action={enqueueBulkContentGenAction}>
-          <Button type="submit" variant="secondary" size="sm">
+          <SubmitButton variant="secondary" size="sm" pendingLabel="Encolando…">
             Generar contenido AI (todos)
-          </Button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -159,7 +159,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
               />
             </div>
             <div className="sm:col-span-2 flex justify-end">
-              <Button type="submit">Crear producto</Button>
+              <SubmitButton pendingLabel="Creando…">Crear producto</SubmitButton>
             </div>
           </form>
         </CardBody>
@@ -208,9 +208,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                           name="isPrivate"
                           value={productPrivateMap.get(p.id) ? 'true' : 'false'}
                         />
-                        <Button type="submit" variant="ghost" size="sm">
+                        <SubmitButton variant="ghost" size="sm" pendingLabel="…">
                           {productPrivateMap.get(p.id) ? 'Sí' : 'No'}
-                        </Button>
+                        </SubmitButton>
                       </form>
                     </td>
                   )}
@@ -218,9 +218,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                     <form action={toggleProductActiveAction}>
                       <input type="hidden" name="id" value={p.id} />
                       <input type="hidden" name="isActive" value={p.isActive ? 'true' : 'false'} />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton variant="secondary" size="sm" pendingLabel="…">
                         {p.isActive ? 'Desactivar' : 'Activar'}
-                      </Button>
+                      </SubmitButton>
                     </form>
                   </td>
                 </tr>
@@ -303,9 +303,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                         className="mt-1 w-32"
                       />
                     </div>
-                    <Button type="submit" size="sm" variant="secondary">
+                    <SubmitButton size="sm" variant="secondary" pendingLabel="Guardando…">
                       Guardar tramo
-                    </Button>
+                    </SubmitButton>
                   </form>
                 </div>
               )

@@ -3,9 +3,9 @@ import {
   revokeCatalogAccessAction,
   setCreditAction,
 } from '@/app/admin/_actions-fase2'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
 import storeConfig from '@/store.config'
@@ -106,7 +106,7 @@ export default async function AdminCustomerCreditPage({ params }: Props) {
                   {formatMoney(org.creditUsed, storeConfig.currency.base)}
                 </strong>
               </p>
-              <Button type="submit">Guardar</Button>
+              <SubmitButton pendingLabel="Guardando…">Guardar</SubmitButton>
             </div>
           </form>
         </CardBody>
@@ -132,9 +132,9 @@ export default async function AdminCustomerCreditPage({ params }: Props) {
                     <input type="hidden" name="orgId" value={org.id} />
                     {a.productId && <input type="hidden" name="productId" value={a.productId} />}
                     {a.categoryId && <input type="hidden" name="categoryId" value={a.categoryId} />}
-                    <Button type="submit" variant="ghost" size="sm">
+                    <SubmitButton variant="ghost" size="sm" pendingLabel="…">
                       Quitar
-                    </Button>
+                    </SubmitButton>
                   </form>
                 </li>
               ))
@@ -184,9 +184,9 @@ export default async function AdminCustomerCreditPage({ params }: Props) {
               </select>
             </div>
             <div className="flex items-end">
-              <Button type="submit" className="w-full">
+              <SubmitButton className="w-full" pendingLabel="Otorgando…">
                 Otorgar acceso
-              </Button>
+              </SubmitButton>
             </div>
           </form>
         </CardBody>

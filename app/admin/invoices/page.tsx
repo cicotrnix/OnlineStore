@@ -1,7 +1,7 @@
 import { markInvoicePaidAction } from '@/app/admin/_actions-fase2'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
 
@@ -65,9 +65,9 @@ export default async function AdminInvoicesPage() {
                         required
                         className="w-32 rounded border border-gray-200 px-2 py-1 text-xs"
                       />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton variant="secondary" size="sm" pendingLabel="Guardando…">
                         Marcar pagada
-                      </Button>
+                      </SubmitButton>
                     </form>
                   )}
                 </td>

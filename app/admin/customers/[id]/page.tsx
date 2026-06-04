@@ -198,9 +198,9 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
                     </span>
                     <form action={viewCertificateAction} className="ml-auto">
                       <input type="hidden" name="taxDocumentId" value={d.id} />
-                      <Button type="submit" variant="secondary">
+                      <SubmitButton variant="secondary" pendingLabel="Abriendo…">
                         Ver certificado
-                      </Button>
+                      </SubmitButton>
                     </form>
                   </li>
                 ))}
@@ -263,7 +263,7 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
                 className="block w-full text-sm"
               />
             </div>
-            <Button type="submit">Subir + auto-aprobar</Button>
+            <SubmitButton pendingLabel="Subiendo…">Subir + auto-aprobar</SubmitButton>
           </form>
         </CardBody>
       </Card>
@@ -281,9 +281,9 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
               </label>
               <Input id="reason" name="reason" placeholder="Soporte ticket #..." className="mt-1" />
             </div>
-            <Button type="submit" variant="secondary">
+            <SubmitButton variant="secondary" pendingLabel="Entrando…">
               Ver storefront como esta org
-            </Button>
+            </SubmitButton>
           </form>
         </CardBody>
       </Card>

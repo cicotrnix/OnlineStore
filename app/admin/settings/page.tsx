@@ -1,3 +1,4 @@
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { customersService } from '@/modules/customers'
 import { createOrganizationAction, inviteMemberAction } from './actions'
@@ -26,13 +27,7 @@ export default async function SettingsPage() {
             placeholder="acme-wholesale"
             className="w-full border rounded-lg px-3 py-2 text-sm"
           />
-          <button
-            type="submit"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-white"
-            style={{ background: 'var(--color-primary)' }}
-          >
-            Create
-          </button>
+          <SubmitButton pendingLabel="Creating…">Create</SubmitButton>
         </form>
       </section>
 
@@ -57,9 +52,9 @@ export default async function SettingsPage() {
                     placeholder="invitee@company.com"
                     className="flex-1 border rounded-lg px-3 py-2 text-sm"
                   />
-                  <button type="submit" className="rounded-lg px-3 py-2 text-sm font-medium border">
+                  <SubmitButton variant="secondary" pendingLabel="Sending…">
                     Invite
-                  </button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}

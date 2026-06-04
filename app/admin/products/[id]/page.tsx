@@ -1,7 +1,7 @@
 import { enqueueContentGenAction, publishContentAction } from '@/app/admin/products/_ai-actions'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { LOCALES, type Locale } from '@/lib/i18n'
@@ -62,9 +62,9 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
             <h2 className="font-medium">Contenido AI</h2>
             <form action={enqueueContentGenAction}>
               <input type="hidden" name="productId" value={product.id} />
-              <Button type="submit" size="sm">
+              <SubmitButton size="sm" pendingLabel="Encolando…">
                 Generar / Regenerar (EN + ES)
-              </Button>
+              </SubmitButton>
             </form>
           </div>
           <p className="mt-1 text-xs text-gray-500">
@@ -93,9 +93,9 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
                     <form action={publishContentAction}>
                       <input type="hidden" name="productId" value={product.id} />
                       <input type="hidden" name="locale" value={locale} />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton variant="secondary" size="sm" pendingLabel="Publicando…">
                         Publicar
-                      </Button>
+                      </SubmitButton>
                     </form>
                   )}
                 </div>

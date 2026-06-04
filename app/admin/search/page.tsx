@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { notFound } from 'next/navigation'
@@ -52,7 +52,7 @@ export default async function AdminSearchPage() {
         </CardHeader>
         <CardBody>
           <form action={reindexAllAction}>
-            <Button type="submit">Reindex todo</Button>
+            <SubmitButton pendingLabel="Encolando…">Reindex todo</SubmitButton>
           </form>
         </CardBody>
       </Card>
@@ -91,9 +91,9 @@ export default async function AdminSearchPage() {
                     <td className="px-5 py-3 text-right">
                       <form action={retryFailedAction}>
                         <input type="hidden" name="queueItemId" value={r.id} />
-                        <Button type="submit" variant="ghost" size="sm">
+                        <SubmitButton variant="ghost" size="sm" pendingLabel="…">
                           Reintentar
-                        </Button>
+                        </SubmitButton>
                       </form>
                     </td>
                   </tr>
