@@ -2,6 +2,8 @@
 
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { toastUrl } from '@/lib/feedback/action-result'
+import type { MessageKey } from '@/lib/i18n/messages'
 import { markPaid } from '@/modules/accounts'
 import { grantAccess, revokeAccess } from '@/modules/catalog'
 import { upsertTier } from '@/modules/pricing'
@@ -9,6 +11,23 @@ import { quote, revise } from '@/modules/quotes'
 import { enqueueIndex } from '@/modules/search'
 import { Decimal } from '@prisma/client/runtime/library'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+
+function safeReturnTo(raw: FormDataEntryValue | null, fallback: string): string {
+  const v = typeof raw === 'string' ? raw : ''
+  if (v.startsWith('/') && !v.startsWith('//')) return v
+  return fallback
+}
+
+function adminToast(
+  formData: FormData,
+  fallback: string,
+  variant: 'success' | 'error' | 'info',
+  msg: MessageKey
+): never {
+  const returnTo = safeReturnTo(formData.get('returnTo'), fallback)
+  redirect(toastUrl(returnTo, variant, msg))
+}
 
 async function requirePlatformAdmin() {
   const user = await requireAuth()
@@ -47,6 +66,12 @@ export async function quoteOrReviseAction(formData: FormData) {
     adminNotes,
   })
   revalidatePath(`/admin/quotes/${quoteId}`)
+  adminToast(
+    formData,
+    `/admin/quotes/${quoteId}`,
+    'success',
+    action === 'revise' ? 'admin.toast.quoteRevised' : 'admin.toast.quoteSent'
+  )
 }
 
 export async function markInvoicePaidAction(formData: FormData) {
@@ -55,6 +80,7 @@ export async function markInvoicePaidAction(formData: FormData) {
   const paidNote = String(formData.get('paidNote') ?? '')
   await markPaid({ invoiceId, paidById: admin.id, paidNote })
   revalidatePath('/admin/invoices')
+  adminToast(formData, '/admin/invoices', 'success', 'admin.toast.invoicePaid')
 }
 
 export async function setCreditAction(formData: FormData) {
@@ -77,6 +103,7 @@ export async function setCreditAction(formData: FormData) {
     },
   })
   revalidatePath(`/admin/customers/${orgId}`)
+  adminToast(formData, `/admin/customers/${orgId}/credit`, 'success', 'admin.toast.creditSaved')
 }
 
 export async function upsertProductTierAction(formData: FormData) {
@@ -86,6 +113,7 @@ export async function upsertProductTierAction(formData: FormData) {
   const unitPrice = Number(formData.get('unitPrice'))
   await upsertTier({ productId, minQty, unitPrice })
   revalidatePath('/admin/products')
+  adminToast(formData, `/admin/products/${productId}`, 'success', 'admin.toast.tierUpserted')
 }
 
 export async function grantCatalogAccessAction(formData: FormData) {
@@ -95,6 +123,7 @@ export async function grantCatalogAccessAction(formData: FormData) {
   const categoryId = formData.get('categoryId')?.toString().trim() || undefined
   await grantAccess({ organizationId, productId, categoryId, grantedById: admin.id })
   revalidatePath(`/admin/customers/${organizationId}`)
+  adminToast(formData, `/admin/customers/${organizationId}`, 'success', 'admin.toast.accessGranted')
 }
 
 export async function revokeCatalogAccessAction(formData: FormData) {
@@ -104,6 +133,7 @@ export async function revokeCatalogAccessAction(formData: FormData) {
   const categoryId = formData.get('categoryId')?.toString().trim() || undefined
   await revokeAccess({ organizationId, productId, categoryId })
   revalidatePath(`/admin/customers/${organizationId}`)
+  adminToast(formData, `/admin/customers/${organizationId}`, 'success', 'admin.toast.accessRevoked')
 }
 
 export async function toggleProductPrivateAction(formData: FormData) {
@@ -113,4 +143,5 @@ export async function toggleProductPrivateAction(formData: FormData) {
   await prisma.product.update({ where: { id }, data: { isPrivate: !current } })
   await enqueueIndex(id, 'UPSERT')
   revalidatePath('/admin/products')
+  adminToast(formData, '/admin/products', 'success', 'admin.toast.productPrivacyToggled')
 }

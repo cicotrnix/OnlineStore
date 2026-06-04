@@ -56,7 +56,9 @@ describe('uploadTaxCertificateAction', () => {
     fd.set('file', file)
 
     const { uploadTaxCertificateAction } = await import('../_actions')
-    await uploadTaxCertificateAction(fd)
+    await expect(uploadTaxCertificateAction(fd)).rejects.toThrow(
+      /REDIRECT:.+toast=success&msg=admin\.toast\.certUploaded/
+    )
 
     const org = await prisma.organization.findUniqueOrThrow({ where: { id: orgId } })
     expect(org.verificationStatus).toBe('VERIFIED')
@@ -86,7 +88,9 @@ describe('uploadTaxCertificateAction', () => {
     fd.set('jurisdiction', 'TX')
     fd.set('file', new File([], 'empty.pdf'))
     const { uploadTaxCertificateAction } = await import('../_actions')
-    await expect(uploadTaxCertificateAction(fd)).rejects.toThrow(/archivo obligatorio/i)
+    await expect(uploadTaxCertificateAction(fd)).rejects.toThrow(
+      /REDIRECT:.+toast=error&msg=admin\.toast\.certFailed/
+    )
   })
 
   it('non-admin no puede subir', async () => {

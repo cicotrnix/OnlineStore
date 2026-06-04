@@ -6,7 +6,7 @@ export function isSupportedLocale(value: string | null | undefined): value is Lo
   return value === 'en-US' || value === 'es-419'
 }
 
-type MessageKey =
+export type MessageKey =
   | 'localeSwitch.label'
   | 'localeSwitch.en'
   | 'localeSwitch.es'
@@ -233,6 +233,43 @@ type MessageKey =
   // Admin upload cert
   | 'admin.toast.certUploaded'
   | 'admin.toast.certFailed'
+  // Admin generic toasts
+  | 'admin.toast.saved'
+  | 'admin.toast.created'
+  | 'admin.toast.updated'
+  | 'admin.toast.deleted'
+  | 'admin.toast.invalidInput'
+  // Admin product/category
+  | 'admin.toast.productCreated'
+  | 'admin.toast.productEnabled'
+  | 'admin.toast.productDisabled'
+  | 'admin.toast.productPrivacyToggled'
+  | 'admin.toast.categoryCreated'
+  | 'admin.toast.categoryPrivacyToggled'
+  | 'admin.toast.tierUpserted'
+  // Admin orders
+  | 'admin.toast.orderStatusChanged'
+  | 'admin.toast.orderCancelled'
+  // Admin invoices / quotes
+  | 'admin.toast.invoicePaid'
+  | 'admin.toast.quoteSent'
+  | 'admin.toast.quoteRevised'
+  // Admin credit / customer
+  | 'admin.toast.creditSaved'
+  | 'admin.toast.customerPriceSaved'
+  | 'admin.toast.accessGranted'
+  | 'admin.toast.accessRevoked'
+  // Admin actions labels
+  | 'admin.action.save'
+  | 'admin.action.saving'
+  | 'admin.action.create'
+  | 'admin.action.creating'
+  | 'admin.action.toggle'
+  | 'admin.action.cancel'
+  | 'admin.action.cancelling'
+  | 'admin.action.confirmCancel'
+  | 'admin.action.upload'
+  | 'admin.action.uploading'
   // Cart toasts
   | 'cart.toast.added'
   | 'cart.toast.updated'
@@ -489,6 +526,37 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.wireFailed': 'Wire reconciliation failed.',
     'admin.toast.certUploaded': 'Certificate uploaded and customer approved ✓',
     'admin.toast.certFailed': 'Certificate upload failed.',
+    'admin.toast.saved': 'Saved ✓',
+    'admin.toast.created': 'Created ✓',
+    'admin.toast.updated': 'Updated ✓',
+    'admin.toast.deleted': 'Deleted ✓',
+    'admin.toast.invalidInput': 'Invalid input. Please review.',
+    'admin.toast.productCreated': 'Product created ✓',
+    'admin.toast.productEnabled': 'Product enabled ✓',
+    'admin.toast.productDisabled': 'Product disabled ✓',
+    'admin.toast.productPrivacyToggled': 'Product privacy updated ✓',
+    'admin.toast.categoryCreated': 'Category created ✓',
+    'admin.toast.categoryPrivacyToggled': 'Category privacy updated ✓',
+    'admin.toast.tierUpserted': 'Price tier saved ✓',
+    'admin.toast.orderStatusChanged': 'Order status updated ✓',
+    'admin.toast.orderCancelled': 'Order cancelled.',
+    'admin.toast.invoicePaid': 'Invoice marked paid ✓',
+    'admin.toast.quoteSent': 'Quote sent ✓',
+    'admin.toast.quoteRevised': 'Quote revised ✓',
+    'admin.toast.creditSaved': 'Credit settings saved ✓',
+    'admin.toast.customerPriceSaved': 'Customer price saved ✓',
+    'admin.toast.accessGranted': 'Access granted ✓',
+    'admin.toast.accessRevoked': 'Access revoked.',
+    'admin.action.save': 'Save',
+    'admin.action.saving': 'Saving…',
+    'admin.action.create': 'Create',
+    'admin.action.creating': 'Creating…',
+    'admin.action.toggle': 'Toggle',
+    'admin.action.cancel': 'Cancel order',
+    'admin.action.cancelling': 'Cancelling…',
+    'admin.action.confirmCancel': 'Cancel this order? Stock will be restored.',
+    'admin.action.upload': 'Upload',
+    'admin.action.uploading': 'Uploading…',
     // Cart
     'cart.toast.added': 'Added to cart ✓',
     'cart.toast.updated': 'Cart updated.',
@@ -745,6 +813,37 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.wireFailed': 'Falló la conciliación del wire.',
     'admin.toast.certUploaded': 'Certificado subido y cliente aprobado ✓',
     'admin.toast.certFailed': 'Falló la subida del certificado.',
+    'admin.toast.saved': 'Guardado ✓',
+    'admin.toast.created': 'Creado ✓',
+    'admin.toast.updated': 'Actualizado ✓',
+    'admin.toast.deleted': 'Eliminado ✓',
+    'admin.toast.invalidInput': 'Datos inválidos. Revisalos.',
+    'admin.toast.productCreated': 'Producto creado ✓',
+    'admin.toast.productEnabled': 'Producto activado ✓',
+    'admin.toast.productDisabled': 'Producto desactivado ✓',
+    'admin.toast.productPrivacyToggled': 'Privacidad del producto actualizada ✓',
+    'admin.toast.categoryCreated': 'Categoría creada ✓',
+    'admin.toast.categoryPrivacyToggled': 'Privacidad de la categoría actualizada ✓',
+    'admin.toast.tierUpserted': 'Tier de precio guardado ✓',
+    'admin.toast.orderStatusChanged': 'Estado de la orden actualizado ✓',
+    'admin.toast.orderCancelled': 'Orden cancelada.',
+    'admin.toast.invoicePaid': 'Factura marcada como pagada ✓',
+    'admin.toast.quoteSent': 'Cotización enviada ✓',
+    'admin.toast.quoteRevised': 'Cotización revisada ✓',
+    'admin.toast.creditSaved': 'Configuración de crédito guardada ✓',
+    'admin.toast.customerPriceSaved': 'Precio del cliente guardado ✓',
+    'admin.toast.accessGranted': 'Acceso otorgado ✓',
+    'admin.toast.accessRevoked': 'Acceso revocado.',
+    'admin.action.save': 'Guardar',
+    'admin.action.saving': 'Guardando…',
+    'admin.action.create': 'Crear',
+    'admin.action.creating': 'Creando…',
+    'admin.action.toggle': 'Alternar',
+    'admin.action.cancel': 'Cancelar orden',
+    'admin.action.cancelling': 'Cancelando…',
+    'admin.action.confirmCancel': '¿Cancelar esta orden? Se restaurará el stock.',
+    'admin.action.upload': 'Subir',
+    'admin.action.uploading': 'Subiendo…',
     // Cart
     'cart.toast.added': 'Agregado al carrito ✓',
     'cart.toast.updated': 'Carrito actualizado.',
