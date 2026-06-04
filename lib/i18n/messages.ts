@@ -199,6 +199,47 @@ type MessageKey =
   | 'admin.nav.customers'
   | 'admin.nav.search'
   | 'admin.nav.settings'
+  // Common
+  | 'common.pending'
+  | 'common.toast.error.unexpected'
+  // Auth toasts
+  | 'auth.toast.linkSent'
+  | 'auth.toast.linkFailed'
+  | 'auth.signIn.sending'
+  // Onboarding toasts
+  | 'onboarding.toast.submitted'
+  | 'onboarding.toast.resubmitted'
+  | 'onboarding.toast.fileMissing'
+  | 'onboarding.toast.alreadyHasOrg'
+  | 'onboarding.toast.invalidCountry'
+  | 'onboarding.sending'
+  // Admin verification
+  | 'admin.toast.approved'
+  | 'admin.toast.approvedNoop'
+  | 'admin.toast.rejected'
+  | 'admin.toast.rejectedNoop'
+  | 'admin.toast.reasonRequired'
+  | 'admin.confirm.approve'
+  | 'admin.confirm.reject'
+  | 'admin.action.approve'
+  | 'admin.action.reject'
+  | 'admin.action.rejectReasonLabel'
+  | 'admin.action.rejectReasonPlaceholder'
+  | 'admin.action.approving'
+  | 'admin.action.rejecting'
+  // Admin reconcile wire
+  | 'admin.toast.wireReconciled'
+  | 'admin.toast.wireFailed'
+  // Admin upload cert
+  | 'admin.toast.certUploaded'
+  | 'admin.toast.certFailed'
+  // Cart toasts
+  | 'cart.toast.updated'
+  | 'cart.toast.removed'
+  | 'cart.confirm.remove'
+  // Checkout
+  | 'checkout.toast.orderPlaced'
+  | 'checkout.toast.failed'
 
 type Dict = Record<MessageKey, string>
 
@@ -409,6 +450,45 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.nav.customers': 'Customers',
     'admin.nav.search': 'Search',
     'admin.nav.settings': 'Settings',
+    // Common
+    'common.pending': 'Working…',
+    'common.toast.error.unexpected': 'Something went wrong. Please try again.',
+    // Auth
+    'auth.toast.linkSent': 'Magic link sent. Check your inbox.',
+    'auth.toast.linkFailed': "We couldn't send the magic link. Try again.",
+    'auth.signIn.sending': 'Sending…',
+    // Onboarding
+    'onboarding.toast.submitted': 'Application submitted. We will email you once reviewed.',
+    'onboarding.toast.resubmitted': 'Certificate resubmitted. Back to pending review.',
+    'onboarding.toast.fileMissing': 'The certificate file is required.',
+    'onboarding.toast.alreadyHasOrg': 'You already belong to an organization.',
+    'onboarding.toast.invalidCountry': 'Country must be a 2-letter ISO code.',
+    'onboarding.sending': 'Submitting…',
+    // Admin verification
+    'admin.toast.approved': 'Customer approved ✓',
+    'admin.toast.approvedNoop': 'Customer was already approved (no changes).',
+    'admin.toast.rejected': 'Customer rejected.',
+    'admin.toast.rejectedNoop': 'Customer was already rejected with that reason (no changes).',
+    'admin.toast.reasonRequired': 'A rejection reason is required.',
+    'admin.confirm.approve': 'Approve {name}? This lets them see prices and place orders.',
+    'admin.confirm.reject': 'Reject {name}?',
+    'admin.action.approve': 'Approve',
+    'admin.action.reject': 'Reject',
+    'admin.action.rejectReasonLabel': 'Rejection reason',
+    'admin.action.rejectReasonPlaceholder': 'Expired certificate / illegible / etc.',
+    'admin.action.approving': 'Approving…',
+    'admin.action.rejecting': 'Rejecting…',
+    'admin.toast.wireReconciled': 'Wire reconciled ✓',
+    'admin.toast.wireFailed': 'Wire reconciliation failed.',
+    'admin.toast.certUploaded': 'Certificate uploaded and customer approved ✓',
+    'admin.toast.certFailed': 'Certificate upload failed.',
+    // Cart
+    'cart.toast.updated': 'Cart updated.',
+    'cart.toast.removed': 'Item removed.',
+    'cart.confirm.remove': 'Remove this item from the cart?',
+    // Checkout
+    'checkout.toast.orderPlaced': 'Order placed ✓',
+    'checkout.toast.failed': 'We could not place the order.',
   },
   'es-419': {
     'localeSwitch.label': 'Idioma',
@@ -618,6 +698,46 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.nav.customers': 'Clientes',
     'admin.nav.search': 'Búsqueda',
     'admin.nav.settings': 'Settings',
+    // Common
+    'common.pending': 'Procesando…',
+    'common.toast.error.unexpected': 'Algo salió mal. Volvé a intentar.',
+    // Auth
+    'auth.toast.linkSent': 'Te enviamos el link mágico. Revisá tu bandeja.',
+    'auth.toast.linkFailed': 'No pudimos enviar el link. Volvé a intentar.',
+    'auth.signIn.sending': 'Enviando…',
+    // Onboarding
+    'onboarding.toast.submitted':
+      'Solicitud enviada. Te avisamos por email en cuanto la revisemos.',
+    'onboarding.toast.resubmitted': 'Certificado re-enviado. Volvió a estado pendiente.',
+    'onboarding.toast.fileMissing': 'El archivo del certificado es obligatorio.',
+    'onboarding.toast.alreadyHasOrg': 'Ya pertenecés a una organización.',
+    'onboarding.toast.invalidCountry': 'El país debe ser código ISO-2 (2 letras).',
+    'onboarding.sending': 'Enviando…',
+    // Admin verification
+    'admin.toast.approved': 'Cliente aprobado ✓',
+    'admin.toast.approvedNoop': 'El cliente ya estaba aprobado (sin cambios).',
+    'admin.toast.rejected': 'Cliente rechazado.',
+    'admin.toast.rejectedNoop': 'El cliente ya estaba rechazado con ese motivo (sin cambios).',
+    'admin.toast.reasonRequired': 'El motivo de rechazo es obligatorio.',
+    'admin.confirm.approve': '¿Aprobar a {name}? Esto les habilita ver precios y comprar.',
+    'admin.confirm.reject': '¿Rechazar a {name}?',
+    'admin.action.approve': 'Aprobar',
+    'admin.action.reject': 'Rechazar',
+    'admin.action.rejectReasonLabel': 'Motivo de rechazo',
+    'admin.action.rejectReasonPlaceholder': 'Certificado vencido / ilegible / etc.',
+    'admin.action.approving': 'Aprobando…',
+    'admin.action.rejecting': 'Rechazando…',
+    'admin.toast.wireReconciled': 'Wire conciliado ✓',
+    'admin.toast.wireFailed': 'Falló la conciliación del wire.',
+    'admin.toast.certUploaded': 'Certificado subido y cliente aprobado ✓',
+    'admin.toast.certFailed': 'Falló la subida del certificado.',
+    // Cart
+    'cart.toast.updated': 'Carrito actualizado.',
+    'cart.toast.removed': 'Item eliminado.',
+    'cart.confirm.remove': '¿Quitar este item del carrito?',
+    // Checkout
+    'checkout.toast.orderPlaced': 'Orden colocada ✓',
+    'checkout.toast.failed': 'No pudimos colocar la orden.',
   },
 }
 

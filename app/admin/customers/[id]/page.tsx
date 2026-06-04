@@ -5,34 +5,25 @@ import {
   startImpersonationAction,
   uploadTaxCertificateAction,
 } from '@/app/admin/_actions'
-import { SubmitOnceButton } from '@/components/admin/ApproveButton'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 type Props = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ flash?: string }>
 }
 
-const FLASH_MESSAGES: Record<string, { text: string; tone: 'success' | 'info' | 'danger' }> = {
-  approved: { text: 'Cliente aprobado ✓', tone: 'success' },
-  'approved-noop': { text: 'El cliente ya estaba aprobado (sin cambios).', tone: 'info' },
-  rejected: { text: 'Cliente rechazado.', tone: 'danger' },
-  'rejected-noop': {
-    text: 'El cliente ya estaba rechazado con ese motivo (sin cambios).',
-    tone: 'info',
-  },
-}
-
-export default async function AdminCustomerDetailPage({ params, searchParams }: Props) {
+export default async function AdminCustomerDetailPage({ params }: Props) {
   const { id } = await params
-  const { flash } = await searchParams
-  const flashMsg = flash ? FLASH_MESSAGES[flash] : undefined
+  const { auth } = await import('@/lib/auth/config')
+  const session = await auth()
+  const locale = await getLocale({ userId: session?.user?.id ?? null })
   const org = await prisma.organization.findUnique({
     where: { id },
     include: {
@@ -55,20 +46,6 @@ export default async function AdminCustomerDetailPage({ params, searchParams }: 
 
   return (
     <div className="max-w-3xl space-y-6">
-      {flashMsg && (
-        <output
-          aria-live="polite"
-          className={`block rounded-md border px-3 py-2 text-sm ${
-            flashMsg.tone === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : flashMsg.tone === 'danger'
-                ? 'border-red-200 bg-red-50 text-red-800'
-                : 'border-blue-200 bg-blue-50 text-blue-800'
-          }`}
-        >
-          {flashMsg.text}
-        </output>
-      )}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">{org.name}</h1>
@@ -177,28 +154,31 @@ export default async function AdminCustomerDetailPage({ params, searchParams }: 
             <div className="flex items-center gap-3 flex-wrap rounded border border-gray-200 bg-gray-50 p-3">
               <form action={approveOrganizationAction}>
                 <input type="hidden" name="organizationId" value={org.id} />
-                <SubmitOnceButton
+                <SubmitButton
                   variant="primary"
-                  confirmMessage={`¿Aprobar a ${org.name}? Esto les habilita ver precios y comprar.`}
+                  pendingLabel={t(locale, 'admin.action.approving')}
+                  confirmMessage={t(locale, 'admin.confirm.approve', { name: org.name })}
                 >
-                  Aprobar
-                </SubmitOnceButton>
+                  {t(locale, 'admin.action.approve')}
+                </SubmitButton>
               </form>
               <form action={rejectOrganizationAction} className="flex items-end gap-2">
                 <input type="hidden" name="organizationId" value={org.id} />
                 <div>
                   <label htmlFor="reason" className="block text-xs text-gray-500 mb-1">
-                    Motivo de rechazo
+                    {t(locale, 'admin.action.rejectReasonLabel')}
                   </label>
                   <Input
                     id="reason"
                     name="reason"
                     required
-                    placeholder="Certificado vencido / ilegible / etc."
+                    placeholder={t(locale, 'admin.action.rejectReasonPlaceholder')}
                     className="w-72"
                   />
                 </div>
-                <SubmitOnceButton variant="danger">Rechazar</SubmitOnceButton>
+                <SubmitButton variant="danger" pendingLabel={t(locale, 'admin.action.rejecting')}>
+                  {t(locale, 'admin.action.reject')}
+                </SubmitButton>
               </form>
             </div>
           )}

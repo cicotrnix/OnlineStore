@@ -100,9 +100,13 @@ export async function approveOrganizationAction(formData: FormData) {
   const result = await approveOrganization({ organizationId, byAdminId: admin.id })
   revalidatePath('/admin/customers')
   revalidatePath(`/admin/customers/${organizationId}`)
-  // Feedback al admin: redirect con ?flash=approved (o approved-noop si ya estaba).
+  const { toastUrl } = await import('@/lib/feedback/action-result')
   redirect(
-    `/admin/customers/${organizationId}?flash=${result.changed ? 'approved' : 'approved-noop'}`
+    toastUrl(
+      `/admin/customers/${organizationId}`,
+      result.changed ? 'success' : 'info',
+      result.changed ? 'admin.toast.approved' : 'admin.toast.approvedNoop'
+    )
   )
 }
 
@@ -110,13 +114,20 @@ export async function rejectOrganizationAction(formData: FormData) {
   const admin = await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))
   const reason = String(formData.get('reason') ?? '').trim()
-  if (!reason) throw new Error('motivo obligatorio')
+  const { toastUrl } = await import('@/lib/feedback/action-result')
+  if (!reason) {
+    redirect(toastUrl(`/admin/customers/${organizationId}`, 'error', 'admin.toast.reasonRequired'))
+  }
   const { rejectOrganization } = await import('@/modules/verification')
   const result = await rejectOrganization({ organizationId, byAdminId: admin.id, reason })
   revalidatePath('/admin/customers')
   revalidatePath(`/admin/customers/${organizationId}`)
   redirect(
-    `/admin/customers/${organizationId}?flash=${result.changed ? 'rejected' : 'rejected-noop'}`
+    toastUrl(
+      `/admin/customers/${organizationId}`,
+      result.changed ? 'success' : 'info',
+      result.changed ? 'admin.toast.rejected' : 'admin.toast.rejectedNoop'
+    )
   )
 }
 
