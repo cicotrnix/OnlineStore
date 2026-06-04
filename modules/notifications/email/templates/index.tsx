@@ -1,34 +1,42 @@
 import type { JSX } from 'react'
 import { BaseTemplate, type BaseTemplateProps } from './_base'
 
-function make(cta: string) {
+/**
+ * Helper que crea un template con CTA por locale. Si el locale del destinatario
+ * no está en el mapa, cae al CTA en inglés.
+ */
+function make(cta: { en: string; es: string }) {
   return function Template(props: BaseTemplateProps): JSX.Element {
-    return <BaseTemplate {...props} cta={cta} />
+    const localized = props.locale === 'es-419' ? cta.es : cta.en
+    return <BaseTemplate {...props} cta={localized} />
   }
 }
 
-export const QuoteSubmittedEmail = make('Ver solicitud')
-export const QuoteQuotedEmail = make('Ver cotización')
-export const QuoteRevisedEmail = make('Ver cotización revisada')
-export const QuoteAcceptedEmail = make('Ver orden')
-export const QuoteRejectedEmail = make('Ver detalles')
-export const QuoteExpiringEmail = make('Aceptar antes que venza')
-export const ApprovalRequestedEmail = make('Decidir aprobación')
-export const ApprovalGrantedEmail = make('Ver orden')
-export const ApprovalRejectedEmail = make('Ver detalles')
-export const InvoiceDueSoonEmail = make('Ver factura')
-export const InvoiceOverdueEmail = make('Pagar factura')
-export const InvoicePaidEmail = make('Ver factura')
-export const CreditWarningEmail = make('Ver cuenta')
-export const CreditBlockedEmail = make('Ver cuenta')
+export const QuoteSubmittedEmail = make({ en: 'View request', es: 'Ver solicitud' })
+export const QuoteQuotedEmail = make({ en: 'View quote', es: 'Ver cotización' })
+export const QuoteRevisedEmail = make({ en: 'View revised quote', es: 'Ver cotización revisada' })
+export const QuoteAcceptedEmail = make({ en: 'View order', es: 'Ver orden' })
+export const QuoteRejectedEmail = make({ en: 'View details', es: 'Ver detalles' })
+export const QuoteExpiringEmail = make({
+  en: 'Accept before it expires',
+  es: 'Aceptar antes que venza',
+})
+export const ApprovalRequestedEmail = make({
+  en: 'Decide approval',
+  es: 'Decidir aprobación',
+})
+export const ApprovalGrantedEmail = make({ en: 'View order', es: 'Ver orden' })
+export const ApprovalRejectedEmail = make({ en: 'View details', es: 'Ver detalles' })
+export const InvoiceDueSoonEmail = make({ en: 'View invoice', es: 'Ver factura' })
+export const InvoiceOverdueEmail = make({ en: 'Pay invoice', es: 'Pagar factura' })
+export const InvoicePaidEmail = make({ en: 'View invoice', es: 'Ver factura' })
+export const CreditWarningEmail = make({ en: 'View account', es: 'Ver cuenta' })
+export const CreditBlockedEmail = make({ en: 'View account', es: 'Ver cuenta' })
 
-// Fase 5 Corte 5: outbox-driven (disparados por bus de eventos)
-export const OrderPlacedEmail = make('Ver orden')
-export const PaymentCapturedEmail = make('Ver recibo')
-export const PaymentReconciledEmail = make('Ver recibo')
-export const InvoiceIssuedEmail = make('Pagar via wire')
-export const ShipmentDispatchedEmail = make('Rastrear envío')
-
-// Onboarding B2B (2026-06-02): aprobación / rechazo manual del admin.
-export const CustomerApprovedEmail = make('Ver catálogo con precios')
-export const CustomerRejectedEmail = make('Revisar y re-enviar')
+export const OrderPlacedEmail = make({ en: 'View order', es: 'Ver orden' })
+export const PaymentCapturedEmail = make({ en: 'View receipt', es: 'Ver recibo' })
+export const PaymentReconciledEmail = make({ en: 'View receipt', es: 'Ver recibo' })
+export const InvoiceIssuedEmail = make({ en: 'Pay via wire', es: 'Pagar via wire' })
+export const ShipmentDispatchedEmail = make({ en: 'Track shipment', es: 'Rastrear envío' })
+export const CustomerApprovedEmail = make({ en: 'Browse catalog', es: 'Ver catálogo' })
+export const CustomerRejectedEmail = make({ en: 'Resubmit certificate', es: 'Volver a enviar' })

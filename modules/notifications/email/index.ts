@@ -1,3 +1,4 @@
+import type { Locale } from '@/lib/i18n'
 import type { NotificationType } from '@prisma/client'
 import { render } from '@react-email/render'
 import type { JSX } from 'react'
@@ -52,7 +53,11 @@ const TEMPLATES: Record<NotificationType, (p: BaseTemplateProps) => JSX.Element>
   CUSTOMER_REJECTED: CustomerRejectedEmail,
 }
 
-export async function renderEmailFor(type: NotificationType, vars: RenderVars): Promise<string> {
+export async function renderEmailFor(
+  type: NotificationType,
+  vars: RenderVars,
+  locale: Locale = 'en-US'
+): Promise<string> {
   const Template = TEMPLATES[type]
-  return render(Template(vars))
+  return render(Template({ ...vars, locale }))
 }

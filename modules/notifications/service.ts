@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/client'
 import { sendEmail } from '@/lib/email/resend'
+import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/i18n'
 import { logger } from '@/lib/observability/logger'
 import type { Notification, NotificationType } from '@prisma/client'
 import { renderEmailFor } from './email'
@@ -45,12 +46,20 @@ async function sendNotificationEmail(notif: Notification): Promise<void> {
   if (!user?.email) return
 
   try {
-    const rendered = await renderEmailFor(notif.type, {
-      title: notif.title,
-      body: notif.body,
-      link: notif.link,
-      userName: user.name ?? 'there',
-    })
+    const locale =
+      user.preferredLocale && isSupportedLocale(user.preferredLocale)
+        ? user.preferredLocale
+        : DEFAULT_LOCALE
+    const rendered = await renderEmailFor(
+      notif.type,
+      {
+        title: notif.title,
+        body: notif.body,
+        link: notif.link,
+        userName: user.name ?? 'there',
+      },
+      locale
+    )
     await sendEmail({ to: user.email, subject: notif.title, html: rendered })
     await prisma.notification.update({
       where: { id: notif.id },

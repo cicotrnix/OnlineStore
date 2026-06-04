@@ -270,6 +270,9 @@ export type MessageKey =
   | 'admin.action.confirmCancel'
   | 'admin.action.upload'
   | 'admin.action.uploading'
+  // Email chrome
+  | 'email.greeting'
+  | 'email.cta.viewDetail'
   // Cart toasts
   | 'cart.toast.added'
   | 'cart.toast.updated'
@@ -557,6 +560,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.confirmCancel': 'Cancel this order? Stock will be restored.',
     'admin.action.upload': 'Upload',
     'admin.action.uploading': 'Uploading…',
+    'email.greeting': 'Hi {name},',
+    'email.cta.viewDetail': 'View details',
     // Cart
     'cart.toast.added': 'Added to cart ✓',
     'cart.toast.updated': 'Cart updated.',
@@ -844,6 +849,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.confirmCancel': '¿Cancelar esta orden? Se restaurará el stock.',
     'admin.action.upload': 'Subir',
     'admin.action.uploading': 'Subiendo…',
+    'email.greeting': 'Hola {name},',
+    'email.cta.viewDetail': 'Ver detalle',
     // Cart
     'cart.toast.added': 'Agregado al carrito ✓',
     'cart.toast.updated': 'Carrito actualizado.',
