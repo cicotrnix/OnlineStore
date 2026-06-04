@@ -234,12 +234,19 @@ type MessageKey =
   | 'admin.toast.certUploaded'
   | 'admin.toast.certFailed'
   // Cart toasts
+  | 'cart.toast.added'
   | 'cart.toast.updated'
   | 'cart.toast.removed'
+  | 'cart.toast.failed'
   | 'cart.confirm.remove'
+  // Product CTAs
+  | 'product.add'
+  | 'product.unavailable'
+  | 'product.adding'
   // Checkout
   | 'checkout.toast.orderPlaced'
   | 'checkout.toast.failed'
+  | 'checkout.placing'
 
 type Dict = Record<MessageKey, string>
 
@@ -483,12 +490,19 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.certUploaded': 'Certificate uploaded and customer approved ✓',
     'admin.toast.certFailed': 'Certificate upload failed.',
     // Cart
+    'cart.toast.added': 'Added to cart ✓',
     'cart.toast.updated': 'Cart updated.',
     'cart.toast.removed': 'Item removed.',
+    'cart.toast.failed': 'Could not update the cart.',
     'cart.confirm.remove': 'Remove this item from the cart?',
+    // Product CTAs
+    'product.add': 'Add',
+    'product.unavailable': 'Unavailable',
+    'product.adding': 'Adding…',
     // Checkout
     'checkout.toast.orderPlaced': 'Order placed ✓',
     'checkout.toast.failed': 'We could not place the order.',
+    'checkout.placing': 'Placing order…',
   },
   'es-419': {
     'localeSwitch.label': 'Idioma',
@@ -732,12 +746,19 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.certUploaded': 'Certificado subido y cliente aprobado ✓',
     'admin.toast.certFailed': 'Falló la subida del certificado.',
     // Cart
+    'cart.toast.added': 'Agregado al carrito ✓',
     'cart.toast.updated': 'Carrito actualizado.',
     'cart.toast.removed': 'Item eliminado.',
+    'cart.toast.failed': 'No pudimos actualizar el carrito.',
     'cart.confirm.remove': '¿Quitar este item del carrito?',
+    // Product CTAs
+    'product.add': 'Agregar',
+    'product.unavailable': 'No disponible',
+    'product.adding': 'Agregando…',
     // Checkout
     'checkout.toast.orderPlaced': 'Orden colocada ✓',
     'checkout.toast.failed': 'No pudimos colocar la orden.',
+    'checkout.placing': 'Colocando orden…',
   },
 }
 

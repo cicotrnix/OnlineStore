@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody } from '@/components/ui/Card'
+import type { Locale } from '@/lib/i18n'
 import type { Decimal } from '@prisma/client/runtime/library'
 import Link from 'next/link'
 import { AddToCartButton } from './AddToCartButton'
@@ -27,11 +28,14 @@ type Props = {
   customerPrice?: Decimal | null
   currency: string
   canAddToCart: boolean
+  locale: Locale
   disabledReason?: string
   /** Onboarding B2B: si false, oculta precio y muestra CTA "registrate para ver precios". */
   showPrice?: boolean
   signInLinkLabel?: string
   noImageLabel?: string
+  /** Path para retornar tras Add (toast). Default: `/catalog`. */
+  returnTo?: string
 }
 
 export function ProductCard({
@@ -39,10 +43,12 @@ export function ProductCard({
   customerPrice,
   currency,
   canAddToCart,
+  locale,
   disabledReason,
   showPrice = true,
   signInLinkLabel = 'Sign in to see prices →',
   noImageLabel = 'No image',
+  returnTo,
 }: Props) {
   return (
     <Card className="overflow-hidden flex flex-col">
@@ -87,6 +93,8 @@ export function ProductCard({
           {showPrice && (
             <AddToCartButton
               productId={product.id}
+              locale={locale}
+              returnTo={returnTo}
               disabled={!canAddToCart || product.stockQuantity === 0}
               disabledReason={disabledReason}
             />

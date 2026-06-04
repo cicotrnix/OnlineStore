@@ -2,6 +2,7 @@ import { removeCartItemAction, updateCartQuantityAction } from '@/app/(storefron
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireVerifiedCustomer } from '@/lib/auth/customer'
 import { getLocale, t } from '@/lib/i18n'
 import { addMoney, formatMoney, multiplyMoney } from '@/lib/money'
@@ -70,9 +71,13 @@ export default async function CartPage() {
                     </div>
                     <form action={removeCartItemAction}>
                       <input type="hidden" name="productId" value={item.product.id} />
-                      <button type="submit" className="text-xs text-gray-500 hover:text-red-600">
+                      <SubmitButton
+                        variant="ghost"
+                        size="sm"
+                        confirmMessage={t(locale, 'cart.confirm.remove')}
+                      >
                         {t(locale, 'cart.remove')}
-                      </button>
+                      </SubmitButton>
                     </form>
                   </div>
                   <div className="mt-3 flex items-end justify-between flex-wrap gap-3">
@@ -89,9 +94,13 @@ export default async function CartPage() {
                         defaultValue={item.quantity}
                         className="w-16 rounded-lg border border-gray-200 px-2 py-1 text-sm text-center"
                       />
-                      <Button type="submit" variant="secondary" size="sm">
+                      <SubmitButton
+                        variant="secondary"
+                        size="sm"
+                        pendingLabel={t(locale, 'common.pending')}
+                      >
                         {t(locale, 'cart.update')}
-                      </Button>
+                      </SubmitButton>
                     </form>
                     <div className="text-sm text-gray-700 tabular-nums">
                       {formatMoney(item.unitPriceSnapshot, storeConfig.currency.base)} ·{' '}

@@ -1,3 +1,4 @@
+import type { Locale } from '@/lib/i18n'
 import type { Decimal } from '@prisma/client/runtime/library'
 import Link from 'next/link'
 import { AddToCartButton } from './AddToCartButton'
@@ -19,9 +20,11 @@ type Props = {
   customerPrice?: Decimal | null
   currency: string
   canAddToCart: boolean
+  locale: Locale
   disabledReason?: string
   showPrice?: boolean
   signInLabel?: string
+  returnTo?: string
 }
 
 export function ProductListRow({
@@ -29,9 +32,11 @@ export function ProductListRow({
   customerPrice,
   currency,
   canAddToCart,
+  locale,
   disabledReason,
   showPrice = true,
   signInLabel = 'Sign in',
+  returnTo,
 }: Props) {
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
@@ -63,6 +68,8 @@ export function ProductListRow({
         {showPrice && (
           <AddToCartButton
             productId={product.id}
+            locale={locale}
+            returnTo={returnTo}
             showQuantity
             disabled={!canAddToCart || product.stockQuantity === 0}
             disabledReason={disabledReason}

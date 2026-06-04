@@ -117,6 +117,8 @@ export default async function CatalogPage({ searchParams }: Props) {
               customerPrice={customerPrices.get(p.id)}
               currency={storeConfig.currency.base}
               canAddToCart={canAddToCart}
+              locale={locale}
+              returnTo="/catalog"
               disabledReason={disabledReason}
               showPrice={customerState.kind === 'verified'}
               signInLinkLabel={`${t(locale, 'product.signInForPrice')} →`}
@@ -144,6 +146,8 @@ export default async function CatalogPage({ searchParams }: Props) {
                   customerPrice={customerPrices.get(p.id)}
                   currency={storeConfig.currency.base}
                   canAddToCart={canAddToCart}
+                  locale={locale}
+                  returnTo="/catalog"
                   disabledReason={disabledReason}
                   showPrice={customerState.kind === 'verified'}
                   signInLabel={t(locale, 'catalog.signInLinkShort')}

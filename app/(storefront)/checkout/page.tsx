@@ -1,8 +1,8 @@
 import { placeOrderAction } from '@/app/(storefront)/_actions'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { auth } from '@/lib/auth/config'
 import { requireVerifiedCustomer } from '@/lib/auth/customer'
 import { getLocale, t } from '@/lib/i18n'
@@ -197,9 +197,19 @@ export default async function CheckoutPage() {
                   {formatMoney(subtotal, storeConfig.currency.base)}
                 </span>
               </div>
-              <Button type="submit" size="lg" disabled={hasBlockingIssue || addresses.length === 0}>
-                {t(locale, 'checkout.placeOrder')}
-              </Button>
+              {hasBlockingIssue || addresses.length === 0 ? (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-6 py-2.5 text-base text-gray-400 cursor-not-allowed"
+                >
+                  {t(locale, 'checkout.placeOrder')}
+                </button>
+              ) : (
+                <SubmitButton size="lg" pendingLabel={t(locale, 'checkout.placing')}>
+                  {t(locale, 'checkout.placeOrder')}
+                </SubmitButton>
+              )}
             </div>
           </CardBody>
         </Card>
