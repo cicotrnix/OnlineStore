@@ -97,9 +97,13 @@ export async function approveOrganizationAction(formData: FormData) {
   const admin = await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))
   const { approveOrganization } = await import('@/modules/verification')
-  await approveOrganization({ organizationId, byAdminId: admin.id })
+  const result = await approveOrganization({ organizationId, byAdminId: admin.id })
   revalidatePath('/admin/customers')
   revalidatePath(`/admin/customers/${organizationId}`)
+  // Feedback al admin: redirect con ?flash=approved (o approved-noop si ya estaba).
+  redirect(
+    `/admin/customers/${organizationId}?flash=${result.changed ? 'approved' : 'approved-noop'}`
+  )
 }
 
 export async function rejectOrganizationAction(formData: FormData) {
@@ -108,9 +112,12 @@ export async function rejectOrganizationAction(formData: FormData) {
   const reason = String(formData.get('reason') ?? '').trim()
   if (!reason) throw new Error('motivo obligatorio')
   const { rejectOrganization } = await import('@/modules/verification')
-  await rejectOrganization({ organizationId, byAdminId: admin.id, reason })
+  const result = await rejectOrganization({ organizationId, byAdminId: admin.id, reason })
   revalidatePath('/admin/customers')
   revalidatePath(`/admin/customers/${organizationId}`)
+  redirect(
+    `/admin/customers/${organizationId}?flash=${result.changed ? 'rejected' : 'rejected-noop'}`
+  )
 }
 
 export async function uploadTaxCertificateAction(formData: FormData) {

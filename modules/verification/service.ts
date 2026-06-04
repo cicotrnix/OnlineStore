@@ -50,12 +50,28 @@ export async function uploadCertificate(input: UploadTaxDocInput): Promise<void>
 /**
  * Aprobación manual del admin (Onboarding B2B 2026-06-02). Marca VERIFIED +
  * taxExempt y emite customer.verified.
+ *
+ * Idempotente: si la org ya está VERIFIED, no actualiza ni emite eventos.
+ * Evita doble-emisión cuando el admin clickea repetidas veces el botón.
  */
 export async function approveOrganization(input: {
   organizationId: string
   byAdminId: string
-}): Promise<void> {
-  await prisma.$transaction(async (tx) => {
+}): Promise<{ changed: boolean }> {
+  return prisma.$transaction(async (tx) => {
+    // Row lock para evitar race entre dos admins clickeando en paralelo.
+    await tx.$executeRawUnsafe(
+      `SELECT id FROM "Organization" WHERE id = $1 FOR UPDATE`,
+      input.organizationId
+    )
+    const current = await tx.organization.findUniqueOrThrow({
+      where: { id: input.organizationId },
+      select: { verificationStatus: true },
+    })
+    if (current.verificationStatus === 'VERIFIED') {
+      return { changed: false }
+    }
+
     const org = await tx.organization.update({
       where: { id: input.organizationId },
       data: {
@@ -81,6 +97,7 @@ export async function approveOrganization(input: {
         byAdminId: input.byAdminId,
       },
     })
+    return { changed: true }
   })
 }
 
@@ -88,19 +105,36 @@ export async function approveOrganization(input: {
  * Rechazo manual del admin con motivo. Marca REJECTED + emite
  * customer.rejected. El usuario puede re-subir el certificado para volver a
  * PENDING (uploadCertificate limpia rejectionReason).
+ *
+ * Idempotente: si la org ya está REJECTED con el mismo motivo, no actualiza
+ * ni emite. Si está REJECTED con otro motivo, actualiza el motivo y re-emite
+ * (el motivo nuevo amerita notificación).
  */
 export async function rejectOrganization(input: {
   organizationId: string
   byAdminId: string
   reason: string
-}): Promise<void> {
-  if (!input.reason.trim()) throw new Error('reason is required for rejection')
-  await prisma.$transaction(async (tx) => {
+}): Promise<{ changed: boolean }> {
+  const reason = input.reason.trim()
+  if (!reason) throw new Error('reason is required for rejection')
+  return prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe(
+      `SELECT id FROM "Organization" WHERE id = $1 FOR UPDATE`,
+      input.organizationId
+    )
+    const current = await tx.organization.findUniqueOrThrow({
+      where: { id: input.organizationId },
+      select: { verificationStatus: true, rejectionReason: true },
+    })
+    if (current.verificationStatus === 'REJECTED' && current.rejectionReason === reason) {
+      return { changed: false }
+    }
+
     const org = await tx.organization.update({
       where: { id: input.organizationId },
       data: {
         verificationStatus: 'REJECTED',
-        rejectionReason: input.reason.trim(),
+        rejectionReason: reason,
       },
     })
     await tx.taxDocument.updateMany({
@@ -113,10 +147,11 @@ export async function rejectOrganization(input: {
       aggregateId: org.id,
       payload: {
         organizationId: org.id,
-        reason: input.reason.trim(),
+        reason,
         byAdminId: input.byAdminId,
       },
     })
+    return { changed: true }
   })
 }
 
