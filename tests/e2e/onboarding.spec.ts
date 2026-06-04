@@ -13,7 +13,8 @@ test.describe('Onboarding B2B — público vs gated (2026-06-02)', () => {
     await page.goto('/catalog')
     await expect(page.getByRole('heading', { name: /catálogo/i })).toBeVisible()
     // El anon ve productos pero no precios.
-    await expect(page.getByText(/Iniciá sesión para ver precios mayoristas/i).first()).toBeVisible()
+    // Card usa el texto corto 'product.signInForPrice'.
+    await expect(page.getByText(/Iniciá sesión para ver precios/i).first()).toBeVisible()
   })
 
   test('PDP público anónimo: sin precio, con CTA + sin botón comprar', async ({ page }) => {
