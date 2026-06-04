@@ -10,6 +10,24 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    // i18n: default app locale = en-US. Forzamos es-419 vía cookie para que
+    // las specs existentes (escritas en español) sigan funcionando. Specs
+    // nuevas que verifiquen EN deben sobrescribir la cookie explícitamente.
+    storageState: {
+      cookies: [
+        {
+          name: 'locale',
+          value: 'es-419',
+          domain: 'localhost',
+          path: '/',
+          expires: -1,
+          httpOnly: false,
+          secure: false,
+          sameSite: 'Lax',
+        },
+      ],
+      origins: [],
+    },
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
