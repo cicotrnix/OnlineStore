@@ -2,7 +2,9 @@ import { markInvoicePaidAction } from '@/app/admin/_actions-fase2'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
@@ -15,6 +17,8 @@ const STATUS_VARIANT: Record<string, 'default' | 'info' | 'success' | 'warning' 
 }
 
 export default async function AdminInvoicesPage() {
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const invoices = await prisma.invoice.findMany({
     include: { organization: true, order: { select: { orderNumber: true } } },
     orderBy: { issuedAt: 'desc' },
@@ -65,8 +69,12 @@ export default async function AdminInvoicesPage() {
                         required
                         className="w-32 rounded border border-gray-200 px-2 py-1 text-xs"
                       />
-                      <SubmitButton variant="secondary" size="sm" pendingLabel="Guardando…">
-                        Marcar pagada
+                      <SubmitButton
+                        variant="secondary"
+                        size="sm"
+                        pendingLabel={t(locale, 'admin.action.saving')}
+                      >
+                        {t(locale, 'admin.action.markPaid')}
                       </SubmitButton>
                     </form>
                   )}

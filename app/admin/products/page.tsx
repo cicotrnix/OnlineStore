@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { catalogService } from '@/modules/catalog'
 import storeConfig from '@/store.config'
@@ -16,6 +18,8 @@ type Props = { searchParams: Promise<{ flash?: string; n?: string }> }
 
 export default async function AdminProductsPage({ searchParams }: Props) {
   const sp = await searchParams
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const bulkMessage =
     sp.flash === 'bulk-queued'
       ? `Encolados ${sp.n ?? '?'} jobs de generación AI. El worker procesa cada minuto.`
@@ -31,10 +35,10 @@ export default async function AdminProductsPage({ searchParams }: Props) {
     ? await prisma.productPriceTier.findMany({ orderBy: [{ productId: 'asc' }, { minQty: 'asc' }] })
     : []
   const tiersByProduct = new Map<string, typeof allTiers>()
-  for (const t of allTiers) {
-    const arr = tiersByProduct.get(t.productId) ?? []
-    arr.push(t)
-    tiersByProduct.set(t.productId, arr)
+  for (const tier of allTiers) {
+    const arr = tiersByProduct.get(tier.productId) ?? []
+    arr.push(tier)
+    tiersByProduct.set(tier.productId, arr)
   }
   const productPrivateMap = new Map<string, boolean>()
   if (showPrivate) {
@@ -60,8 +64,12 @@ export default async function AdminProductsPage({ searchParams }: Props) {
           </p>
         </div>
         <form action={enqueueBulkContentGenAction}>
-          <SubmitButton variant="secondary" size="sm" pendingLabel="Encolando…">
-            Generar contenido AI (todos)
+          <SubmitButton
+            variant="secondary"
+            size="sm"
+            pendingLabel={t(locale, 'admin.action.enqueuing')}
+          >
+            {t(locale, 'admin.action.generateAllContent')}
           </SubmitButton>
         </form>
       </div>
@@ -159,7 +167,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
               />
             </div>
             <div className="sm:col-span-2 flex justify-end">
-              <SubmitButton pendingLabel="Creando…">Crear producto</SubmitButton>
+              <SubmitButton pendingLabel={t(locale, 'admin.action.creating')}>
+                {t(locale, 'admin.action.createProduct')}
+              </SubmitButton>
             </div>
           </form>
         </CardBody>
@@ -208,8 +218,14 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                           name="isPrivate"
                           value={productPrivateMap.get(p.id) ? 'true' : 'false'}
                         />
-                        <SubmitButton variant="ghost" size="sm" pendingLabel="…">
-                          {productPrivateMap.get(p.id) ? 'Sí' : 'No'}
+                        <SubmitButton
+                          variant="ghost"
+                          size="sm"
+                          pendingLabel={t(locale, 'common.pending')}
+                        >
+                          {productPrivateMap.get(p.id)
+                            ? t(locale, 'common.yes')
+                            : t(locale, 'common.no')}
                         </SubmitButton>
                       </form>
                     </td>
@@ -218,8 +234,14 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                     <form action={toggleProductActiveAction}>
                       <input type="hidden" name="id" value={p.id} />
                       <input type="hidden" name="isActive" value={p.isActive ? 'true' : 'false'} />
-                      <SubmitButton variant="secondary" size="sm" pendingLabel="…">
-                        {p.isActive ? 'Desactivar' : 'Activar'}
+                      <SubmitButton
+                        variant="secondary"
+                        size="sm"
+                        pendingLabel={t(locale, 'common.pending')}
+                      >
+                        {p.isActive
+                          ? t(locale, 'admin.action.deactivate')
+                          : t(locale, 'admin.action.activate')}
                       </SubmitButton>
                     </form>
                   </td>
@@ -255,11 +277,11 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                   </div>
                   {tiers.length > 0 && (
                     <ul className="mt-2 text-xs text-gray-600 space-y-1">
-                      {tiers.map((t) => (
-                        <li key={t.id} className="flex justify-between">
-                          <span>≥ {t.minQty} uds</span>
+                      {tiers.map((tier) => (
+                        <li key={tier.id} className="flex justify-between">
+                          <span>≥ {tier.minQty} uds</span>
                           <span className="tabular-nums">
-                            {formatMoney(t.unitPrice, storeConfig.currency.base)}
+                            {formatMoney(tier.unitPrice, storeConfig.currency.base)}
                           </span>
                         </li>
                       ))}
@@ -303,8 +325,12 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                         className="mt-1 w-32"
                       />
                     </div>
-                    <SubmitButton size="sm" variant="secondary" pendingLabel="Guardando…">
-                      Guardar tramo
+                    <SubmitButton
+                      size="sm"
+                      variant="secondary"
+                      pendingLabel={t(locale, 'admin.action.saving')}
+                    >
+                      {t(locale, 'admin.action.saveTier')}
                     </SubmitButton>
                   </form>
                 </div>

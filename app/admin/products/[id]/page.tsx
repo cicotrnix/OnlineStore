@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
-import { LOCALES, type Locale } from '@/lib/i18n'
+import { LOCALES, type Locale, getLocale, t } from '@/lib/i18n'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -24,6 +24,7 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
   const sp = await searchParams
   const flashMessage = sp.flash ? FLASH_MESSAGES[sp.flash]?.(sp.locale) : null
   const user = await requireAuth()
+  const uiLocale = await getLocale({ userId: user.id })
   const u = await prisma.user.findUnique({
     where: { id: user.id },
     select: { isPlatformAdmin: true },
@@ -62,8 +63,8 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
             <h2 className="font-medium">Contenido AI</h2>
             <form action={enqueueContentGenAction}>
               <input type="hidden" name="productId" value={product.id} />
-              <SubmitButton size="sm" pendingLabel="Encolando…">
-                Generar / Regenerar (EN + ES)
+              <SubmitButton size="sm" pendingLabel={t(uiLocale, 'admin.action.enqueuing')}>
+                {t(uiLocale, 'admin.action.generateRegenerate')}
               </SubmitButton>
             </form>
           </div>
@@ -93,8 +94,12 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
                     <form action={publishContentAction}>
                       <input type="hidden" name="productId" value={product.id} />
                       <input type="hidden" name="locale" value={locale} />
-                      <SubmitButton variant="secondary" size="sm" pendingLabel="Publicando…">
-                        Publicar
+                      <SubmitButton
+                        variant="secondary"
+                        size="sm"
+                        pendingLabel={t(uiLocale, 'admin.action.publishing')}
+                      >
+                        {t(uiLocale, 'admin.action.publish')}
                       </SubmitButton>
                     </form>
                   )}

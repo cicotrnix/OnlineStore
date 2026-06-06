@@ -201,6 +201,8 @@ export type MessageKey =
   | 'admin.nav.settings'
   // Common
   | 'common.pending'
+  | 'common.yes'
+  | 'common.no'
   | 'common.toast.error.unexpected'
   // Auth toasts
   | 'auth.toast.linkSent'
@@ -270,6 +272,33 @@ export type MessageKey =
   | 'admin.action.confirmCancel'
   | 'admin.action.upload'
   | 'admin.action.uploading'
+  | 'admin.action.remove'
+  | 'admin.action.grantAccess'
+  | 'admin.action.granting'
+  | 'admin.action.viewCert'
+  | 'admin.action.opening'
+  | 'admin.action.uploadAndApprove'
+  | 'admin.action.viewAsOrg'
+  | 'admin.action.entering'
+  | 'admin.action.markPaid'
+  | 'admin.action.reconcileWire'
+  | 'admin.action.reconciling'
+  | 'admin.action.enqueuing'
+  | 'admin.action.generateRegenerate'
+  | 'admin.action.generateAllContent'
+  | 'admin.action.publish'
+  | 'admin.action.publishing'
+  | 'admin.action.reindexAll'
+  | 'admin.action.retry'
+  | 'admin.action.createProduct'
+  | 'admin.action.activate'
+  | 'admin.action.deactivate'
+  | 'admin.action.saveTier'
+  | 'admin.action.revise'
+  | 'admin.action.quote'
+  | 'admin.action.sending'
+  | 'admin.action.invite'
+  | 'admin.action.inviting'
   // Email chrome
   | 'email.greeting'
   | 'email.cta.viewDetail'
@@ -499,6 +528,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.nav.settings': 'Settings',
     // Common
     'common.pending': 'Working…',
+    'common.yes': 'Yes',
+    'common.no': 'No',
     'common.toast.error.unexpected': 'Something went wrong. Please try again.',
     // Auth
     'auth.toast.linkSent': 'Magic link sent. Check your inbox.',
@@ -560,6 +591,33 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.confirmCancel': 'Cancel this order? Stock will be restored.',
     'admin.action.upload': 'Upload',
     'admin.action.uploading': 'Uploading…',
+    'admin.action.remove': 'Remove',
+    'admin.action.grantAccess': 'Grant access',
+    'admin.action.granting': 'Granting…',
+    'admin.action.viewCert': 'View certificate',
+    'admin.action.opening': 'Opening…',
+    'admin.action.uploadAndApprove': 'Upload + auto-approve',
+    'admin.action.viewAsOrg': 'View storefront as this org',
+    'admin.action.entering': 'Entering…',
+    'admin.action.markPaid': 'Mark paid',
+    'admin.action.reconcileWire': 'Reconcile wire',
+    'admin.action.reconciling': 'Reconciling…',
+    'admin.action.enqueuing': 'Enqueuing…',
+    'admin.action.generateRegenerate': 'Generate / Regenerate (EN + ES)',
+    'admin.action.generateAllContent': 'Generate AI content (all)',
+    'admin.action.publish': 'Publish',
+    'admin.action.publishing': 'Publishing…',
+    'admin.action.reindexAll': 'Reindex all',
+    'admin.action.retry': 'Retry',
+    'admin.action.createProduct': 'Create product',
+    'admin.action.activate': 'Activate',
+    'admin.action.deactivate': 'Deactivate',
+    'admin.action.saveTier': 'Save tier',
+    'admin.action.revise': 'Revise',
+    'admin.action.quote': 'Quote',
+    'admin.action.sending': 'Sending…',
+    'admin.action.invite': 'Invite',
+    'admin.action.inviting': 'Inviting…',
     'email.greeting': 'Hi {name},',
     'email.cta.viewDetail': 'View details',
     // Cart
@@ -787,6 +845,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.nav.settings': 'Settings',
     // Common
     'common.pending': 'Procesando…',
+    'common.yes': 'Sí',
+    'common.no': 'No',
     'common.toast.error.unexpected': 'Algo salió mal. Volvé a intentar.',
     // Auth
     'auth.toast.linkSent': 'Te enviamos el link mágico. Revisá tu bandeja.',
@@ -849,6 +909,33 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.confirmCancel': '¿Cancelar esta orden? Se restaurará el stock.',
     'admin.action.upload': 'Subir',
     'admin.action.uploading': 'Subiendo…',
+    'admin.action.remove': 'Quitar',
+    'admin.action.grantAccess': 'Otorgar acceso',
+    'admin.action.granting': 'Otorgando…',
+    'admin.action.viewCert': 'Ver certificado',
+    'admin.action.opening': 'Abriendo…',
+    'admin.action.uploadAndApprove': 'Subir + auto-aprobar',
+    'admin.action.viewAsOrg': 'Ver storefront como esta org',
+    'admin.action.entering': 'Entrando…',
+    'admin.action.markPaid': 'Marcar pagada',
+    'admin.action.reconcileWire': 'Conciliar wire',
+    'admin.action.reconciling': 'Conciliando…',
+    'admin.action.enqueuing': 'Encolando…',
+    'admin.action.generateRegenerate': 'Generar / Regenerar (EN + ES)',
+    'admin.action.generateAllContent': 'Generar contenido AI (todos)',
+    'admin.action.publish': 'Publicar',
+    'admin.action.publishing': 'Publicando…',
+    'admin.action.reindexAll': 'Reindex todo',
+    'admin.action.retry': 'Reintentar',
+    'admin.action.createProduct': 'Crear producto',
+    'admin.action.activate': 'Activar',
+    'admin.action.deactivate': 'Desactivar',
+    'admin.action.saveTier': 'Guardar tramo',
+    'admin.action.revise': 'Revisar',
+    'admin.action.quote': 'Cotizar',
+    'admin.action.sending': 'Enviando…',
+    'admin.action.invite': 'Invitar',
+    'admin.action.inviting': 'Invitando…',
     'email.greeting': 'Hola {name},',
     'email.cta.viewDetail': 'Ver detalle',
     // Cart

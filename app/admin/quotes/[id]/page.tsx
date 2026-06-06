@@ -3,7 +3,9 @@ import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { notFound } from 'next/navigation'
 
@@ -13,6 +15,8 @@ type Props = { params: Promise<{ id: string }> }
 
 export default async function AdminQuoteDetailPage({ params }: Props) {
   const { id } = await params
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const q = await prisma.quote.findUnique({
     where: { id },
     include: {
@@ -132,8 +136,8 @@ export default async function AdminQuoteDetailPage({ params }: Props) {
                 />
               </div>
               <div className="flex justify-end">
-                <SubmitButton pendingLabel="Enviando…">
-                  {canRevise ? 'Revisar' : 'Cotizar'}
+                <SubmitButton pendingLabel={t(locale, 'admin.action.sending')}>
+                  {canRevise ? t(locale, 'admin.action.revise') : t(locale, 'admin.action.quote')}
                 </SubmitButton>
               </div>
             </form>

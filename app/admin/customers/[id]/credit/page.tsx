@@ -6,7 +6,9 @@ import {
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import storeConfig from '@/store.config'
 import { notFound } from 'next/navigation'
@@ -17,6 +19,8 @@ type Props = { params: Promise<{ id: string }> }
 
 export default async function AdminCustomerCreditPage({ params }: Props) {
   const { id } = await params
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const org = await prisma.organization.findUnique({
     where: { id },
     include: {
@@ -106,7 +110,9 @@ export default async function AdminCustomerCreditPage({ params }: Props) {
                   {formatMoney(org.creditUsed, storeConfig.currency.base)}
                 </strong>
               </p>
-              <SubmitButton pendingLabel="Guardando…">Guardar</SubmitButton>
+              <SubmitButton pendingLabel={t(locale, 'admin.action.saving')}>
+                {t(locale, 'admin.action.save')}
+              </SubmitButton>
             </div>
           </form>
         </CardBody>
@@ -132,8 +138,12 @@ export default async function AdminCustomerCreditPage({ params }: Props) {
                     <input type="hidden" name="orgId" value={org.id} />
                     {a.productId && <input type="hidden" name="productId" value={a.productId} />}
                     {a.categoryId && <input type="hidden" name="categoryId" value={a.categoryId} />}
-                    <SubmitButton variant="ghost" size="sm" pendingLabel="…">
-                      Quitar
+                    <SubmitButton
+                      variant="ghost"
+                      size="sm"
+                      pendingLabel={t(locale, 'common.pending')}
+                    >
+                      {t(locale, 'admin.action.remove')}
                     </SubmitButton>
                   </form>
                 </li>
@@ -184,8 +194,8 @@ export default async function AdminCustomerCreditPage({ params }: Props) {
               </select>
             </div>
             <div className="flex items-end">
-              <SubmitButton className="w-full" pendingLabel="Otorgando…">
-                Otorgar acceso
+              <SubmitButton className="w-full" pendingLabel={t(locale, 'admin.action.granting')}>
+                {t(locale, 'admin.action.grantAccess')}
               </SubmitButton>
             </div>
           </form>

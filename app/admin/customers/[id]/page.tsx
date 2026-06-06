@@ -198,8 +198,11 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
                     </span>
                     <form action={viewCertificateAction} className="ml-auto">
                       <input type="hidden" name="taxDocumentId" value={d.id} />
-                      <SubmitButton variant="secondary" pendingLabel="Abriendo…">
-                        Ver certificado
+                      <SubmitButton
+                        variant="secondary"
+                        pendingLabel={t(locale, 'admin.action.opening')}
+                      >
+                        {t(locale, 'admin.action.viewCert')}
                       </SubmitButton>
                     </form>
                   </li>
@@ -263,7 +266,9 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
                 className="block w-full text-sm"
               />
             </div>
-            <SubmitButton pendingLabel="Subiendo…">Subir + auto-aprobar</SubmitButton>
+            <SubmitButton pendingLabel={t(locale, 'admin.action.uploading')}>
+              {t(locale, 'admin.action.uploadAndApprove')}
+            </SubmitButton>
           </form>
         </CardBody>
       </Card>
@@ -281,8 +286,8 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
               </label>
               <Input id="reason" name="reason" placeholder="Soporte ticket #..." className="mt-1" />
             </div>
-            <SubmitButton variant="secondary" pendingLabel="Entrando…">
-              Ver storefront como esta org
+            <SubmitButton variant="secondary" pendingLabel={t(locale, 'admin.action.entering')}>
+              {t(locale, 'admin.action.viewAsOrg')}
             </SubmitButton>
           </form>
         </CardBody>

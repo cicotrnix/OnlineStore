@@ -2,6 +2,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { notFound } from 'next/navigation'
 import { reindexAllAction, retryFailedAction } from './_actions'
 
@@ -9,6 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AdminSearchPage() {
   const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const u = await prisma.user.findUnique({
     where: { id: user.id },
     select: { isPlatformAdmin: true },
@@ -52,7 +54,9 @@ export default async function AdminSearchPage() {
         </CardHeader>
         <CardBody>
           <form action={reindexAllAction}>
-            <SubmitButton pendingLabel="Encolando…">Reindex todo</SubmitButton>
+            <SubmitButton pendingLabel={t(locale, 'admin.action.enqueuing')}>
+              {t(locale, 'admin.action.reindexAll')}
+            </SubmitButton>
           </form>
         </CardBody>
       </Card>
@@ -91,8 +95,12 @@ export default async function AdminSearchPage() {
                     <td className="px-5 py-3 text-right">
                       <form action={retryFailedAction}>
                         <input type="hidden" name="queueItemId" value={r.id} />
-                        <SubmitButton variant="ghost" size="sm" pendingLabel="…">
-                          Reintentar
+                        <SubmitButton
+                          variant="ghost"
+                          size="sm"
+                          pendingLabel={t(locale, 'common.pending')}
+                        >
+                          {t(locale, 'admin.action.retry')}
                         </SubmitButton>
                       </form>
                     </td>
