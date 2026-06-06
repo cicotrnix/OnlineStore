@@ -155,6 +155,8 @@ export default async function ProductPage({ params }: Props) {
           {showPrice && (
             <AddToCartButton
               productId={product.id}
+              locale={locale}
+              returnTo={`/products/${product.slug}`}
               showQuantity
               disabled={isImpersonating || product.stockQuantity === 0}
               disabledReason={

@@ -1,3 +1,4 @@
+import { type Locale, t } from '@/lib/i18n'
 import { Body, Container, Head, Heading, Html, Link, Section, Text } from '@react-email/components'
 import type { JSX } from 'react'
 
@@ -7,6 +8,8 @@ export interface BaseTemplateProps {
   link?: string | null
   userName: string
   cta?: string
+  /** Locale del destinatario. Default: 'en-US' (chrome en EN). */
+  locale?: Locale
 }
 
 export function BaseTemplate({
@@ -14,9 +17,11 @@ export function BaseTemplate({
   body,
   link,
   userName,
-  cta = 'Ver detalle',
+  cta,
+  locale = 'en-US',
 }: BaseTemplateProps): JSX.Element {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const ctaText = cta ?? t(locale, 'email.cta.viewDetail')
   return (
     <Html>
       <Head />
@@ -40,7 +45,7 @@ export function BaseTemplate({
           <Heading as="h2" style={{ marginTop: 0 }}>
             {title}
           </Heading>
-          <Text>Hola {userName},</Text>
+          <Text>{t(locale, 'email.greeting', { name: userName })}</Text>
           <Text style={{ lineHeight: 1.5 }}>{body}</Text>
           {link ? (
             <Section style={{ marginTop: 24 }}>
@@ -56,7 +61,7 @@ export function BaseTemplate({
                   display: 'inline-block',
                 }}
               >
-                {cta}
+                {ctaText}
               </Link>
             </Section>
           ) : null}

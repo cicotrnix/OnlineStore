@@ -6,7 +6,7 @@ export function isSupportedLocale(value: string | null | undefined): value is Lo
   return value === 'en-US' || value === 'es-419'
 }
 
-type MessageKey =
+export type MessageKey =
   | 'localeSwitch.label'
   | 'localeSwitch.en'
   | 'localeSwitch.es'
@@ -201,6 +201,8 @@ type MessageKey =
   | 'admin.nav.settings'
   // Common
   | 'common.pending'
+  | 'common.yes'
+  | 'common.no'
   | 'common.toast.error.unexpected'
   // Auth toasts
   | 'auth.toast.linkSent'
@@ -233,13 +235,87 @@ type MessageKey =
   // Admin upload cert
   | 'admin.toast.certUploaded'
   | 'admin.toast.certFailed'
+  // Admin generic toasts
+  | 'admin.toast.saved'
+  | 'admin.toast.created'
+  | 'admin.toast.updated'
+  | 'admin.toast.deleted'
+  | 'admin.toast.invalidInput'
+  // Admin product/category
+  | 'admin.toast.productCreated'
+  | 'admin.toast.productEnabled'
+  | 'admin.toast.productDisabled'
+  | 'admin.toast.productPrivacyToggled'
+  | 'admin.toast.categoryCreated'
+  | 'admin.toast.categoryPrivacyToggled'
+  | 'admin.toast.tierUpserted'
+  // Admin orders
+  | 'admin.toast.orderStatusChanged'
+  | 'admin.toast.orderCancelled'
+  // Admin invoices / quotes
+  | 'admin.toast.invoicePaid'
+  | 'admin.toast.quoteSent'
+  | 'admin.toast.quoteRevised'
+  // Admin credit / customer
+  | 'admin.toast.creditSaved'
+  | 'admin.toast.customerPriceSaved'
+  | 'admin.toast.accessGranted'
+  | 'admin.toast.accessRevoked'
+  // Admin actions labels
+  | 'admin.action.save'
+  | 'admin.action.saving'
+  | 'admin.action.create'
+  | 'admin.action.creating'
+  | 'admin.action.toggle'
+  | 'admin.action.cancel'
+  | 'admin.action.cancelling'
+  | 'admin.action.confirmCancel'
+  | 'admin.action.upload'
+  | 'admin.action.uploading'
+  | 'admin.action.remove'
+  | 'admin.action.grantAccess'
+  | 'admin.action.granting'
+  | 'admin.action.viewCert'
+  | 'admin.action.opening'
+  | 'admin.action.uploadAndApprove'
+  | 'admin.action.viewAsOrg'
+  | 'admin.action.entering'
+  | 'admin.action.markPaid'
+  | 'admin.action.reconcileWire'
+  | 'admin.action.reconciling'
+  | 'admin.action.enqueuing'
+  | 'admin.action.generateRegenerate'
+  | 'admin.action.generateAllContent'
+  | 'admin.action.publish'
+  | 'admin.action.publishing'
+  | 'admin.action.reindexAll'
+  | 'admin.action.retry'
+  | 'admin.action.createProduct'
+  | 'admin.action.activate'
+  | 'admin.action.deactivate'
+  | 'admin.action.saveTier'
+  | 'admin.action.revise'
+  | 'admin.action.quote'
+  | 'admin.action.sending'
+  | 'admin.action.invite'
+  | 'admin.action.inviting'
+  // Email chrome
+  | 'email.greeting'
+  | 'email.cta.viewDetail'
   // Cart toasts
+  | 'cart.toast.added'
   | 'cart.toast.updated'
   | 'cart.toast.removed'
+  | 'cart.toast.failed'
   | 'cart.confirm.remove'
+  // Product CTAs
+  | 'product.add'
+  | 'product.unavailable'
+  | 'product.adding'
   // Checkout
   | 'checkout.toast.orderPlaced'
   | 'checkout.toast.failed'
+  | 'checkout.placing'
 
 type Dict = Record<MessageKey, string>
 
@@ -452,6 +528,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.nav.settings': 'Settings',
     // Common
     'common.pending': 'Working…',
+    'common.yes': 'Yes',
+    'common.no': 'No',
     'common.toast.error.unexpected': 'Something went wrong. Please try again.',
     // Auth
     'auth.toast.linkSent': 'Magic link sent. Check your inbox.',
@@ -482,13 +560,80 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.wireFailed': 'Wire reconciliation failed.',
     'admin.toast.certUploaded': 'Certificate uploaded and customer approved ✓',
     'admin.toast.certFailed': 'Certificate upload failed.',
+    'admin.toast.saved': 'Saved ✓',
+    'admin.toast.created': 'Created ✓',
+    'admin.toast.updated': 'Updated ✓',
+    'admin.toast.deleted': 'Deleted ✓',
+    'admin.toast.invalidInput': 'Invalid input. Please review.',
+    'admin.toast.productCreated': 'Product created ✓',
+    'admin.toast.productEnabled': 'Product enabled ✓',
+    'admin.toast.productDisabled': 'Product disabled ✓',
+    'admin.toast.productPrivacyToggled': 'Product privacy updated ✓',
+    'admin.toast.categoryCreated': 'Category created ✓',
+    'admin.toast.categoryPrivacyToggled': 'Category privacy updated ✓',
+    'admin.toast.tierUpserted': 'Price tier saved ✓',
+    'admin.toast.orderStatusChanged': 'Order status updated ✓',
+    'admin.toast.orderCancelled': 'Order cancelled.',
+    'admin.toast.invoicePaid': 'Invoice marked paid ✓',
+    'admin.toast.quoteSent': 'Quote sent ✓',
+    'admin.toast.quoteRevised': 'Quote revised ✓',
+    'admin.toast.creditSaved': 'Credit settings saved ✓',
+    'admin.toast.customerPriceSaved': 'Customer price saved ✓',
+    'admin.toast.accessGranted': 'Access granted ✓',
+    'admin.toast.accessRevoked': 'Access revoked.',
+    'admin.action.save': 'Save',
+    'admin.action.saving': 'Saving…',
+    'admin.action.create': 'Create',
+    'admin.action.creating': 'Creating…',
+    'admin.action.toggle': 'Toggle',
+    'admin.action.cancel': 'Cancel order',
+    'admin.action.cancelling': 'Cancelling…',
+    'admin.action.confirmCancel': 'Cancel this order? Stock will be restored.',
+    'admin.action.upload': 'Upload',
+    'admin.action.uploading': 'Uploading…',
+    'admin.action.remove': 'Remove',
+    'admin.action.grantAccess': 'Grant access',
+    'admin.action.granting': 'Granting…',
+    'admin.action.viewCert': 'View certificate',
+    'admin.action.opening': 'Opening…',
+    'admin.action.uploadAndApprove': 'Upload + auto-approve',
+    'admin.action.viewAsOrg': 'View storefront as this org',
+    'admin.action.entering': 'Entering…',
+    'admin.action.markPaid': 'Mark paid',
+    'admin.action.reconcileWire': 'Reconcile wire',
+    'admin.action.reconciling': 'Reconciling…',
+    'admin.action.enqueuing': 'Enqueuing…',
+    'admin.action.generateRegenerate': 'Generate / Regenerate (EN + ES)',
+    'admin.action.generateAllContent': 'Generate AI content (all)',
+    'admin.action.publish': 'Publish',
+    'admin.action.publishing': 'Publishing…',
+    'admin.action.reindexAll': 'Reindex all',
+    'admin.action.retry': 'Retry',
+    'admin.action.createProduct': 'Create product',
+    'admin.action.activate': 'Activate',
+    'admin.action.deactivate': 'Deactivate',
+    'admin.action.saveTier': 'Save tier',
+    'admin.action.revise': 'Revise',
+    'admin.action.quote': 'Quote',
+    'admin.action.sending': 'Sending…',
+    'admin.action.invite': 'Invite',
+    'admin.action.inviting': 'Inviting…',
+    'email.greeting': 'Hi {name},',
+    'email.cta.viewDetail': 'View details',
     // Cart
+    'cart.toast.added': 'Added to cart ✓',
     'cart.toast.updated': 'Cart updated.',
     'cart.toast.removed': 'Item removed.',
+    'cart.toast.failed': 'Could not update the cart.',
     'cart.confirm.remove': 'Remove this item from the cart?',
+    // Product CTAs
+    'product.add': 'Add',
+    'product.unavailable': 'Unavailable',
+    'product.adding': 'Adding…',
     // Checkout
     'checkout.toast.orderPlaced': 'Order placed ✓',
     'checkout.toast.failed': 'We could not place the order.',
+    'checkout.placing': 'Placing order…',
   },
   'es-419': {
     'localeSwitch.label': 'Idioma',
@@ -700,6 +845,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.nav.settings': 'Settings',
     // Common
     'common.pending': 'Procesando…',
+    'common.yes': 'Sí',
+    'common.no': 'No',
     'common.toast.error.unexpected': 'Algo salió mal. Volvé a intentar.',
     // Auth
     'auth.toast.linkSent': 'Te enviamos el link mágico. Revisá tu bandeja.',
@@ -731,13 +878,80 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.wireFailed': 'Falló la conciliación del wire.',
     'admin.toast.certUploaded': 'Certificado subido y cliente aprobado ✓',
     'admin.toast.certFailed': 'Falló la subida del certificado.',
+    'admin.toast.saved': 'Guardado ✓',
+    'admin.toast.created': 'Creado ✓',
+    'admin.toast.updated': 'Actualizado ✓',
+    'admin.toast.deleted': 'Eliminado ✓',
+    'admin.toast.invalidInput': 'Datos inválidos. Revisalos.',
+    'admin.toast.productCreated': 'Producto creado ✓',
+    'admin.toast.productEnabled': 'Producto activado ✓',
+    'admin.toast.productDisabled': 'Producto desactivado ✓',
+    'admin.toast.productPrivacyToggled': 'Privacidad del producto actualizada ✓',
+    'admin.toast.categoryCreated': 'Categoría creada ✓',
+    'admin.toast.categoryPrivacyToggled': 'Privacidad de la categoría actualizada ✓',
+    'admin.toast.tierUpserted': 'Tier de precio guardado ✓',
+    'admin.toast.orderStatusChanged': 'Estado de la orden actualizado ✓',
+    'admin.toast.orderCancelled': 'Orden cancelada.',
+    'admin.toast.invoicePaid': 'Factura marcada como pagada ✓',
+    'admin.toast.quoteSent': 'Cotización enviada ✓',
+    'admin.toast.quoteRevised': 'Cotización revisada ✓',
+    'admin.toast.creditSaved': 'Configuración de crédito guardada ✓',
+    'admin.toast.customerPriceSaved': 'Precio del cliente guardado ✓',
+    'admin.toast.accessGranted': 'Acceso otorgado ✓',
+    'admin.toast.accessRevoked': 'Acceso revocado.',
+    'admin.action.save': 'Guardar',
+    'admin.action.saving': 'Guardando…',
+    'admin.action.create': 'Crear',
+    'admin.action.creating': 'Creando…',
+    'admin.action.toggle': 'Alternar',
+    'admin.action.cancel': 'Cancelar orden',
+    'admin.action.cancelling': 'Cancelando…',
+    'admin.action.confirmCancel': '¿Cancelar esta orden? Se restaurará el stock.',
+    'admin.action.upload': 'Subir',
+    'admin.action.uploading': 'Subiendo…',
+    'admin.action.remove': 'Quitar',
+    'admin.action.grantAccess': 'Otorgar acceso',
+    'admin.action.granting': 'Otorgando…',
+    'admin.action.viewCert': 'Ver certificado',
+    'admin.action.opening': 'Abriendo…',
+    'admin.action.uploadAndApprove': 'Subir + auto-aprobar',
+    'admin.action.viewAsOrg': 'Ver storefront como esta org',
+    'admin.action.entering': 'Entrando…',
+    'admin.action.markPaid': 'Marcar pagada',
+    'admin.action.reconcileWire': 'Conciliar wire',
+    'admin.action.reconciling': 'Conciliando…',
+    'admin.action.enqueuing': 'Encolando…',
+    'admin.action.generateRegenerate': 'Generar / Regenerar (EN + ES)',
+    'admin.action.generateAllContent': 'Generar contenido AI (todos)',
+    'admin.action.publish': 'Publicar',
+    'admin.action.publishing': 'Publicando…',
+    'admin.action.reindexAll': 'Reindex todo',
+    'admin.action.retry': 'Reintentar',
+    'admin.action.createProduct': 'Crear producto',
+    'admin.action.activate': 'Activar',
+    'admin.action.deactivate': 'Desactivar',
+    'admin.action.saveTier': 'Guardar tramo',
+    'admin.action.revise': 'Revisar',
+    'admin.action.quote': 'Cotizar',
+    'admin.action.sending': 'Enviando…',
+    'admin.action.invite': 'Invitar',
+    'admin.action.inviting': 'Invitando…',
+    'email.greeting': 'Hola {name},',
+    'email.cta.viewDetail': 'Ver detalle',
     // Cart
+    'cart.toast.added': 'Agregado al carrito ✓',
     'cart.toast.updated': 'Carrito actualizado.',
     'cart.toast.removed': 'Item eliminado.',
+    'cart.toast.failed': 'No pudimos actualizar el carrito.',
     'cart.confirm.remove': '¿Quitar este item del carrito?',
+    // Product CTAs
+    'product.add': 'Agregar',
+    'product.unavailable': 'No disponible',
+    'product.adding': 'Agregando…',
     // Checkout
     'checkout.toast.orderPlaced': 'Orden colocada ✓',
     'checkout.toast.failed': 'No pudimos colocar la orden.',
+    'checkout.placing': 'Colocando orden…',
   },
 }
 

@@ -1,8 +1,10 @@
 import { setCustomerPriceAction } from '@/app/admin/_actions'
-import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { catalogService } from '@/modules/catalog'
 import { pricingService } from '@/modules/pricing'
@@ -13,6 +15,8 @@ type Props = { params: Promise<{ id: string }> }
 
 export default async function AdminCustomerPricesPage({ params }: Props) {
   const { id } = await params
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const org = await prisma.organization.findUnique({ where: { id } })
   if (!org) notFound()
 
@@ -65,9 +69,13 @@ export default async function AdminCustomerPricesPage({ params }: Props) {
                         placeholder="—"
                         className="w-28"
                       />
-                      <Button type="submit" variant="secondary" size="sm">
-                        Guardar
-                      </Button>
+                      <SubmitButton
+                        variant="secondary"
+                        size="sm"
+                        pendingLabel={t(locale, 'admin.action.saving')}
+                      >
+                        {t(locale, 'admin.action.save')}
+                      </SubmitButton>
                     </form>
                   </td>
                 </tr>

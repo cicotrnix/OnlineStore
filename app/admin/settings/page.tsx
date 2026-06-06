@@ -1,9 +1,12 @@
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
+import { getLocale, t } from '@/lib/i18n'
 import { customersService } from '@/modules/customers'
 import { createOrganizationAction, inviteMemberAction } from './actions'
 
 export default async function SettingsPage() {
   const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const orgs = await customersService.listForUser(user.id)
 
   return (
@@ -26,13 +29,9 @@ export default async function SettingsPage() {
             placeholder="acme-wholesale"
             className="w-full border rounded-lg px-3 py-2 text-sm"
           />
-          <button
-            type="submit"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-white"
-            style={{ background: 'var(--color-primary)' }}
-          >
-            Create
-          </button>
+          <SubmitButton pendingLabel={t(locale, 'admin.action.creating')}>
+            {t(locale, 'admin.action.create')}
+          </SubmitButton>
         </form>
       </section>
 
@@ -57,9 +56,12 @@ export default async function SettingsPage() {
                     placeholder="invitee@company.com"
                     className="flex-1 border rounded-lg px-3 py-2 text-sm"
                   />
-                  <button type="submit" className="rounded-lg px-3 py-2 text-sm font-medium border">
-                    Invite
-                  </button>
+                  <SubmitButton
+                    variant="secondary"
+                    pendingLabel={t(locale, 'admin.action.inviting')}
+                  >
+                    {t(locale, 'admin.action.invite')}
+                  </SubmitButton>
                 </form>
               </li>
             ))}

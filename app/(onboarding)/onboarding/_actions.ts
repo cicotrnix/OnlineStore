@@ -2,6 +2,7 @@
 
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { toastUrl } from '@/lib/feedback/action-result'
 import { customersService } from '@/modules/customers'
 import { uploadCertificate } from '@/modules/verification'
 import type { TaxDocumentType } from '@prisma/client'
@@ -9,10 +10,8 @@ import { redirect } from 'next/navigation'
 
 /**
  * Onboarding self-service: crea Organization PENDING + member OWNER + default
- * address + sube certificado. Tras submit, redirige a /onboarding/pending.
- *
- * Si el user ya pertenece a una org → throw ALREADY_HAS_ORG (la UI no debería
- * mostrar el form; defensa en profundidad).
+ * address + sube certificado. Tras submit, redirige a /onboarding/pending +
+ * toast. Errores de validación: redirect a /onboarding con toast=error.
  */
 export async function submitOnboardingAction(formData: FormData): Promise<void> {
   const user = await requireAuth()
@@ -21,11 +20,15 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
     where: { userId: user.id },
     select: { organizationId: true },
   })
-  if (existingMember) throw new Error('ALREADY_HAS_ORG')
+  if (existingMember) {
+    redirect(toastUrl('/onboarding/pending', 'info', 'onboarding.toast.alreadyHasOrg'))
+  }
 
   const name = String(formData.get('name')).trim()
   const countryRaw = String(formData.get('country')).trim().toUpperCase()
-  if (countryRaw.length !== 2) throw new Error('country debe ser ISO-2')
+  if (countryRaw.length !== 2) {
+    redirect(toastUrl('/onboarding', 'error', 'onboarding.toast.invalidCountry'))
+  }
   const country = countryRaw
   const addressLine1 = String(formData.get('addressLine1')).trim()
   const addressLine2 = String(formData.get('addressLine2') ?? '').trim() || undefined
@@ -38,13 +41,15 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
   const jurisdiction = String(formData.get('jurisdiction')).trim()
   const file = formData.get('file') as File | null
 
-  if (!name) throw new Error('name obligatorio')
-  if (country.length !== 2) throw new Error('country debe ser ISO-2')
-  if (!addressLine1 || !city || !postalCode) throw new Error('dirección incompleta')
-  if (!docNumber || !jurisdiction)
-    throw new Error('certificado: número y jurisdicción obligatorios')
-  if (!file || file.size === 0) throw new Error('archivo del certificado obligatorio')
-  if (file.size > 10 * 1024 * 1024) throw new Error('archivo > 10 MB')
+  if (!name || !addressLine1 || !city || !postalCode || !docNumber || !jurisdiction) {
+    redirect(toastUrl('/onboarding', 'error', 'common.toast.error.unexpected'))
+  }
+  if (!file || file.size === 0) {
+    redirect(toastUrl('/onboarding', 'error', 'onboarding.toast.fileMissing'))
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    redirect(toastUrl('/onboarding', 'error', 'common.toast.error.unexpected'))
+  }
 
   const org = await customersService.createOrganizationWithOwner({
     userId: user.id,
@@ -71,12 +76,11 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
     country,
   })
 
-  redirect('/onboarding/pending')
+  redirect(toastUrl('/onboarding/pending', 'success', 'onboarding.toast.submitted'))
 }
 
 /**
- * Re-upload del certificado para una org REJECTED. La org vuelve a PENDING
- * y el rejectionReason se limpia. (Implementado dentro de uploadCertificate.)
+ * Re-upload del certificado para una org REJECTED. La org vuelve a PENDING.
  */
 export async function resubmitCertificateAction(formData: FormData): Promise<void> {
   const user = await requireAuth()
@@ -84,19 +88,27 @@ export async function resubmitCertificateAction(formData: FormData): Promise<voi
     where: { userId: user.id, role: { in: ['OWNER', 'ADMIN'] } },
     select: { organizationId: true },
   })
-  if (!member) throw new Error('NO_ORG')
+  if (!member) {
+    redirect(toastUrl('/onboarding', 'error', 'common.toast.error.unexpected'))
+  }
 
   const docType = String(formData.get('type')) as TaxDocumentType
   const docNumber = String(formData.get('number')).trim()
   const jurisdiction = String(formData.get('jurisdiction')).trim()
   const file = formData.get('file') as File | null
-  if (!docNumber || !jurisdiction) throw new Error('número y jurisdicción obligatorios')
-  if (!file || file.size === 0) throw new Error('archivo obligatorio')
-  if (file.size > 10 * 1024 * 1024) throw new Error('archivo > 10 MB')
+  if (!docNumber || !jurisdiction) {
+    redirect(toastUrl('/onboarding/pending', 'error', 'common.toast.error.unexpected'))
+  }
+  if (!file || file.size === 0) {
+    redirect(toastUrl('/onboarding/pending', 'error', 'onboarding.toast.fileMissing'))
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    redirect(toastUrl('/onboarding/pending', 'error', 'common.toast.error.unexpected'))
+  }
 
   const fileBytes = new Uint8Array(await file.arrayBuffer())
   await uploadCertificate({
-    organizationId: member.organizationId,
+    organizationId: member!.organizationId,
     type: docType,
     number: docNumber,
     jurisdiction,
@@ -104,5 +116,5 @@ export async function resubmitCertificateAction(formData: FormData): Promise<voi
     fileBytes,
   })
 
-  redirect('/onboarding/pending')
+  redirect(toastUrl('/onboarding/pending', 'success', 'onboarding.toast.resubmitted'))
 }

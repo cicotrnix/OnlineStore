@@ -4,9 +4,11 @@ import {
   transitionOrderStatusAction,
 } from '@/app/admin/_actions'
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { notFound } from 'next/navigation'
@@ -25,6 +27,8 @@ const CAN_CANCEL = new Set(['PENDING_PAYMENT', 'CONFIRMED'])
 
 export default async function AdminOrderDetailPage({ params }: Props) {
   const { id } = await params
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const order = await ordersService.findById(id)
   if (!order) notFound()
 
@@ -95,15 +99,19 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               <form key={s} action={transitionOrderStatusAction}>
                 <input type="hidden" name="orderId" value={order.id} />
                 <input type="hidden" name="newStatus" value={s} />
-                <Button type="submit">→ {s}</Button>
+                <SubmitButton pendingLabel={t(locale, 'common.pending')}>→ {s}</SubmitButton>
               </form>
             ))}
             {CAN_CANCEL.has(order.status) && (
               <form action={cancelOrderAction}>
                 <input type="hidden" name="orderId" value={order.id} />
-                <Button type="submit" variant="danger">
-                  Cancelar orden
-                </Button>
+                <SubmitButton
+                  variant="danger"
+                  pendingLabel={t(locale, 'admin.action.cancelling')}
+                  confirmMessage={t(locale, 'admin.action.confirmCancel')}
+                >
+                  {t(locale, 'admin.action.cancel')}
+                </SubmitButton>
               </form>
             )}
           </CardBody>
@@ -149,7 +157,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   className="block w-full rounded border border-gray-300 px-3 py-2 text-sm font-mono"
                 />
               </div>
-              <Button type="submit">Conciliar wire</Button>
+              <SubmitButton pendingLabel={t(locale, 'admin.action.reconciling')}>
+                {t(locale, 'admin.action.reconcileWire')}
+              </SubmitButton>
             </form>
           </CardBody>
         </Card>

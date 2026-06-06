@@ -1,11 +1,15 @@
 import { createCategoryAction } from '@/app/admin/_actions'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { requireAuth } from '@/lib/auth/helpers'
+import { getLocale, t } from '@/lib/i18n'
 import { catalogService } from '@/modules/catalog'
 
 export default async function AdminCategoriesPage() {
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const categories = await catalogService.listCategories(false)
 
   return (
@@ -49,7 +53,9 @@ export default async function AdminCategoriesPage() {
               />
             </div>
             <div className="sm:col-span-3 flex justify-end">
-              <Button type="submit">Crear</Button>
+              <SubmitButton pendingLabel={t(locale, 'admin.action.creating')}>
+                {t(locale, 'admin.action.create')}
+              </SubmitButton>
             </div>
           </form>
         </CardBody>

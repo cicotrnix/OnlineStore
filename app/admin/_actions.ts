@@ -3,12 +3,30 @@
 import { impersonationStart } from '@/lib/auth/actions'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { toastUrl } from '@/lib/feedback/action-result'
+import type { MessageKey } from '@/lib/i18n/messages'
 import { catalogService } from '@/modules/catalog'
 import { ordersService } from '@/modules/orders'
 import { pricingService } from '@/modules/pricing'
 import { enqueueIndex } from '@/modules/search'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+
+function safeReturnTo(raw: FormDataEntryValue | null, fallback: string): string {
+  const v = typeof raw === 'string' ? raw : ''
+  if (v.startsWith('/') && !v.startsWith('//')) return v
+  return fallback
+}
+
+function adminToast(
+  formData: FormData,
+  fallback: string,
+  variant: 'success' | 'error' | 'info',
+  msg: MessageKey
+): never {
+  const returnTo = safeReturnTo(formData.get('returnTo'), fallback)
+  redirect(toastUrl(returnTo, variant, msg))
+}
 
 async function requirePlatformAdmin() {
   const user = await requireAuth()
@@ -42,6 +60,7 @@ export async function createProductAction(formData: FormData) {
   })
   await enqueueIndex(product.id, 'UPSERT')
   revalidatePath('/admin/products')
+  adminToast(formData, '/admin/products', 'success', 'admin.toast.productCreated')
 }
 
 export async function toggleProductActiveAction(formData: FormData) {
@@ -51,6 +70,12 @@ export async function toggleProductActiveAction(formData: FormData) {
   await catalogService.updateProduct({ id, isActive: !isActive })
   await enqueueIndex(id, isActive ? 'DELETE' : 'UPSERT')
   revalidatePath('/admin/products')
+  adminToast(
+    formData,
+    '/admin/products',
+    'success',
+    isActive ? 'admin.toast.productDisabled' : 'admin.toast.productEnabled'
+  )
 }
 
 export async function createCategoryAction(formData: FormData) {
@@ -60,6 +85,7 @@ export async function createCategoryAction(formData: FormData) {
   const sortOrder = Number(formData.get('sortOrder') ?? 0)
   await catalogService.createCategory({ slug, name, sortOrder })
   revalidatePath('/admin/categories')
+  adminToast(formData, '/admin/categories', 'success', 'admin.toast.categoryCreated')
 }
 
 export async function toggleCategoryPrivacyAction(formData: FormData) {
@@ -75,6 +101,7 @@ export async function toggleCategoryPrivacyAction(formData: FormData) {
     await enqueueIndex(p.id, 'UPSERT')
   }
   revalidatePath('/admin/categories')
+  adminToast(formData, '/admin/categories', 'success', 'admin.toast.categoryPrivacyToggled')
 }
 
 export async function transitionOrderStatusAction(formData: FormData) {
@@ -84,6 +111,7 @@ export async function transitionOrderStatusAction(formData: FormData) {
   await ordersService.transitionStatus({ orderId, newStatus })
   revalidatePath('/admin/orders')
   revalidatePath(`/admin/orders/${orderId}`)
+  adminToast(formData, `/admin/orders/${orderId}`, 'success', 'admin.toast.orderStatusChanged')
 }
 
 export async function cancelOrderAction(formData: FormData) {
@@ -91,6 +119,7 @@ export async function cancelOrderAction(formData: FormData) {
   const orderId = String(formData.get('orderId'))
   await ordersService.cancel({ orderId, byUserId: user.id })
   revalidatePath('/admin/orders')
+  adminToast(formData, '/admin/orders', 'success', 'admin.toast.orderCancelled')
 }
 
 export async function approveOrganizationAction(formData: FormData) {
@@ -134,26 +163,38 @@ export async function rejectOrganizationAction(formData: FormData) {
 export async function uploadTaxCertificateAction(formData: FormData) {
   await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))
+  const fallback = `/admin/customers/${organizationId}`
   const type = String(formData.get('type')) as 'US_RESALE_CERT' | 'FOREIGN_EQUIV'
   const number = String(formData.get('number')).trim()
   const jurisdiction = String(formData.get('jurisdiction')).trim()
   const country = String(formData.get('country') ?? '').trim() || undefined
-  if (!number || !jurisdiction) throw new Error('number y jurisdiction obligatorios')
+  if (!number || !jurisdiction) {
+    adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+  }
   const file = formData.get('file') as File | null
-  if (!file || file.size === 0) throw new Error('archivo obligatorio')
-  if (file.size > 10 * 1024 * 1024) throw new Error('archivo > 10 MB')
-  const fileBytes = new Uint8Array(await file.arrayBuffer())
+  if (!file || file.size === 0) {
+    adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+  }
+  if (file!.size > 10 * 1024 * 1024) {
+    adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+  }
+  const fileBytes = new Uint8Array(await file!.arrayBuffer())
   const { uploadAndAutoApprove } = await import('@/modules/verification')
-  await uploadAndAutoApprove({
-    organizationId,
-    type,
-    number,
-    jurisdiction,
-    fileName: file.name,
-    fileBytes,
-    country,
-  })
-  revalidatePath(`/admin/customers/${organizationId}`)
+  try {
+    await uploadAndAutoApprove({
+      organizationId,
+      type,
+      number,
+      jurisdiction,
+      fileName: file!.name,
+      fileBytes,
+      country,
+    })
+  } catch {
+    adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+  }
+  revalidatePath(fallback)
+  adminToast(formData, fallback, 'success', 'admin.toast.certUploaded')
 }
 
 export async function getTaxCertificateUrlAction(formData: FormData): Promise<string> {
@@ -170,33 +211,45 @@ export async function getTaxCertificateUrlAction(formData: FormData): Promise<st
 export async function reconcileWireAction(formData: FormData) {
   const user = await requirePlatformAdmin()
   const orderId = String(formData.get('orderId'))
+  const fallback = `/admin/orders/${orderId}`
   const amountStr = String(formData.get('amount'))
   const wireReference = String(formData.get('wireReference')).trim()
-  if (!wireReference) throw new Error('wireReference es obligatorio')
+  if (!wireReference) {
+    adminToast(formData, fallback, 'error', 'admin.toast.wireFailed')
+  }
   // amount viene en USD; el módulo de pagos trabaja en cents.
   const amount = Number(amountStr)
-  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Monto inválido')
+  if (!Number.isFinite(amount) || amount <= 0) {
+    adminToast(formData, fallback, 'error', 'admin.toast.wireFailed')
+  }
   const amountCents = Math.round(amount * 100)
   const { reconcileWire } = await import('@/modules/payments')
-  await reconcileWire({ orderId, amountCents, wireReference, adminUserId: user.id })
+  try {
+    await reconcileWire({ orderId, amountCents, wireReference, adminUserId: user.id })
+  } catch {
+    adminToast(formData, fallback, 'error', 'admin.toast.wireFailed')
+  }
   revalidatePath('/admin/orders')
-  revalidatePath(`/admin/orders/${orderId}`)
+  revalidatePath(fallback)
+  adminToast(formData, fallback, 'success', 'admin.toast.wireReconciled')
 }
 
 export async function setCustomerPriceAction(formData: FormData) {
   await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))
+  const fallback = `/admin/customers/${organizationId}/prices`
   const productId = String(formData.get('productId'))
   const price = Number(formData.get('price'))
   if (!Number.isFinite(price) || price <= 0) {
-    throw new Error('Precio inválido')
+    adminToast(formData, fallback, 'error', 'admin.toast.invalidInput')
   }
   await pricingService.setCustomerPrice({
     organizationId,
     productId,
     price,
   })
-  revalidatePath(`/admin/customers/${organizationId}/prices`)
+  revalidatePath(fallback)
+  adminToast(formData, fallback, 'success', 'admin.toast.customerPriceSaved')
 }
 
 export async function startImpersonationAction(formData: FormData) {
