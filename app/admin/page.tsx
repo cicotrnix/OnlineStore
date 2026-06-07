@@ -52,7 +52,10 @@ export default async function AdminDashboardPage() {
     },
     {
       label: 'Saldo abierto (pendiente + overdue)',
-      value: formatMoney(openInvoiceAgg._sum?.amount ?? new Decimal(0), getStoreConfig().currency.base),
+      value: formatMoney(
+        openInvoiceAgg._sum?.amount ?? new Decimal(0),
+        getStoreConfig().currency.base
+      ),
       href: '/admin/invoices',
       show: creditOn,
     },

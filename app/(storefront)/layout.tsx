@@ -46,7 +46,11 @@ export default async function StorefrontLayout({
       {impersonatingName && <ImpersonationBanner orgName={impersonatingName} />}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto pl-2 pr-6 h-20 flex items-center justify-between">
-          <Link href="/" aria-label={getStoreConfig().identity.name} className="-my-2 block shrink-0">
+          <Link
+            href="/"
+            aria-label={getStoreConfig().identity.name}
+            className="-my-2 block shrink-0"
+          >
             <Image
               src={getStoreConfig().identity.logo}
               alt={getStoreConfig().identity.name}

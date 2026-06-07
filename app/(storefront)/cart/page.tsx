@@ -124,7 +124,9 @@ export default async function CartPage() {
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-gray-500">{t(locale, 'cart.subtotal')}</dt>
-                <dd className="tabular-nums">{formatMoney(subtotal, getStoreConfig().currency.base)}</dd>
+                <dd className="tabular-nums">
+                  {formatMoney(subtotal, getStoreConfig().currency.base)}
+                </dd>
               </div>
               <p className="text-[11px] text-gray-400 pt-1">{t(locale, 'cart.taxNote')}</p>
             </dl>

@@ -20,7 +20,8 @@ export default async function OrderDetailPage({ params }: Props) {
   const order = await ordersService.findById(id)
   if (!order) notFound()
 
-  const canPayWithCard = getStoreConfig().payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
+  const canPayWithCard =
+    getStoreConfig().payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
