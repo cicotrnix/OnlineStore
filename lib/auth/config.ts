@@ -1,8 +1,10 @@
 import { prisma } from '@/lib/db/client'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import NextAuth from 'next-auth'
 import Resend from 'next-auth/providers/resend'
+
+const storeConfig = getStoreConfig()
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),

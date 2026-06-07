@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db/client'
 import { dispatch } from '@/modules/notifications'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Quote } from '@prisma/client'
 import { Decimal } from '@prisma/client/runtime/library'
 import { convertQuoteToOrder } from './conversion'
@@ -29,7 +29,7 @@ export async function addLineToDraft(input: AddLineInput): Promise<Quote> {
           organizationId: input.organizationId,
           requestedById: input.userId,
           status: 'DRAFT',
-          currency: storeConfig.currency.base,
+          currency: getStoreConfig().currency.base,
         },
       })
     }

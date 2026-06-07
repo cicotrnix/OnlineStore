@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db/client'
 import type { Locale } from '@/lib/i18n'
 import { complete } from '@/modules/ai/provider'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { parseContentSections } from './parser'
 import { buildContentPrompt } from './prompt'
 
@@ -17,6 +17,7 @@ export async function generateContentForProduct(input: GenerateInput) {
   })
   if (!product) throw new Error(`Product not found: ${input.productId}`)
 
+  const storeConfig = getStoreConfig()
   const brandVoice = storeConfig.identity.brandVoice
   if (!brandVoice) {
     throw new Error('store.config.identity.brandVoice missing — required for content generation')

@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/db/client'
-import type storeConfig from '@/store.config'
 import { cleanDb } from '@/tests/helpers/cleanDb'
 import { Decimal } from '@prisma/client/runtime/library'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,13 +7,15 @@ import { deleteTier, listTiersForProduct, upsertTier } from '../tiers'
 
 beforeEach(cleanDb)
 
-vi.mock('@/store.config', async () => {
-  const actual = (await vi.importActual('@/store.config')) as { default: typeof storeConfig }
+vi.mock('@/stores', async () => {
+  const actual = await vi.importActual<typeof import('@/stores')>('@/stores')
+  const base = actual.getStoreConfig()
   return {
-    default: {
-      ...actual.default,
-      modules: { ...actual.default.modules, volumeDiscounts: true },
-    },
+    ...actual,
+    getStoreConfig: () => ({
+      ...base,
+      modules: { ...base.modules, volumeDiscounts: true },
+    }),
   }
 })
 
