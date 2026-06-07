@@ -1,4 +1,6 @@
 import type { StoreConfig, ThemeConfig } from '@/modules/config'
+import demoConfig from './demo/store.config'
+import demoTheme from './demo/theme.config'
 import pipowerConfig from './pipower/store.config'
 import pipowerTheme from './pipower/theme.config'
 
@@ -10,6 +12,7 @@ export interface StoreEntry {
 /** Registry real: imports estáticos — todas las configs viajan en el bundle (data, sin secretos). */
 export const STORE_REGISTRY: Record<string, StoreEntry> = {
   pipower: { config: pipowerConfig, theme: pipowerTheme },
+  demo: { config: demoConfig, theme: demoTheme },
 }
 
 const DEFAULT_STORE_ID = 'pipower'

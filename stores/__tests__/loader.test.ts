@@ -57,4 +57,9 @@ describe('stores loader', () => {
     vi.stubEnv('STORE_ID', 'pipower')
     expect(getStoreTheme()).toBe(STORE_REGISTRY.pipower?.theme)
   })
+
+  it('STORE_ID=demo → sirve la tienda demo del registry real', () => {
+    vi.stubEnv('STORE_ID', 'demo')
+    expect(getStoreConfig().identity.name).toBe('Demo Store')
+  })
 })
