@@ -29,6 +29,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/online_store_test
       NEXTAUTH_SECRET: test-secret-for-ci-only
       NEXTAUTH_URL: http://localhost:3000
+      STORE_ID: pipower
 
     steps:
       - uses: actions/checkout@v4
@@ -91,6 +92,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/online_store_test
       NEXTAUTH_SECRET: test-secret-for-ci-only
       NEXTAUTH_URL: http://localhost:3000
+      STORE_ID: pipower
 
     steps:
       - uses: actions/checkout@v4
