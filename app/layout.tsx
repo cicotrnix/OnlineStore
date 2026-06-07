@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth/config'
 import { getLocale } from '@/lib/i18n'
 import { themeToCssVars } from '@/lib/theme/apply'
 import storeConfig from '@/store.config'
-import themeConfig from '@/theme.config'
+import { getStoreTheme } from '@/stores'
 import type { Metadata } from 'next'
 import './globals.css'
 
@@ -27,9 +27,9 @@ export default async function RootLayout({
     <html lang={locale}>
       <head>
         <style
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: theme tokens are statically generated from theme.config.ts
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: theme tokens are statically generated from the active store's theme config
           dangerouslySetInnerHTML={{
-            __html: `:root { ${themeToCssVars(themeConfig)} }`,
+            __html: `:root { ${themeToCssVars(getStoreTheme())} }`,
           }}
         />
       </head>
