@@ -3,14 +3,13 @@ import { Toaster } from '@/components/ui/Toaster'
 import { auth } from '@/lib/auth/config'
 import { getLocale } from '@/lib/i18n'
 import { themeToCssVars } from '@/lib/theme/apply'
-import storeConfig from '@/store.config'
-import { getStoreTheme } from '@/stores'
+import { getStoreConfig, getStoreTheme } from '@/stores'
 import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: storeConfig.identity.name,
-  description: `${storeConfig.identity.name} · Wholesale store`,
+  title: getStoreConfig().identity.name,
+  description: `${getStoreConfig().identity.name} · Wholesale store`,
 }
 
 export const dynamic = 'force-dynamic'

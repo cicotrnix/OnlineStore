@@ -7,7 +7,7 @@ import { prisma } from '@/lib/db/client'
 import { getLocale, t } from '@/lib/i18n'
 import { catalogService } from '@/modules/catalog'
 import { pricingService } from '@/modules/pricing'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
 
 type Props = {
@@ -115,7 +115,7 @@ export default async function CatalogPage({ searchParams }: Props) {
               key={p.id}
               product={p}
               customerPrice={customerPrices.get(p.id)}
-              currency={storeConfig.currency.base}
+              currency={getStoreConfig().currency.base}
               canAddToCart={canAddToCart}
               locale={locale}
               returnTo="/catalog"
@@ -144,7 +144,7 @@ export default async function CatalogPage({ searchParams }: Props) {
                   key={p.id}
                   product={p}
                   customerPrice={customerPrices.get(p.id)}
-                  currency={storeConfig.currency.base}
+                  currency={getStoreConfig().currency.base}
                   canAddToCart={canAddToCart}
                   locale={locale}
                   returnTo="/catalog"

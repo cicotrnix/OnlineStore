@@ -17,16 +17,22 @@ vi.mock('next/navigation', () => ({
 }))
 
 const stripeEnabled = { value: false }
-vi.mock('@/store.config', () => ({
-  default: {
-    payments: {
-      get stripe() {
-        return { enabled: stripeEnabled.value }
+vi.mock('@/stores', async () => {
+  const actual = await vi.importActual<typeof import('@/stores')>('@/stores')
+  const base = actual.getStoreConfig()
+  return {
+    ...actual,
+    getStoreConfig: () => ({
+      ...base,
+      payments: {
+        get stripe() {
+          return { enabled: stripeEnabled.value }
+        },
+        mercadopago: { enabled: false },
       },
-      mercadopago: { enabled: false },
-    },
-  },
-}))
+    }),
+  }
+})
 
 async function makeOrderForUser(): Promise<{ orderId: string }> {
   const user = await prisma.user.create({ data: { email: `b-${Date.now()}@t.com` } })

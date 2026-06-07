@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
 import { filterForOrg } from '@/modules/catalog'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Category, Product } from '@prisma/client'
 import Link from 'next/link'
 
@@ -44,7 +44,7 @@ export async function FeaturedGrid({ limit = 8 }: { limit?: number }) {
                   <p className="mt-1 text-xs text-gray-500">{p.category.name}</p>
                   {session?.user ? (
                     <p className="mt-3 text-sm font-medium tabular-nums">
-                      {formatMoney(p.basePrice, storeConfig.currency.base)}
+                      {formatMoney(p.basePrice, getStoreConfig().currency.base)}
                     </p>
                   ) : (
                     <p className="mt-3 text-xs text-gray-500 italic">

@@ -2,7 +2,7 @@ import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { auth } from '@/lib/auth/config'
 import { getLocale, t } from '@/lib/i18n'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale({ userId: null })
   return {
-    title: `${storeConfig.identity.name} — ${t(locale, 'landing.tagline')}`,
+    title: `${getStoreConfig().identity.name} — ${t(locale, 'landing.tagline')}`,
     description: t(locale, 'landing.metaDescription'),
   }
 }
@@ -31,10 +31,10 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto pl-2 pr-6 h-20 flex items-center justify-between">
-          <Link href="/" aria-label={storeConfig.identity.name} className="-my-2 block shrink-0">
+          <Link href="/" aria-label={getStoreConfig().identity.name} className="-my-2 block shrink-0">
             <Image
-              src={storeConfig.identity.logo}
-              alt={storeConfig.identity.name}
+              src={getStoreConfig().identity.logo}
+              alt={getStoreConfig().identity.name}
               width={1600}
               height={998}
               priority
@@ -74,8 +74,8 @@ export default async function LandingPage() {
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-6 py-20 md:py-28 text-center">
           <Image
-            src={storeConfig.identity.logo}
-            alt={storeConfig.identity.name}
+            src={getStoreConfig().identity.logo}
+            alt={getStoreConfig().identity.name}
             width={1600}
             height={998}
             priority
@@ -159,7 +159,7 @@ export default async function LandingPage() {
       <footer className="border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-6 text-xs text-gray-500 flex flex-wrap gap-4 justify-between">
           <span>
-            © {new Date().getFullYear()} {storeConfig.identity.name}
+            © {new Date().getFullYear()} {getStoreConfig().identity.name}
           </span>
           <div className="flex gap-4">
             <Link href="/catalog" className="hover:text-gray-700">

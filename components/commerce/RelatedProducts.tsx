@@ -1,6 +1,6 @@
 import { Card, CardBody } from '@/components/ui/Card'
 import { formatMoney } from '@/lib/money'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Category, Product } from '@prisma/client'
 import Link from 'next/link'
 
@@ -27,7 +27,7 @@ export function RelatedProducts({ title, products, signedIn }: Props) {
                   <p className="mt-1 text-xs text-gray-500">{p.category.name}</p>
                   {signedIn ? (
                     <p className="mt-2 text-sm font-medium tabular-nums">
-                      {formatMoney(p.basePrice, storeConfig.currency.base)}
+                      {formatMoney(p.basePrice, getStoreConfig().currency.base)}
                     </p>
                   ) : (
                     <p className="mt-2 text-xs text-gray-500 italic">Inicia sesión</p>

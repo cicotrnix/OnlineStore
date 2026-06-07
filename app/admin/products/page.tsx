@@ -12,7 +12,7 @@ import { isFeatureEnabled } from '@/lib/features'
 import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { catalogService } from '@/modules/catalog'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 
 type Props = { searchParams: Promise<{ flash?: string; n?: string }> }
 
@@ -197,7 +197,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                   <td className="px-5 py-3">{p.name}</td>
                   <td className="px-5 py-3 text-xs text-gray-500">{p.category.name}</td>
                   <td className="px-5 py-3 tabular-nums">
-                    {formatMoney(p.basePrice, storeConfig.currency.base)}
+                    {formatMoney(p.basePrice, getStoreConfig().currency.base)}
                   </td>
                   <td className="px-5 py-3">
                     <StockBadge stockQuantity={p.stockQuantity} />
@@ -272,7 +272,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                       <div className="text-xs text-gray-500 font-mono">{p.sku}</div>
                     </div>
                     <div className="text-xs text-gray-500">
-                      Base {formatMoney(p.basePrice, storeConfig.currency.base)}
+                      Base {formatMoney(p.basePrice, getStoreConfig().currency.base)}
                     </div>
                   </div>
                   {tiers.length > 0 && (
@@ -281,7 +281,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                         <li key={tier.id} className="flex justify-between">
                           <span>≥ {tier.minQty} uds</span>
                           <span className="tabular-nums">
-                            {formatMoney(tier.unitPrice, storeConfig.currency.base)}
+                            {formatMoney(tier.unitPrice, getStoreConfig().currency.base)}
                           </span>
                         </li>
                       ))}

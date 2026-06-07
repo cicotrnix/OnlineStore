@@ -10,7 +10,7 @@ import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { getLocale, t } from '@/lib/i18n'
 import { cartService } from '@/modules/cart'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -46,10 +46,10 @@ export default async function StorefrontLayout({
       {impersonatingName && <ImpersonationBanner orgName={impersonatingName} />}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto pl-2 pr-6 h-20 flex items-center justify-between">
-          <Link href="/" aria-label={storeConfig.identity.name} className="-my-2 block shrink-0">
+          <Link href="/" aria-label={getStoreConfig().identity.name} className="-my-2 block shrink-0">
             <Image
-              src={storeConfig.identity.logo}
-              alt={storeConfig.identity.name}
+              src={getStoreConfig().identity.logo}
+              alt={getStoreConfig().identity.name}
               width={1600}
               height={998}
               priority
@@ -111,10 +111,10 @@ export default async function StorefrontLayout({
       <main className="flex-1">{children}</main>
       <footer className="border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-6 text-xs text-gray-500">
-          © {new Date().getFullYear()} {storeConfig.identity.name}
+          © {new Date().getFullYear()} {getStoreConfig().identity.name}
         </div>
       </footer>
-      {storeConfig.ai.chat && <ChatWidget />}
+      {getStoreConfig().ai.chat && <ChatWidget />}
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { submitDraftAction } from '../_actions'
@@ -69,7 +69,7 @@ export default async function QuoteDraftPage() {
                   <td className="px-5 py-2 font-mono text-xs">{l.sku}</td>
                   <td className="px-5 py-2">{l.name}</td>
                   <td className="px-5 py-2 text-right tabular-nums">
-                    {formatMoney(l.unitPriceBase, storeConfig.currency.base)}
+                    {formatMoney(l.unitPriceBase, getStoreConfig().currency.base)}
                   </td>
                   <td className="px-5 py-2 text-right tabular-nums">{l.qty}</td>
                 </tr>

@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Prisma, QuoteStatus } from '@prisma/client'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -105,7 +105,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm tabular-nums font-medium">
-                        {formatMoney(q.total, storeConfig.currency.base)}
+                        {formatMoney(q.total, getStoreConfig().currency.base)}
                       </span>
                       <Badge variant={STATUS_VARIANT[q.status] ?? 'default'}>
                         {STATUS_LABELS[q.status] ?? q.status}
