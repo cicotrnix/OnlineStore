@@ -72,6 +72,8 @@ export type MessageKey =
   | 'onboarding.pending.body'
   | 'onboarding.pending.submittedOn'
   | 'onboarding.pending.exploreLink'
+  | 'onboarding.pending.noCert.intro'
+  | 'onboarding.pending.noCert.submit'
   // Onboarding rejected
   | 'onboarding.rejected.intro'
   | 'onboarding.rejected.resubmitNote'
@@ -394,6 +396,9 @@ export const MESSAGES: Record<Locale, Dict> = {
       'Your account is under review. We will email you when it is approved. This usually takes 1 business day.',
     'onboarding.pending.submittedOn': 'Submitted on {date}.',
     'onboarding.pending.exploreLink': 'In the meantime, explore the catalog →',
+    'onboarding.pending.noCert.intro':
+      "We don't have your tax certificate yet. Upload it to start verification.",
+    'onboarding.pending.noCert.submit': 'Upload certificate',
     // Onboarding rejected
     'onboarding.rejected.intro': 'Your application was rejected with the following reason:',
     'onboarding.rejected.resubmitNote':
@@ -711,6 +716,9 @@ export const MESSAGES: Record<Locale, Dict> = {
       'Tu cuenta está en revisión. Te enviamos un email cuando esté aprobada. Esto suele tardar 1 día hábil.',
     'onboarding.pending.submittedOn': 'Enviada el {date}.',
     'onboarding.pending.exploreLink': 'Mientras tanto, explorá el catálogo →',
+    'onboarding.pending.noCert.intro':
+      'Todavía no tenemos tu certificado fiscal. Subilo para iniciar la verificación.',
+    'onboarding.pending.noCert.submit': 'Subir certificado',
     // Onboarding rejected
     'onboarding.rejected.intro': 'Tu solicitud fue rechazada con el siguiente motivo:',
     'onboarding.rejected.resubmitNote':

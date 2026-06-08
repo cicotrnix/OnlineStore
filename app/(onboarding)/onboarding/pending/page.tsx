@@ -24,6 +24,7 @@ export default async function OnboardingPendingPage() {
           verificationStatus: true,
           rejectionReason: true,
           verificationSubmittedAt: true,
+          _count: { select: { taxDocuments: true } },
         },
       },
     },
@@ -31,6 +32,9 @@ export default async function OnboardingPendingPage() {
   if (!member?.organization) redirect('/onboarding')
   const org = member.organization
   if (org.verificationStatus === 'VERIFIED') redirect('/catalog')
+  const hasCert = org._count.taxDocuments > 0
+  const showUploadForm =
+    org.verificationStatus === 'REJECTED' || (org.verificationStatus === 'PENDING' && !hasCert)
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
@@ -44,7 +48,7 @@ export default async function OnboardingPendingPage() {
           </div>
         </CardHeader>
         <CardBody className="space-y-4 text-sm text-gray-700">
-          {org.verificationStatus === 'PENDING' && (
+          {org.verificationStatus === 'PENDING' && hasCert && (
             <>
               <p>{t(locale, 'onboarding.pending.body')}</p>
               {org.verificationSubmittedAt && (
@@ -57,6 +61,10 @@ export default async function OnboardingPendingPage() {
             </>
           )}
 
+          {org.verificationStatus === 'PENDING' && !hasCert && (
+            <p>{t(locale, 'onboarding.pending.noCert.intro')}</p>
+          )}
+
           {org.verificationStatus === 'REJECTED' && (
             <>
               <p>{t(locale, 'onboarding.rejected.intro')}</p>
@@ -64,63 +72,68 @@ export default async function OnboardingPendingPage() {
                 {org.rejectionReason ?? '—'}
               </p>
               <p>{t(locale, 'onboarding.rejected.resubmitNote')}</p>
-              <form
-                action={resubmitCertificateAction}
-                className="space-y-3 border-t border-gray-200 pt-4 mt-4"
-              >
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="type" className="block text-xs text-gray-500 mb-1">
-                      {t(locale, 'onboarding.cert.type')}
-                    </label>
-                    <select
-                      id="type"
-                      name="type"
-                      required
-                      className="block w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    >
-                      <option value="US_RESALE_CERT">{t(locale, 'onboarding.cert.type.us')}</option>
-                      <option value="FOREIGN_EQUIV">
-                        {t(locale, 'onboarding.cert.type.foreign')}
-                      </option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="jurisdiction" className="block text-xs text-gray-500 mb-1">
-                      {t(locale, 'onboarding.cert.jurisdiction')}
-                    </label>
-                    <Input
-                      id="jurisdiction"
-                      name="jurisdiction"
-                      required
-                      placeholder={t(locale, 'onboarding.cert.jurisdictionPlaceholder')}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="number" className="block text-xs text-gray-500 mb-1">
-                      {t(locale, 'onboarding.cert.number')}
-                    </label>
-                    <Input id="number" name="number" required />
-                  </div>
-                  <div>
-                    <label htmlFor="file" className="block text-xs text-gray-500 mb-1">
-                      {t(locale, 'onboarding.cert.file')} ({t(locale, 'onboarding.cert.fileHint')})
-                    </label>
-                    <input
-                      id="file"
-                      name="file"
-                      type="file"
-                      required
-                      accept="application/pdf,image/*"
-                      className="block w-full text-sm"
-                    />
-                  </div>
-                </div>
-                <SubmitButton pendingLabel={t(locale, 'onboarding.sending')}>
-                  {t(locale, 'onboarding.rejected.submit')}
-                </SubmitButton>
-              </form>
             </>
+          )}
+
+          {showUploadForm && (
+            <form
+              action={resubmitCertificateAction}
+              className="space-y-3 border-t border-gray-200 pt-4 mt-4"
+            >
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="type" className="block text-xs text-gray-500 mb-1">
+                    {t(locale, 'onboarding.cert.type')}
+                  </label>
+                  <select
+                    id="type"
+                    name="type"
+                    required
+                    className="block w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                  >
+                    <option value="US_RESALE_CERT">{t(locale, 'onboarding.cert.type.us')}</option>
+                    <option value="FOREIGN_EQUIV">
+                      {t(locale, 'onboarding.cert.type.foreign')}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="jurisdiction" className="block text-xs text-gray-500 mb-1">
+                    {t(locale, 'onboarding.cert.jurisdiction')}
+                  </label>
+                  <Input
+                    id="jurisdiction"
+                    name="jurisdiction"
+                    required
+                    placeholder={t(locale, 'onboarding.cert.jurisdictionPlaceholder')}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="number" className="block text-xs text-gray-500 mb-1">
+                    {t(locale, 'onboarding.cert.number')}
+                  </label>
+                  <Input id="number" name="number" required />
+                </div>
+                <div>
+                  <label htmlFor="file" className="block text-xs text-gray-500 mb-1">
+                    {t(locale, 'onboarding.cert.file')} ({t(locale, 'onboarding.cert.fileHint')})
+                  </label>
+                  <input
+                    id="file"
+                    name="file"
+                    type="file"
+                    required
+                    accept="application/pdf,image/*"
+                    className="block w-full text-sm"
+                  />
+                </div>
+              </div>
+              <SubmitButton pendingLabel={t(locale, 'onboarding.sending')}>
+                {org.verificationStatus === 'REJECTED'
+                  ? t(locale, 'onboarding.rejected.submit')
+                  : t(locale, 'onboarding.pending.noCert.submit')}
+              </SubmitButton>
+            </form>
           )}
 
           <div className="mt-4 pt-4 border-t border-gray-200">
