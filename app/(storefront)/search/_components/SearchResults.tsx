@@ -1,6 +1,6 @@
 import { Card, CardBody } from '@/components/ui/Card'
 import { formatMoney } from '@/lib/money'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Category, Product } from '@prisma/client'
 import Link from 'next/link'
 
@@ -36,7 +36,7 @@ export function SearchResults({ hits, signedIn }: Props) {
                 <p className="mt-1 text-[10px] text-gray-400 font-mono">SKU {p.sku}</p>
                 {signedIn ? (
                   <p className="mt-3 text-sm font-medium tabular-nums">
-                    {formatMoney(p.basePrice, storeConfig.currency.base)}
+                    {formatMoney(p.basePrice, getStoreConfig().currency.base)}
                   </p>
                 ) : (
                   <p className="mt-3 text-xs text-gray-500 italic">

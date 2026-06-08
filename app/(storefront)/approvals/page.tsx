@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
 import { canApprove } from '@/modules/approvals'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { notFound } from 'next/navigation'
 import { approveAction, rejectAction } from './_actions'
 
@@ -48,7 +48,7 @@ export default async function ApprovalsPage() {
                       {r.subjectType}
                     </div>
                     <div className="font-medium mt-0.5">
-                      {formatMoney(r.amount, storeConfig.currency.base)}
+                      {formatMoney(r.amount, getStoreConfig().currency.base)}
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
                       Solicitado por {r.requestedBy.email} · {r.createdAt.toLocaleString()}

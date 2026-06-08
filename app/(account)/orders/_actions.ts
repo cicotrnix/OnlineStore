@@ -3,7 +3,7 @@
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { createCardCheckout } from '@/modules/payments'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { redirect } from 'next/navigation'
 
 /**
@@ -15,7 +15,7 @@ import { redirect } from 'next/navigation'
  * hasta que ops lo encienda + STRIPE_SECRET_KEY exista en env).
  */
 export async function startCardCheckoutAction(formData: FormData): Promise<void> {
-  if (!storeConfig.payments.stripe.enabled) {
+  if (!getStoreConfig().payments.stripe.enabled) {
     throw new Error('PAYMENT_CARD_DISABLED')
   }
   const user = await requireAuth()

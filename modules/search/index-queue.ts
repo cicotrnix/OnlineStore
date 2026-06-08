@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db/client'
 import { SEARCH_INDEX_NAME, getMeilisearchClient, isMeilisearchEnabled } from '@/lib/meilisearch'
 import { logger } from '@/lib/observability/logger'
 import { isVoyageEnabled } from '@/lib/voyage'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { SearchIndexAction } from '@prisma/client'
 import { buildSearchableText, embedProductText, formatVectorForPostgres } from './embeddings'
 
@@ -98,7 +98,7 @@ async function processItem(productId: string, action: SearchIndexAction): Promis
 
   if (!product) return
   const newText = buildSearchableText(product)
-  const semanticOn = storeConfig.modules?.semanticSearch !== false
+  const semanticOn = getStoreConfig().modules?.semanticSearch !== false
   const shouldEmbed = isVoyageEnabled() && semanticOn && product.searchableText !== newText
 
   if (shouldEmbed) {

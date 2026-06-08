@@ -4,13 +4,15 @@ import { Decimal } from '@prisma/client/runtime/library'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { filterAccessibleIds, getAccessGrants } from '../access'
 
-vi.mock('@/store.config', async () => {
-  const actual = await vi.importActual<typeof import('@/store.config')>('@/store.config')
+vi.mock('@/stores', async () => {
+  const actual = await vi.importActual<typeof import('@/stores')>('@/stores')
+  const base = actual.getStoreConfig()
   return {
-    default: {
-      ...actual.default,
-      modules: { ...actual.default.modules, privateCatalogs: true },
-    },
+    ...actual,
+    getStoreConfig: () => ({
+      ...base,
+      modules: { ...base.modules, privateCatalogs: true },
+    }),
   }
 })
 

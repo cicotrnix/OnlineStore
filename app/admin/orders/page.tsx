@@ -2,7 +2,7 @@ import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { Card } from '@/components/ui/Card'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
 
 export default async function AdminOrdersPage() {
@@ -41,7 +41,7 @@ export default async function AdminOrdersPage() {
                   {order.placedAt.toLocaleDateString()}
                 </td>
                 <td className="px-5 py-3 tabular-nums">
-                  {formatMoney(order.total, storeConfig.currency.base)}
+                  {formatMoney(order.total, getStoreConfig().currency.base)}
                 </td>
                 <td className="px-5 py-3">
                   <OrderStatusBadge status={order.status} />

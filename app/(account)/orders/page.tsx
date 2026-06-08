@@ -3,7 +3,7 @@ import { Card, CardBody } from '@/components/ui/Card'
 import { auth } from '@/lib/auth/config'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -44,7 +44,7 @@ export default async function OrdersListPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="text-sm tabular-nums font-medium">
-                        {formatMoney(order.total, storeConfig.currency.base)}
+                        {formatMoney(order.total, getStoreConfig().currency.base)}
                       </span>
                       <OrderStatusBadge status={order.status} />
                     </div>

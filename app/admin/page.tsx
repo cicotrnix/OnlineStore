@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
 import { customersService } from '@/modules/customers'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { Decimal } from '@prisma/client/runtime/library'
 import Link from 'next/link'
 
@@ -52,7 +52,10 @@ export default async function AdminDashboardPage() {
     },
     {
       label: 'Saldo abierto (pendiente + overdue)',
-      value: formatMoney(openInvoiceAgg._sum?.amount ?? new Decimal(0), storeConfig.currency.base),
+      value: formatMoney(
+        openInvoiceAgg._sum?.amount ?? new Decimal(0),
+        getStoreConfig().currency.base
+      ),
       href: '/admin/invoices',
       show: creditOn,
     },

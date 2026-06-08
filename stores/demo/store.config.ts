@@ -1,4 +1,4 @@
-import { defineStoreConfig } from './modules/config'
+import { defineStoreConfig } from '@/modules/config'
 
 /**
  * Store configuration — change identity, modules, payments, UI defaults here.
@@ -6,10 +6,10 @@ import { defineStoreConfig } from './modules/config'
  */
 export default defineStoreConfig({
   identity: {
-    name: 'PiPower',
+    name: 'Demo Store',
     logo: '/logo-pipower.png',
-    supportEmail: 'support@pipower.example',
-    tagline: 'Baterías mayoristas para iPhone · USA + LATAM',
+    supportEmail: 'demo@example.com',
+    tagline: 'Tienda de demostración Fase 6',
     brandVoice: {
       audience:
         'Independent iPhone repair professionals and authorized service shops across USA and Latin America',

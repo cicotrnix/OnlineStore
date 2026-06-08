@@ -10,7 +10,7 @@ import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -107,7 +107,7 @@ export default async function AdminCustomerCreditPage({ params }: Props) {
               <p className="text-xs text-gray-500">
                 Uso actual:{' '}
                 <strong className="tabular-nums">
-                  {formatMoney(org.creditUsed, storeConfig.currency.base)}
+                  {formatMoney(org.creditUsed, getStoreConfig().currency.base)}
                 </strong>
               </p>
               <SubmitButton pendingLabel={t(locale, 'admin.action.saving')}>

@@ -7,7 +7,7 @@ import {
 } from '@/lib/meilisearch'
 import { logger } from '@/lib/observability/logger'
 import { isVoyageEnabled } from '@/lib/voyage'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Category, Product } from '@prisma/client'
 import { filterAccessibleIds, getAccessGrants } from './access'
 import { embedSearchQuery, formatVectorForPostgres } from './embeddings'
@@ -50,7 +50,7 @@ export async function query(input: QueryInput): Promise<QueryResult> {
   }
 
   const accessFilter = await buildFilterForRequest(input.orgId, input.facets)
-  const semanticOn = isVoyageEnabled() && storeConfig.modules?.semanticSearch !== false
+  const semanticOn = isVoyageEnabled() && getStoreConfig().modules?.semanticSearch !== false
 
   const [meiliIds, vectorIds] = await Promise.all([
     fetchMeiliIds(q, accessFilter.meili).catch((err) => {

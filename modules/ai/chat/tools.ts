@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db/client'
 import type { Locale } from '@/lib/i18n'
 import { filterForOrg } from '@/modules/catalog'
 import { pricingService } from '@/modules/pricing'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Category, Product } from '@prisma/client'
 
 export interface ToolContext {
@@ -14,7 +14,9 @@ export type ToolName = 'searchProducts' | 'getProductDetail' | 'checkCompatibili
 
 export type ToolResult = { ok: true; data: Record<string, unknown> } | { ok: false; hint: string }
 
-const SUPPORT_HINT = `If you can't find a product, please contact ${storeConfig.identity.supportEmail}.`
+function supportHint(): string {
+  return `If you can't find a product, please contact ${getStoreConfig().identity.supportEmail}.`
+}
 
 export const TOOL_SCHEMAS = [
   {
@@ -75,7 +77,7 @@ async function searchProducts(args: { query: string }, ctx: ToolContext): Promis
   })
   const visible = await filterForOrg(ctx.orgId, products as (Product & { category: Category })[])
   const top = visible.slice(0, 8)
-  if (top.length === 0) return { ok: false, hint: SUPPORT_HINT }
+  if (top.length === 0) return { ok: false, hint: supportHint() }
   const results = await Promise.all(
     top.map(async (p) => ({
       id: p.id,
@@ -97,9 +99,9 @@ async function getProductDetail(
     where: { id: args.productId },
     include: { category: true },
   })
-  if (!product || !product.isActive) return { ok: false, hint: SUPPORT_HINT }
+  if (!product || !product.isActive) return { ok: false, hint: supportHint() }
   const visible = await filterForOrg(ctx.orgId, [product as Product & { category: Category }])
-  if (visible.length === 0) return { ok: false, hint: SUPPORT_HINT }
+  if (visible.length === 0) return { ok: false, hint: supportHint() }
   return {
     ok: true,
     data: {
@@ -122,7 +124,7 @@ async function checkCompatibility(args: { model: string }, ctx: ToolContext): Pr
     take: 12,
   })
   const visible = await filterForOrg(ctx.orgId, products as (Product & { category: Category })[])
-  if (visible.length === 0) return { ok: false, hint: SUPPORT_HINT }
+  if (visible.length === 0) return { ok: false, hint: supportHint() }
   const matches = await Promise.all(
     visible.map(async (p) => ({
       id: p.id,

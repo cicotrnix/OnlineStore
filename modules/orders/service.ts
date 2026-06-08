@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db/client'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { Decimal } from '@prisma/client/runtime/library'
 import { EmptyCartError, InsufficientStockError, ProductInactiveError } from './errors'
 import { generateOrderNumber } from './orderNumber'
@@ -81,7 +81,7 @@ export const ordersService = {
           shippingAddressId,
           subtotal,
           total: subtotal,
-          currency: storeConfig.currency.base,
+          currency: getStoreConfig().currency.base,
           lines: {
             create: cart.items.map((item) => {
               const p = productMap.get(item.productId)

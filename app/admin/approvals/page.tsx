@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { prisma } from '@/lib/db/client'
 import { formatMoney } from '@/lib/money'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,10 +41,10 @@ export default async function AdminApprovalsPage() {
                 <td className="px-5 py-3">{r.organization.name}</td>
                 <td className="px-5 py-3 text-xs uppercase">{r.subjectType}</td>
                 <td className="px-5 py-3 text-right tabular-nums">
-                  {formatMoney(r.amount, storeConfig.currency.base)}
+                  {formatMoney(r.amount, getStoreConfig().currency.base)}
                 </td>
                 <td className="px-5 py-3 text-right tabular-nums text-gray-500">
-                  {formatMoney(r.threshold, storeConfig.currency.base)}
+                  {formatMoney(r.threshold, getStoreConfig().currency.base)}
                 </td>
                 <td className="px-5 py-3 text-xs">{r.requestedBy.email}</td>
                 <td className="px-5 py-3">

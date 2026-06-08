@@ -7,7 +7,7 @@ import { requireVerifiedCustomer } from '@/lib/auth/customer'
 import { getLocale, t } from '@/lib/i18n'
 import { addMoney, formatMoney, multiplyMoney } from '@/lib/money'
 import { cartService } from '@/modules/cart'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
 
 export default async function CartPage() {
@@ -103,11 +103,11 @@ export default async function CartPage() {
                       </SubmitButton>
                     </form>
                     <div className="text-sm text-gray-700 tabular-nums">
-                      {formatMoney(item.unitPriceSnapshot, storeConfig.currency.base)} ·{' '}
+                      {formatMoney(item.unitPriceSnapshot, getStoreConfig().currency.base)} ·{' '}
                       <span className="font-medium">
                         {formatMoney(
                           item.unitPriceSnapshot.mul(item.quantity),
-                          storeConfig.currency.base
+                          getStoreConfig().currency.base
                         )}
                       </span>
                     </div>
@@ -124,14 +124,16 @@ export default async function CartPage() {
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-gray-500">{t(locale, 'cart.subtotal')}</dt>
-                <dd className="tabular-nums">{formatMoney(subtotal, storeConfig.currency.base)}</dd>
+                <dd className="tabular-nums">
+                  {formatMoney(subtotal, getStoreConfig().currency.base)}
+                </dd>
               </div>
               <p className="text-[11px] text-gray-400 pt-1">{t(locale, 'cart.taxNote')}</p>
             </dl>
             <Link href="/checkout" className="mt-6 block">
               <Button className="w-full">
                 {t(locale, 'cart.proceedCheckout', {
-                  amount: formatMoney(subtotal, storeConfig.currency.base),
+                  amount: formatMoney(subtotal, getStoreConfig().currency.base),
                 })}
               </Button>
             </Link>

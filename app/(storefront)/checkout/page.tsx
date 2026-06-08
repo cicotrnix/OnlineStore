@@ -10,7 +10,7 @@ import { addMoney, formatMoney, multiplyMoney } from '@/lib/money'
 import { cartService } from '@/modules/cart'
 import { checkoutService } from '@/modules/checkout'
 import { customersService } from '@/modules/customers'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { redirect } from 'next/navigation'
 
 export default async function CheckoutPage() {
@@ -82,7 +82,7 @@ export default async function CheckoutPage() {
             <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between">
               <span className="text-sm text-gray-500">{t(locale, 'cart.subtotal')}</span>
               <span className="font-medium tabular-nums">
-                {formatMoney(subtotal, storeConfig.currency.base)}
+                {formatMoney(subtotal, getStoreConfig().currency.base)}
               </span>
             </div>
           </CardBody>
@@ -194,7 +194,7 @@ export default async function CheckoutPage() {
               <div className="text-sm text-gray-500">
                 {t(locale, 'checkout.total')}:{' '}
                 <span className="font-medium text-gray-900 tabular-nums">
-                  {formatMoney(subtotal, storeConfig.currency.base)}
+                  {formatMoney(subtotal, getStoreConfig().currency.base)}
                 </span>
               </div>
               {hasBlockingIssue || addresses.length === 0 ? (

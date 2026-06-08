@@ -8,7 +8,7 @@ import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { catalogService } from '@/modules/catalog'
 import { pricingService } from '@/modules/pricing'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { notFound } from 'next/navigation'
 
 type Props = { params: Promise<{ id: string }> }
@@ -54,7 +54,7 @@ export default async function AdminCustomerPricesPage({ params }: Props) {
                   <td className="px-5 py-3 font-mono text-xs">{p.sku}</td>
                   <td className="px-5 py-3">{p.name}</td>
                   <td className="px-5 py-3 tabular-nums text-gray-500">
-                    {formatMoney(p.basePrice, storeConfig.currency.base)}
+                    {formatMoney(p.basePrice, getStoreConfig().currency.base)}
                   </td>
                   <td className="px-5 py-3" colSpan={2}>
                     <form action={setCustomerPriceAction} className="flex items-center gap-2">

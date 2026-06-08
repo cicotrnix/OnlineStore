@@ -1,4 +1,4 @@
-import { defineTheme } from './modules/config'
+import { defineTheme } from '@/modules/config'
 
 /**
  * Theme tokens — change visual identity here.

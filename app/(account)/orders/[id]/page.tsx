@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { notFound } from 'next/navigation'
 import { startCardCheckoutAction } from '../_actions'
 
@@ -20,7 +20,8 @@ export default async function OrderDetailPage({ params }: Props) {
   const order = await ordersService.findById(id)
   if (!order) notFound()
 
-  const canPayWithCard = storeConfig.payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
+  const canPayWithCard =
+    getStoreConfig().payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">

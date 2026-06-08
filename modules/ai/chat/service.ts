@@ -2,7 +2,7 @@ import type { Locale } from '@/lib/i18n'
 import { logger } from '@/lib/observability/logger'
 import { currentPeriodYm, isBudgetExceeded, recordUsage } from '@/modules/ai/budget'
 import { AIBudgetExceededError, AIDisabledError } from '@/modules/ai/errors'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import Anthropic from '@anthropic-ai/sdk'
 import { TOOL_SCHEMAS, type ToolName, handleTool } from './tools'
 
@@ -37,6 +37,7 @@ function getClient(): Anthropic {
 }
 
 function systemPrompt(locale: Locale): string {
+  const storeConfig = getStoreConfig()
   return [
     'You are a B2B wholesale assistant for an iPhone parts catalog.',
     'You ONLY answer using data from the provided tools. Do not invent products, prices, or specs.',
@@ -60,6 +61,7 @@ export async function runChat(input: RunChatInput): Promise<RunChatResult> {
   if (!process.env.ANTHROPIC_API_KEY) throw new AIDisabledError()
   if (await isBudgetExceeded()) throw new AIBudgetExceededError(currentPeriodYm())
 
+  const storeConfig = getStoreConfig()
   const client = getClient()
   const toolCalls: ToolCallTrace[] = []
   const conversation: Anthropic.MessageParam[] = input.messages.map((m) => ({

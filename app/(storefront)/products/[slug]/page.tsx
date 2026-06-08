@@ -12,7 +12,7 @@ import { DEFAULT_LOCALE, getLocale } from '@/lib/i18n'
 import { getPersonalizedRecommendations, getRelatedProducts } from '@/modules/ai/recommendations'
 import { catalogService } from '@/modules/catalog'
 import { listTiersForProduct, pricingService } from '@/modules/pricing'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -73,14 +73,14 @@ export default async function ProductPage({ params }: Props) {
     (product.attributes as Record<string, unknown>).flex_included === 'tag-on'
 
   const personalized =
-    storeConfig.ai.recommendations && session?.user?.id
+    getStoreConfig().ai.recommendations && session?.user?.id
       ? await getPersonalizedRecommendations({
           userId: session.user.id,
           orgId,
           limit: 8,
         }).catch(() => [])
       : []
-  const related = storeConfig.ai.recommendations
+  const related = getStoreConfig().ai.recommendations
     ? personalized.length > 0
       ? personalized
       : await getRelatedProducts({ productId: product.id, orgId, limit: 8 }).catch(() => [])
@@ -124,7 +124,7 @@ export default async function ProductPage({ params }: Props) {
             <PriceTag
               basePrice={product.basePrice}
               customerPrice={showOverride ? customerPrice : null}
-              currency={storeConfig.currency.base}
+              currency={getStoreConfig().currency.base}
               size="lg"
             />
           ) : (
@@ -181,7 +181,7 @@ export default async function ProductPage({ params }: Props) {
         </div>
         {tiers.length > 0 && (
           <div className="md:col-span-2">
-            <PriceTierTable tiers={tiers} currency={storeConfig.currency.base} />
+            <PriceTierTable tiers={tiers} currency={getStoreConfig().currency.base} />
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { logger } from '@/lib/observability/logger'
-import storeConfig from '@/store.config'
+import { getStoreConfig } from '@/stores'
 import { Resend } from 'resend'
 
 let client: Resend | null = null
@@ -35,7 +35,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     return { id: 'noop-no-api-key' }
   }
   const from = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
-  const fromName = `${storeConfig.identity.name} <${from}>`
+  const fromName = `${getStoreConfig().identity.name} <${from}>`
   const result = await getClient().emails.send({
     from: fromName,
     to: input.to,
