@@ -209,6 +209,7 @@ export type MessageKey =
   // Auth toasts
   | 'auth.toast.linkSent'
   | 'auth.toast.linkFailed'
+  | 'auth.toast.rateLimited'
   | 'auth.signIn.sending'
   // Onboarding toasts
   | 'onboarding.toast.submitted'
@@ -539,6 +540,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Auth
     'auth.toast.linkSent': 'Magic link sent. Check your inbox.',
     'auth.toast.linkFailed': "We couldn't send the magic link. Try again.",
+    'auth.toast.rateLimited': 'Too many attempts. Wait a minute and try again.',
     'auth.signIn.sending': 'Sending…',
     // Onboarding
     'onboarding.toast.submitted': 'Application submitted. We will email you once reviewed.',
@@ -859,6 +861,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Auth
     'auth.toast.linkSent': 'Te enviamos el link mágico. Revisá tu bandeja.',
     'auth.toast.linkFailed': 'No pudimos enviar el link. Volvé a intentar.',
+    'auth.toast.rateLimited': 'Demasiados intentos. Esperá un minuto y volvé a intentar.',
     'auth.signIn.sending': 'Enviando…',
     // Onboarding
     'onboarding.toast.submitted':
