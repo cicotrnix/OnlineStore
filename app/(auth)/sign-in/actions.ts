@@ -6,7 +6,7 @@ import { isRedirectError } from 'next/dist/client/components/redirect'
 
 /**
  * Server action de sign-in. Devuelve ActionResult que el form client consume
- * con `useActionState` y dispara el toast.
+ * con `useFormState` y dispara el toast.
  *
  * NextAuth signIn() con `redirect: false` retorna sin throw. Si throws con
  * RedirectError lo dejamos pasar (la redirección es parte normal del flujo).

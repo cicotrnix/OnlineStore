@@ -4,7 +4,8 @@ import { SubmitButton } from '@/components/ui/SubmitButton'
 import { toast } from '@/components/ui/Toaster'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
 import { type Locale, t } from '@/lib/i18n/messages'
-import { useActionState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useFormState } from 'react-dom'
 import { signInAction } from './actions'
 
 type Props = {
@@ -15,7 +16,7 @@ type Props = {
 }
 
 export function SignInForm({ locale, emailPlaceholder, submitLabel, pendingLabel }: Props) {
-  const [state, formAction] = useActionState(signInAction, INITIAL_ACTION_RESULT)
+  const [state, formAction] = useFormState(signInAction, INITIAL_ACTION_RESULT)
 
   useEffect(() => {
     if (!state.messageKey) return

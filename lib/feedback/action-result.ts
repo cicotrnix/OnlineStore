@@ -9,7 +9,7 @@
  *    montar, renderiza el toast traducido, y limpia la URL con `replaceState`.
  *
  *  - Si NO navega (form inline, estado se queda en la misma pantalla) →
- *    devolver `ActionResult` y el form lo consume con `useActionState` para
+ *    devolver `ActionResult` y el form lo consume con `useFormState` para
  *    disparar el toast manualmente.
  *
  * `messageKey` es siempre una key de `lib/i18n/messages.ts` — no texto crudo.
@@ -47,5 +47,5 @@ export function toastUrl(
   return `${url.pathname}${url.search}`
 }
 
-/** Estado inicial neutro para `useActionState`. */
+/** Estado inicial neutro para `useFormState`. */
 export const INITIAL_ACTION_RESULT: ActionResult = { ok: false }
