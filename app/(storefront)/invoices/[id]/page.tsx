@@ -3,7 +3,10 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
+import { wireInstructionsReady } from '@/modules/config'
+import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -22,6 +25,11 @@ export default async function InvoiceDetailPage({ params }: Props) {
     include: { order: true, paidBy: true },
   })
   if (!inv || inv.organizationId !== session.activeOrgId) notFound()
+
+  const locale = await getLocale({ userId: session.user.id })
+  const storeConfig = getStoreConfig()
+  const showWire = wireInstructionsReady(storeConfig)
+  const wire = showWire ? storeConfig.payments.wire : null
 
   return (
     <main className="max-w-3xl mx-auto p-6">
@@ -73,6 +81,41 @@ export default async function InvoiceDetailPage({ params }: Props) {
           </div>
         </CardBody>
       </Card>
+
+      {wire && (
+        <Card className="mt-6">
+          <CardHeader>
+            <h2 className="font-medium">{t(locale, 'invoice.wire.title')}</h2>
+          </CardHeader>
+          <CardBody className="space-y-2 text-sm">
+            <Row label={t(locale, 'invoice.wire.beneficiary')} value={wire.beneficiaryName} />
+            <Row label={t(locale, 'invoice.wire.bank')} value={wire.bankName} />
+            <Row label={t(locale, 'invoice.wire.account')} value={wire.accountNumber} mono />
+            <Row label={t(locale, 'invoice.wire.routing')} value={wire.routingNumber} mono />
+            <Row label={t(locale, 'invoice.wire.swift')} value={wire.swift} mono />
+            <Row label={t(locale, 'invoice.wire.accountType')} value={wire.accountType} />
+            {wire.reference && (
+              <div>
+                <div className="text-gray-500">{t(locale, 'invoice.wire.reference')}</div>
+                <div className="mt-1 whitespace-pre-wrap">{wire.reference}</div>
+              </div>
+            )}
+            {wire.notes && (
+              <div className="mt-1 whitespace-pre-wrap text-gray-700">{wire.notes}</div>
+            )}
+          </CardBody>
+        </Card>
+      )}
     </main>
+  )
+}
+
+function Row({ label, value, mono = false }: { label: string; value?: string; mono?: boolean }) {
+  if (!value) return null
+  return (
+    <div className="flex justify-between gap-3">
+      <span className="text-gray-500">{label}</span>
+      <span className={mono ? 'font-mono tabular-nums' : ''}>{value}</span>
+    </div>
   )
 }

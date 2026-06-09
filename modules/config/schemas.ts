@@ -35,7 +35,23 @@ export const storeConfigSchema = z.object({
     stripe: z.object({ enabled: z.boolean() }),
     mercadopago: z.object({ enabled: z.boolean() }),
     // Fase 5: extensión del bloque (no reemplazo). Opcional para retrocompat.
-    wire: z.object({ enabled: z.boolean() }).optional(),
+    // B6 (Fase 6): campos de instrucciones de wire opcionales. La página
+    // de factura las muestra sólo si wireInstructionsReady(cfg) es true
+    // (enabled + beneficiaryName + accountNumber). Si faltan, no se muestra
+    // nada (gate explícito; no se publican datos a medias).
+    wire: z
+      .object({
+        enabled: z.boolean(),
+        beneficiaryName: z.string().optional(),
+        bankName: z.string().optional(),
+        accountNumber: z.string().optional(),
+        routingNumber: z.string().optional(),
+        swift: z.string().optional(),
+        accountType: z.string().optional(),
+        reference: z.string().optional(),
+        notes: z.string().optional(),
+      })
+      .optional(),
     netTerms: z.boolean().optional(), // Fase 2 dormido por flag (default false)
     card: z.object({ enabled: z.boolean() }).optional(),
   }),
