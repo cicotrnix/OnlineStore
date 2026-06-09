@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
-import { auth } from '@/lib/auth/config'
+import { requireActiveOrgId } from '@/lib/auth/active-org'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { formatMoney } from '@/lib/money'
@@ -20,11 +20,10 @@ export default async function InvoicesPage() {
   if (!isFeatureEnabled('credit')) notFound()
   const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
   await requireVerifiedCustomer()
-  const session = await auth()
-  if (!session?.user?.id || !session.activeOrgId) notFound()
+  const orgId = await requireActiveOrgId()
 
   const invoices = await prisma.invoice.findMany({
-    where: { organizationId: session.activeOrgId },
+    where: { organizationId: orgId },
     orderBy: { issuedAt: 'desc' },
     include: { order: { select: { orderNumber: true } } },
   })

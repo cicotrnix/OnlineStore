@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody } from '@/components/ui/Card'
+import { requireActiveOrgId } from '@/lib/auth/active-org'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
@@ -45,11 +46,12 @@ export default async function QuotesPage({ searchParams }: Props) {
   const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
   await requireVerifiedCustomer()
   const session = await auth()
-  if (!session?.user?.id || !session.activeOrgId) notFound()
+  if (!session?.user?.id) notFound()
+  const orgId = await requireActiveOrgId()
 
   const { status } = await searchParams
   const where: Prisma.QuoteWhereInput = {
-    organizationId: session.activeOrgId,
+    organizationId: orgId,
     requestedById: session.user.id,
   }
   if (status && (VALID_STATUSES as readonly string[]).includes(status)) {

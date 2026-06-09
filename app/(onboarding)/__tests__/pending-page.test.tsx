@@ -9,6 +9,10 @@ vi.mock('@/lib/auth/helpers', () => ({
   getCurrentUser: vi.fn(async () => authUser),
 }))
 
+vi.mock('@/lib/auth/actions', () => ({
+  switchActiveOrg: vi.fn(async (_orgId: string) => {}),
+}))
+
 vi.mock('next/navigation', () => ({
   redirect: vi.fn((url: string) => {
     throw new Error(`REDIRECT:${url}`)

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { requireActiveOrgId } from '@/lib/auth/active-org'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
@@ -14,11 +15,12 @@ export const dynamic = 'force-dynamic'
 export default async function QuoteDraftPage() {
   if (!isFeatureEnabled('rfq')) notFound()
   const session = await auth()
-  if (!session?.user?.id || !session.activeOrgId) notFound()
+  if (!session?.user?.id) notFound()
+  const orgId = await requireActiveOrgId()
 
   const draft = await prisma.quote.findFirst({
     where: {
-      organizationId: session.activeOrgId,
+      organizationId: orgId,
       requestedById: session.user.id,
       status: 'DRAFT',
     },

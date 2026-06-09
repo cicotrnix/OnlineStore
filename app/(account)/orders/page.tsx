@@ -1,6 +1,6 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { Card, CardBody } from '@/components/ui/Card'
-import { auth } from '@/lib/auth/config'
+import { requireActiveOrgId } from '@/lib/auth/active-org'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { getStoreConfig } from '@/stores'
@@ -11,15 +11,7 @@ export const dynamic = 'force-dynamic'
 export default async function OrdersListPage() {
   const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
   await requireVerifiedCustomer()
-  const session = await auth()
-  const orgId = session?.impersonatingOrgId ?? session?.activeOrgId
-  if (!orgId) {
-    return (
-      <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-        <p className="text-sm text-gray-500">Selecciona una organización primero.</p>
-      </div>
-    )
-  }
+  const orgId = await requireActiveOrgId()
   const orders = await ordersService.listForOrg(orgId)
 
   return (

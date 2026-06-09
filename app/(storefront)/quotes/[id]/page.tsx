@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { requireActiveOrgId } from '@/lib/auth/active-org'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
@@ -16,7 +17,8 @@ export default async function QuoteDetailPage({ params }: Props) {
   if (!isFeatureEnabled('rfq')) notFound()
   const { id } = await params
   const session = await auth()
-  if (!session?.user?.id || !session.activeOrgId) notFound()
+  if (!session?.user?.id) notFound()
+  const orgId = await requireActiveOrgId()
 
   const q = await prisma.quote.findUnique({
     where: { id },
@@ -26,7 +28,7 @@ export default async function QuoteDetailPage({ params }: Props) {
       quotedBy: true,
     },
   })
-  if (!q || q.organizationId !== session.activeOrgId) notFound()
+  if (!q || q.organizationId !== orgId) notFound()
 
   const isQuoted = q.status === 'QUOTED'
   const addresses = q.organization.addresses
