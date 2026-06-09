@@ -9,6 +9,11 @@ vi.mock('@/lib/auth/helpers', () => ({
   getCurrentUser: vi.fn(async () => authUser),
 }))
 
+const switchActiveOrgMock = vi.fn(async (_orgId: string) => {})
+vi.mock('@/lib/auth/actions', () => ({
+  switchActiveOrg: switchActiveOrgMock,
+}))
+
 vi.mock('next/navigation', () => ({
   redirect: vi.fn((url: string) => {
     throw new Error(`REDIRECT:${url}`)
@@ -18,6 +23,7 @@ vi.mock('next/navigation', () => ({
 beforeEach(async () => {
   await cleanDb()
   _resetFakeStorage()
+  switchActiveOrgMock.mockClear()
 })
 
 async function makeUser() {
@@ -66,6 +72,8 @@ describe('submitOnboardingAction', () => {
       where: { organizationId: org.id },
     })
     expect(doc.status).toBe('UPLOADED')
+    // B.3: la nueva org queda como activa (evita rebote por /select-org).
+    expect(switchActiveOrgMock).toHaveBeenCalledWith(org.id)
   })
 
   it('usuario que ya tiene org → redirect con toast alreadyHasOrg', async () => {

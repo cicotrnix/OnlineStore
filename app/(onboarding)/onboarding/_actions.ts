@@ -1,5 +1,6 @@
 'use server'
 
+import { switchActiveOrg } from '@/lib/auth/actions'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { toastUrl } from '@/lib/feedback/action-result'
@@ -75,6 +76,10 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
     fileBytes,
     country,
   })
+
+  // Setea la org recién creada como activa para que el usuario quede
+  // listo sin pasar por /select-org cuando vuelva a navegar.
+  await switchActiveOrg(org.id)
 
   redirect(toastUrl('/onboarding/pending', 'success', 'onboarding.toast.submitted'))
 }
