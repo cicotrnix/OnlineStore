@@ -1,5 +1,6 @@
 'use server'
 
+import { requireActiveOrgId } from '@/lib/auth/active-org'
 import { auth } from '@/lib/auth/config'
 import { assertFeature } from '@/lib/features'
 import { accept, addLineToDraft, reject, submit } from '@/modules/quotes'
@@ -9,12 +10,13 @@ import { redirect } from 'next/navigation'
 export async function addToQuoteDraftAction(formData: FormData) {
   assertFeature('rfq')
   const session = await auth()
-  if (!session?.user?.id || !session.activeOrgId) throw new Error('Unauthorized')
+  if (!session?.user?.id) throw new Error('Unauthorized')
+  const orgId = await requireActiveOrgId()
   const productId = String(formData.get('productId'))
   const qty = Number(formData.get('qty') ?? 1)
   await addLineToDraft({
     userId: session.user.id,
-    organizationId: session.activeOrgId,
+    organizationId: orgId,
     productId,
     qty,
   })

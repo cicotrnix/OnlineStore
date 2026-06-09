@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { requireActiveOrgId } from '@/lib/auth/active-org'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
@@ -18,13 +19,14 @@ export default async function InvoiceDetailPage({ params }: Props) {
   if (!isFeatureEnabled('credit')) notFound()
   const { id } = await params
   const session = await auth()
-  if (!session?.user?.id || !session.activeOrgId) notFound()
+  if (!session?.user?.id) notFound()
+  const orgId = await requireActiveOrgId()
 
   const inv = await prisma.invoice.findUnique({
     where: { id },
     include: { order: true, paidBy: true },
   })
-  if (!inv || inv.organizationId !== session.activeOrgId) notFound()
+  if (!inv || inv.organizationId !== orgId) notFound()
 
   const locale = await getLocale({ userId: session.user.id })
   const storeConfig = getStoreConfig()

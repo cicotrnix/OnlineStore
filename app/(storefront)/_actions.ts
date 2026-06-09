@@ -1,5 +1,6 @@
 'use server'
 
+import { resolveActiveOrgId } from '@/lib/auth/active-org'
 import { auth } from '@/lib/auth/config'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
@@ -19,9 +20,7 @@ function safeReturnTo(raw: FormDataEntryValue | null, fallback: string): string 
 }
 
 async function getEffectiveOrgId(): Promise<string | null> {
-  const session = await auth()
-  if (!session?.user) return null
-  return session.impersonatingOrgId ?? session.activeOrgId
+  return resolveActiveOrgId()
 }
 
 export async function addToCartAction(formData: FormData) {
