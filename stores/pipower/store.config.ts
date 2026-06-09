@@ -41,6 +41,19 @@ export default defineStoreConfig({
   payments: {
     stripe: { enabled: false },
     mercadopago: { enabled: false },
+    // TODO(Herney): completar cuando esté resuelta la cuenta bancaria (KonLLC dba PiPower).
+    // Mientras enabled sea false o falten beneficiaryName/accountNumber, NO se muestran instrucciones.
+    wire: {
+      enabled: false,
+      beneficiaryName: '', // ej. 'KonLLC dba PiPower'
+      bankName: '',
+      accountNumber: '',
+      routingNumber: '',
+      swift: '',
+      accountType: '',
+      reference: 'Incluí tu número de orden en el memo de la transferencia.',
+      notes: '',
+    },
   },
   ui: {
     defaultView: 'cards',

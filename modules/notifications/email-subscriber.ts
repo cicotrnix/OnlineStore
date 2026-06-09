@@ -72,7 +72,7 @@ const MAPPERS: Partial<Record<DomainEventType, MailMapper>> = {
     return {
       type: 'INVOICE_ISSUED' as const,
       title: 'Factura emitida',
-      body: 'Recibí instrucciones para tu wire/ACH.',
+      body: 'Tu factura está lista. Mirá las instrucciones de pago en el detalle de la factura.',
       link: `/invoices/${invoiceId}`,
       recipients,
     }

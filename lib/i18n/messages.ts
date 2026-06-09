@@ -183,6 +183,14 @@ export type MessageKey =
   | 'quotes.empty'
   | 'invoices.title'
   | 'invoices.empty'
+  | 'invoice.wire.title'
+  | 'invoice.wire.beneficiary'
+  | 'invoice.wire.bank'
+  | 'invoice.wire.account'
+  | 'invoice.wire.routing'
+  | 'invoice.wire.swift'
+  | 'invoice.wire.accountType'
+  | 'invoice.wire.reference'
   | 'approvals.title'
   | 'approvals.empty'
   | 'notifications.title'
@@ -514,6 +522,14 @@ export const MESSAGES: Record<Locale, Dict> = {
     'quotes.empty': 'No quotes yet.',
     'invoices.title': 'Invoices',
     'invoices.empty': 'No invoices yet.',
+    'invoice.wire.title': 'Payment instructions (wire / ACH)',
+    'invoice.wire.beneficiary': 'Beneficiary',
+    'invoice.wire.bank': 'Bank',
+    'invoice.wire.account': 'Account number',
+    'invoice.wire.routing': 'Routing (ABA)',
+    'invoice.wire.swift': 'SWIFT',
+    'invoice.wire.accountType': 'Account type',
+    'invoice.wire.reference': 'Reference',
     'approvals.title': 'Approvals',
     'approvals.empty': 'No approvals pending.',
     'notifications.title': 'Notifications',
@@ -835,6 +851,14 @@ export const MESSAGES: Record<Locale, Dict> = {
     'quotes.empty': 'Aún no hay cotizaciones.',
     'invoices.title': 'Facturas',
     'invoices.empty': 'Aún no hay facturas.',
+    'invoice.wire.title': 'Instrucciones de pago (transferencia / wire)',
+    'invoice.wire.beneficiary': 'Beneficiario',
+    'invoice.wire.bank': 'Banco',
+    'invoice.wire.account': 'Número de cuenta',
+    'invoice.wire.routing': 'Routing (ABA)',
+    'invoice.wire.swift': 'SWIFT',
+    'invoice.wire.accountType': 'Tipo de cuenta',
+    'invoice.wire.reference': 'Referencia',
     'approvals.title': 'Aprobaciones',
     'approvals.empty': 'No hay aprobaciones pendientes.',
     'notifications.title': 'Notificaciones',
