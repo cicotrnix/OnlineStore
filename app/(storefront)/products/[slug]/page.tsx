@@ -14,6 +14,7 @@ import { catalogService } from '@/modules/catalog'
 import { listTiersForProduct, pricingService } from '@/modules/pricing'
 import { getStoreConfig } from '@/stores'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -92,9 +93,16 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 grid gap-10 md:grid-cols-2">
-      <div className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+      <div className="relative aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
         {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 480px"
+            className="object-cover"
+          />
         ) : (
           <span className="text-sm text-gray-400">{t(locale, 'pdp.noImage')}</span>
         )}

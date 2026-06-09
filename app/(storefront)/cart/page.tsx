@@ -8,6 +8,7 @@ import { getLocale, t } from '@/lib/i18n'
 import { addMoney, formatMoney, multiplyMoney } from '@/lib/money'
 import { cartService } from '@/modules/cart'
 import { getStoreConfig } from '@/stores'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default async function CartPage() {
@@ -40,12 +41,14 @@ export default async function CartPage() {
           {cart.items.map((item) => (
             <Card key={item.id} className={item.product.isActive ? '' : 'opacity-60'}>
               <CardBody className="flex gap-4">
-                <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="relative w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                   {item.product.imageUrl ? (
-                    <img
+                    <Image
                       src={item.product.imageUrl}
                       alt={item.product.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="80px"
+                      className="object-cover"
                     />
                   ) : (
                     <span className="text-[10px] text-gray-400">{t(locale, 'cart.noImage')}</span>

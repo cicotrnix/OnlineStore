@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Card, CardBody } from '@/components/ui/Card'
 import type { Locale } from '@/lib/i18n'
 import type { Decimal } from '@prisma/client/runtime/library'
+import Image from 'next/image'
 import Link from 'next/link'
 import { AddToCartButton } from './AddToCartButton'
 import { PriceTag } from './PriceTag'
@@ -54,10 +55,16 @@ export function ProductCard({
     <Card className="overflow-hidden flex flex-col">
       <Link
         href={`/products/${product.slug}`}
-        className="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden"
+        className="relative aspect-square bg-gray-100 flex items-center justify-center overflow-hidden"
       >
         {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
+            className="object-cover"
+          />
         ) : (
           <span className="text-xs text-gray-400">{noImageLabel}</span>
         )}
