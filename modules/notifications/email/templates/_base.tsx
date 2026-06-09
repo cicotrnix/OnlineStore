@@ -20,7 +20,7 @@ export function BaseTemplate({
   cta,
   locale = 'en-US',
 }: BaseTemplateProps): JSX.Element {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? ''
   const ctaText = cta ?? t(locale, 'email.cta.viewDetail')
   return (
     <Html>
