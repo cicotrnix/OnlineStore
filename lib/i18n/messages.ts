@@ -222,6 +222,9 @@ export type MessageKey =
   | 'invoice.wire.swift'
   | 'invoice.wire.accountType'
   | 'invoice.wire.reference'
+  // Payment status
+  | 'payment.status.paid'
+  | 'payment.status.pending'
   | 'approvals.title'
   | 'approvals.empty'
   | 'notifications.title'
@@ -608,6 +611,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'invoice.wire.swift': 'SWIFT',
     'invoice.wire.accountType': 'Account type',
     'invoice.wire.reference': 'Reference',
+    // Payment status
+    'payment.status.paid': 'Paid',
+    'payment.status.pending': 'Payment pending',
     'approvals.title': 'Approvals',
     'approvals.empty': 'No approvals pending.',
     'notifications.title': 'Notifications',
@@ -984,6 +990,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'invoice.wire.swift': 'SWIFT',
     'invoice.wire.accountType': 'Tipo de cuenta',
     'invoice.wire.reference': 'Referencia',
+    // Payment status
+    'payment.status.paid': 'Pagado',
+    'payment.status.pending': 'Pendiente de pago',
     'approvals.title': 'Aprobaciones',
     'approvals.empty': 'No hay aprobaciones pendientes.',
     'notifications.title': 'Notificaciones',
