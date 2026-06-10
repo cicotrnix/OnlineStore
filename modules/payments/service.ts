@@ -394,6 +394,7 @@ export async function reconcileWire(input: {
       select: { id: true, total: true, currency: true, organizationId: true },
     })
     await ensureInvoiceAndEmit(tx, fullOrder)
+    // Dynamic import avoids a static cycle between modules/payments and modules/accounts.
     const { settleInvoiceForPaidOrder } = await import('@/modules/accounts')
     await settleInvoiceForPaidOrder(tx, {
       orderId: fullOrder.id,
