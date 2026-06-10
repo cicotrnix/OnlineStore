@@ -60,7 +60,7 @@ export interface CreateCardCheckoutInput {
   cancelUrl: string
 }
 
-function decimalToCents(d: { toString(): string }): number {
+export function decimalToCents(d: { toString(): string }): number {
   const [int, frac = ''] = d.toString().split('.')
   const fracPadded = `${frac}00`.slice(0, 2)
   return Number(int) * 100 + Number(fracPadded)

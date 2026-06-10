@@ -4,8 +4,8 @@ import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { toastUrl } from '@/lib/feedback/action-result'
 import type { MessageKey } from '@/lib/i18n/messages'
-import { markPaid } from '@/modules/accounts'
 import { grantAccess, revokeAccess } from '@/modules/catalog'
+import { decimalToCents, reconcileWire } from '@/modules/payments'
 import { upsertTier } from '@/modules/pricing'
 import { quote, revise } from '@/modules/quotes'
 import { enqueueIndex } from '@/modules/search'
@@ -77,8 +77,17 @@ export async function quoteOrReviseAction(formData: FormData) {
 export async function markInvoicePaidAction(formData: FormData) {
   const admin = await requirePlatformAdmin()
   const invoiceId = String(formData.get('invoiceId'))
-  const paidNote = String(formData.get('paidNote') ?? '')
-  await markPaid({ invoiceId, paidById: admin.id, paidNote })
+  const reference = String(formData.get('paidNote') ?? '')
+  const invoice = await prisma.invoice.findUniqueOrThrow({
+    where: { id: invoiceId },
+    select: { orderId: true, amount: true },
+  })
+  await reconcileWire({
+    orderId: invoice.orderId,
+    amountCents: decimalToCents(invoice.amount),
+    wireReference: reference,
+    adminUserId: admin.id,
+  })
   revalidatePath('/admin/invoices')
   adminToast(formData, '/admin/invoices', 'success', 'admin.toast.invoicePaid')
 }

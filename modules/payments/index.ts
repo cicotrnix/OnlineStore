@@ -1,4 +1,4 @@
-export { createCardCheckout, handleStripeWebhook, reconcileWire } from './service'
+export { createCardCheckout, decimalToCents, handleStripeWebhook, reconcileWire } from './service'
 export type { CreateCardCheckoutInput } from './service'
 export { refundPayment } from './refund'
 export type { RefundInput } from './refund'
