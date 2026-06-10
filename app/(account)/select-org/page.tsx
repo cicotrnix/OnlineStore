@@ -11,13 +11,11 @@ export default async function SelectOrgPage() {
   const locale = await getLocale({ userId: user.id })
   const orgs = await customersService.listForUser(user.id)
 
+  // User logueado sin organizaciones → onboarding (no quedarse en estado
+  // vacío sin acción). Compatible con ADR 0034: anónimos siguen navegando
+  // el catálogo público; este flujo solo aplica a sesiones autenticadas.
   if (orgs.length === 0) {
-    return (
-      <div className="max-w-md mx-auto mt-20 px-6 text-center">
-        <h1 className="text-xl font-medium">{t(locale, 'selectOrg.empty.title')}</h1>
-        <p className="mt-2 text-sm text-gray-600">{t(locale, 'selectOrg.empty.body')}</p>
-      </div>
-    )
+    redirect('/onboarding')
   }
 
   if (orgs.length === 1 && orgs[0]) {
