@@ -1,4 +1,5 @@
 import { markInvoicePaidAction } from '@/app/admin/_actions-fase2'
+import { PaymentBadge } from '@/components/commerce/PaymentBadge'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { SubmitButton } from '@/components/ui/SubmitButton'
@@ -42,6 +43,7 @@ export default async function AdminInvoicesPage() {
               <th className="text-left px-5 py-3 font-medium">Vence</th>
               <th className="text-right px-5 py-3 font-medium">Monto</th>
               <th className="text-left px-5 py-3 font-medium">Estado</th>
+              <th className="text-left px-5 py-3 font-medium">Pago</th>
               <th className="text-right px-5 py-3 font-medium">Acción</th>
             </tr>
           </thead>
@@ -57,6 +59,12 @@ export default async function AdminInvoicesPage() {
                 </td>
                 <td className="px-5 py-3">
                   <Badge variant={STATUS_VARIANT[inv.status] ?? 'default'}>{inv.status}</Badge>
+                </td>
+                <td className="px-5 py-3">
+                  <PaymentBadge
+                    paymentStatus={inv.status === 'PAID' ? 'CAPTURED' : 'PENDING'}
+                    locale={locale}
+                  />
                 </td>
                 <td className="px-5 py-3 text-right">
                   {(inv.status === 'PENDING' || inv.status === 'OVERDUE') && (
