@@ -25,6 +25,8 @@ model User {
   isPlatformAdmin      Boolean     @default(false)
   preferredCatalogView CatalogView @default(CARDS)
   preferredLocale      String?
+  hashedPassword       String?
+  passwordUpdatedAt    DateTime?
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
 
