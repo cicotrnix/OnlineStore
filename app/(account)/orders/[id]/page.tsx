@@ -1,6 +1,9 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
+import { PaymentBadge } from '@/components/commerce/PaymentBadge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { prisma } from '@/lib/db/client'
+import { getLocale } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { getStoreConfig } from '@/stores'
@@ -15,10 +18,16 @@ type Props = {
 
 export default async function OrderDetailPage({ params }: Props) {
   const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
-  await requireVerifiedCustomer()
+  const customer = await requireVerifiedCustomer()
+  const locale = await getLocale({ userId: customer.userId })
   const { id } = await params
   const order = await ordersService.findById(id)
   if (!order) notFound()
+
+  const payment = await prisma.payment.findUnique({
+    where: { orderId: order.id },
+    select: { status: true },
+  })
 
   const canPayWithCard =
     getStoreConfig().payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
@@ -35,7 +44,13 @@ export default async function OrderDetailPage({ params }: Props) {
             {order.placedAt.toLocaleString()}
           </p>
         </div>
-        <OrderStatusBadge status={order.status} />
+        <div className="flex items-center gap-2">
+          <OrderStatusBadge status={order.status} />
+          <PaymentBadge
+            paymentStatus={payment?.status === 'CAPTURED' ? 'CAPTURED' : payment ? 'PENDING' : null}
+            locale={locale}
+          />
+        </div>
       </div>
 
       <Card className="mt-8">

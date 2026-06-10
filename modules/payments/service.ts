@@ -60,7 +60,7 @@ export interface CreateCardCheckoutInput {
   cancelUrl: string
 }
 
-function decimalToCents(d: { toString(): string }): number {
+export function decimalToCents(d: { toString(): string }): number {
   const [int, frac = ''] = d.toString().split('.')
   const fracPadded = `${frac}00`.slice(0, 2)
   return Number(int) * 100 + Number(fracPadded)
@@ -394,6 +394,13 @@ export async function reconcileWire(input: {
       select: { id: true, total: true, currency: true, organizationId: true },
     })
     await ensureInvoiceAndEmit(tx, fullOrder)
+    // Dynamic import avoids a static cycle between modules/payments and modules/accounts.
+    const { settleInvoiceForPaidOrder } = await import('@/modules/accounts')
+    await settleInvoiceForPaidOrder(tx, {
+      orderId: fullOrder.id,
+      paidById: input.adminUserId,
+      reference: input.wireReference,
+    })
     const cogsCents = await calculateCogsCents(tx, order.id)
     await emitEvent(tx, {
       type: 'payment.reconciled',

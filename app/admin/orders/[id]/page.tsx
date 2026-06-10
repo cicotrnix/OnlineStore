@@ -1,9 +1,6 @@
-import {
-  cancelOrderAction,
-  reconcileWireAction,
-  transitionOrderStatusAction,
-} from '@/app/admin/_actions'
+import { cancelOrderAction, transitionOrderStatusAction } from '@/app/admin/_actions'
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
+import { PaymentBadge } from '@/components/commerce/PaymentBadge'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
@@ -34,14 +31,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
   const nextStatuses = TRANSITIONS[order.status] ?? []
 
-  // Pago existente (si lo hay) — Fase 5: para decidir si exponer reconcileWire.
+  // Pago existente (si lo hay).
   const payment = await prisma.payment.findUnique({
     where: { orderId: order.id },
     select: { id: true, status: true, method: true, wireReference: true },
   })
-  const canReconcileWire =
-    order.status === 'PENDING_PAYMENT' &&
-    (!payment || (payment.status === 'PENDING' && payment.method !== 'STRIPE_CARD'))
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -118,53 +112,6 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         </Card>
       )}
 
-      {canReconcileWire && (
-        <Card>
-          <CardHeader>
-            <h2 className="font-medium">Conciliar wire / ACH</h2>
-            <p className="mt-1 text-xs text-gray-500">
-              Para confirmar pago vía transferencia bancaria. El monto debe coincidir exactamente
-              con el total. Mismatch lanza error y no se postea.
-            </p>
-          </CardHeader>
-          <CardBody>
-            <form action={reconcileWireAction} className="space-y-3 max-w-sm">
-              <input type="hidden" name="orderId" value={order.id} />
-              <div>
-                <label htmlFor="amount" className="block text-xs text-gray-500 mb-1">
-                  Monto recibido (USD)
-                </label>
-                <input
-                  id="amount"
-                  name="amount"
-                  type="number"
-                  step="0.01"
-                  required
-                  defaultValue={order.total.toString()}
-                  className="block w-full rounded border border-gray-300 px-3 py-2 text-sm font-mono tabular-nums"
-                />
-              </div>
-              <div>
-                <label htmlFor="wireReference" className="block text-xs text-gray-500 mb-1">
-                  Referencia del wire
-                </label>
-                <input
-                  id="wireReference"
-                  name="wireReference"
-                  type="text"
-                  required
-                  placeholder="ej: WR-2026-06-001"
-                  className="block w-full rounded border border-gray-300 px-3 py-2 text-sm font-mono"
-                />
-              </div>
-              <SubmitButton pendingLabel={t(locale, 'admin.action.reconciling')}>
-                {t(locale, 'admin.action.reconcileWire')}
-              </SubmitButton>
-            </form>
-          </CardBody>
-        </Card>
-      )}
-
       {payment && (
         <Card>
           <CardHeader>
@@ -175,9 +122,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               <span className="text-gray-500">Método</span>
               <span className="font-mono">{payment.method}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-500">Estado</span>
-              <span className="font-mono">{payment.status}</span>
+              <PaymentBadge
+                paymentStatus={payment.status === 'CAPTURED' ? 'CAPTURED' : 'PENDING'}
+                locale={locale}
+              />
             </div>
             {payment.wireReference && (
               <div className="flex justify-between">

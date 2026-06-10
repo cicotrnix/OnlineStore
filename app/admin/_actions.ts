@@ -208,32 +208,6 @@ export async function getTaxCertificateUrlAction(formData: FormData): Promise<st
   return getStorage().signedUrl(doc.fileKey, 900) // 15 min
 }
 
-export async function reconcileWireAction(formData: FormData) {
-  const user = await requirePlatformAdmin()
-  const orderId = String(formData.get('orderId'))
-  const fallback = `/admin/orders/${orderId}`
-  const amountStr = String(formData.get('amount'))
-  const wireReference = String(formData.get('wireReference')).trim()
-  if (!wireReference) {
-    adminToast(formData, fallback, 'error', 'admin.toast.wireFailed')
-  }
-  // amount viene en USD; el módulo de pagos trabaja en cents.
-  const amount = Number(amountStr)
-  if (!Number.isFinite(amount) || amount <= 0) {
-    adminToast(formData, fallback, 'error', 'admin.toast.wireFailed')
-  }
-  const amountCents = Math.round(amount * 100)
-  const { reconcileWire } = await import('@/modules/payments')
-  try {
-    await reconcileWire({ orderId, amountCents, wireReference, adminUserId: user.id })
-  } catch {
-    adminToast(formData, fallback, 'error', 'admin.toast.wireFailed')
-  }
-  revalidatePath('/admin/orders')
-  revalidatePath(fallback)
-  adminToast(formData, fallback, 'success', 'admin.toast.wireReconciled')
-}
-
 export async function setCustomerPriceAction(formData: FormData) {
   await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))
