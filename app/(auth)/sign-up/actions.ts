@@ -1,10 +1,10 @@
 'use server'
 
 import { signIn } from '@/lib/auth'
-import { prisma } from '@/lib/db/client'
 import { hashPassword, validatePasswordPolicy } from '@/lib/auth/password'
+import { prisma } from '@/lib/db/client'
 import type { ActionResult } from '@/lib/feedback/action-result'
-import { SIGNIN_LIMITS, checkRateLimit, type RateLimitConfig } from '@/lib/rate-limit'
+import { type RateLimitConfig, SIGNIN_LIMITS, checkRateLimit } from '@/lib/rate-limit'
 import { headers } from 'next/headers'
 
 const SIGNUP_IP_LIMITS: RateLimitConfig = { perMinute: 5, perHour: 20 }
@@ -20,11 +20,10 @@ const SIGNUP_IP_LIMITS: RateLimitConfig = { perMinute: 5, perHour: 20 }
  * Race guard: en paralelo, dos signups con mismo email pueden pasar el "no
  * existe" check; el segundo cae en P2002 (unique constraint) y rebota igual.
  */
-export async function signUpAction(
-  _prev: ActionResult,
-  fd: FormData
-): Promise<ActionResult> {
-  const email = String(fd.get('email') ?? '').trim().toLowerCase()
+export async function signUpAction(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
+  const email = String(fd.get('email') ?? '')
+    .trim()
+    .toLowerCase()
   const password = String(fd.get('password') ?? '')
   if (!email) return { ok: false, messageKey: 'auth.toast.invalidEmail' }
 
@@ -51,12 +50,7 @@ export async function signUpAction(
   try {
     await prisma.user.create({ data: { email, hashedPassword: hashed } })
   } catch (e) {
-    if (
-      e &&
-      typeof e === 'object' &&
-      'code' in e &&
-      (e as { code: string }).code === 'P2002'
-    ) {
+    if (e && typeof e === 'object' && 'code' in e && (e as { code: string }).code === 'P2002') {
       return { ok: false, messageKey: 'auth.toast.accountExists' }
     }
     throw e

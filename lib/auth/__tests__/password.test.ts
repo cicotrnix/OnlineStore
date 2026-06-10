@@ -1,5 +1,5 @@
+import { hashPassword, validatePasswordPolicy, verifyPassword } from '@/lib/auth/password'
 import { describe, expect, it } from 'vitest'
-import { hashPassword, verifyPassword, validatePasswordPolicy } from '@/lib/auth/password'
 
 describe('password', () => {
   it('hash + verify round-trip', async () => {

@@ -1,15 +1,12 @@
 'use server'
 
-import { prisma } from '@/lib/db/client'
+import { auth } from '@/lib/auth/config'
 import { hashPassword, validatePasswordPolicy, verifyPassword } from '@/lib/auth/password'
 import { cookieName } from '@/lib/auth/session'
-import { auth } from '@/lib/auth/config'
+import { prisma } from '@/lib/db/client'
 import { sendEmail } from '@/lib/email/resend'
 import type { ActionResult } from '@/lib/feedback/action-result'
-import {
-  consumeSensitiveActionToken,
-  issueSensitiveActionToken,
-} from '@/modules/payments/step-up'
+import { consumeSensitiveActionToken, issueSensitiveActionToken } from '@/modules/payments/step-up'
 import { cookies } from 'next/headers'
 
 /**
@@ -81,10 +78,7 @@ export async function changePasswordAction(
   return { ok: true, messageKey: 'auth.toast.passwordChanged' }
 }
 
-export async function setPasswordAction(
-  _prev: ActionResult,
-  fd: FormData
-): Promise<ActionResult> {
+export async function setPasswordAction(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
   const session = await auth()
   const userId = session?.user?.id
   if (!userId) return { ok: false, messageKey: 'auth.toast.unauthenticated' }

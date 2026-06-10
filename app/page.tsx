@@ -62,7 +62,7 @@ export default async function LandingPage() {
                   {t(locale, 'landing.nav.signIn')}
                 </Link>
                 <Link
-                  href="/onboarding"
+                  href="/sign-up"
                   className="rounded-md bg-gray-900 text-white px-3 py-1.5 hover:bg-gray-800"
                 >
                   {t(locale, 'landing.nav.register')}
@@ -98,7 +98,7 @@ export default async function LandingPage() {
           <div className="mt-10 flex items-center justify-center gap-3 flex-wrap">
             {!session?.user && (
               <Link
-                href="/onboarding"
+                href="/sign-up"
                 className="rounded-md bg-gray-900 text-white px-6 py-3 text-base font-medium hover:bg-gray-800"
               >
                 {t(locale, 'landing.cta.register')}
@@ -170,7 +170,7 @@ export default async function LandingPage() {
               {t(locale, 'landing.nav.catalog')}
             </Link>
             {!session?.user && (
-              <Link href="/onboarding" className="hover:text-gray-700">
+              <Link href="/sign-up" className="hover:text-gray-700">
                 {t(locale, 'landing.cta.register')}
               </Link>
             )}

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db/client'
-import { cleanDb } from '@/tests/helpers/cleanDb'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
 import { resetRateLimits } from '@/lib/rate-limit'
+import { cleanDb } from '@/tests/helpers/cleanDb'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const signInMock = vi.fn(async () => undefined)

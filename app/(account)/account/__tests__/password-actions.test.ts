@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/db/client'
-import { cleanDb } from '@/tests/helpers/cleanDb'
 import { hashPassword, verifyPassword } from '@/lib/auth/password'
+import { prisma } from '@/lib/db/client'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
 import { issueSensitiveActionToken } from '@/modules/payments/step-up'
+import { cleanDb } from '@/tests/helpers/cleanDb'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // `auth()` returns the current session's user.

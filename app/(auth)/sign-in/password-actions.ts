@@ -1,8 +1,8 @@
 'use server'
 
-import { prisma } from '@/lib/db/client'
 import { DUMMY_HASH, verifyPassword } from '@/lib/auth/password'
 import { createDbSession } from '@/lib/auth/session'
+import { prisma } from '@/lib/db/client'
 import type { ActionResult } from '@/lib/feedback/action-result'
 import { SIGNIN_LIMITS, checkRateLimit } from '@/lib/rate-limit'
 import { headers } from 'next/headers'
@@ -19,7 +19,9 @@ export async function passwordSignInAction(
   _prev: ActionResult,
   fd: FormData
 ): Promise<ActionResult> {
-  const email = String(fd.get('email') ?? '').trim().toLowerCase()
+  const email = String(fd.get('email') ?? '')
+    .trim()
+    .toLowerCase()
   const password = String(fd.get('password') ?? '')
   if (!email || !password) return { ok: false, messageKey: 'auth.toast.invalidCredentials' }
 

@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/db/client'
-import { cleanDb } from '@/tests/helpers/cleanDb'
 import { hashPassword } from '@/lib/auth/password'
-import { resetRateLimits } from '@/lib/rate-limit'
+import { prisma } from '@/lib/db/client'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
+import { resetRateLimits } from '@/lib/rate-limit'
+import { cleanDb } from '@/tests/helpers/cleanDb'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const cookieStore = new Map<string, string>()
