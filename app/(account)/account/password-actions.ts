@@ -93,6 +93,14 @@ export async function setPasswordAction(_prev: ActionResult, fd: FormData): Prom
   const otp = String(fd.get('otp') ?? '')
   const newPassword = String(fd.get('newPassword') ?? '')
 
+  // Validate policy BEFORE consuming the OTP so a weak password doesn't burn
+  // the one-shot step-up token (user can fix the password and retry without
+  // re-requesting a new OTP).
+  const policy = validatePasswordPolicy(newPassword)
+  if (!policy.ok) {
+    return { ok: false, messageKey: 'auth.toast.weakPassword' }
+  }
+
   if (!token || !otp) {
     return { ok: false, messageKey: 'auth.toast.stepUpRequired' }
   }
@@ -106,11 +114,6 @@ export async function setPasswordAction(_prev: ActionResult, fd: FormData): Prom
   })
   if (!consumed) {
     return { ok: false, messageKey: 'auth.toast.stepUpRequired' }
-  }
-
-  const policy = validatePasswordPolicy(newPassword)
-  if (!policy.ok) {
-    return { ok: false, messageKey: 'auth.toast.weakPassword' }
   }
 
   const hashed = await hashPassword(newPassword)

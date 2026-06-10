@@ -155,4 +155,34 @@ describe('setPasswordAction', () => {
     const after = await prisma.user.findUnique({ where: { id: user.id } })
     expect(after?.hashedPassword).toBe(before?.hashedPassword)
   })
+
+  it('weak new password → weakPassword BEFORE consuming the OTP (token stays usable)', async () => {
+    const { user } = await seedUserWithSession({})
+    const issued = await issueSensitiveActionToken({
+      userId: user.id,
+      action: 'set_password',
+      subjectId: user.id,
+    })
+    const { setPasswordAction } = await import('../password-actions')
+
+    // First attempt: weak password. Token must NOT be consumed.
+    const fdWeak = new FormData()
+    fdWeak.set('token', issued.token)
+    fdWeak.set('otp', issued.otp)
+    fdWeak.set('newPassword', 'short')
+    const r1 = await setPasswordAction(INITIAL_ACTION_RESULT, fdWeak)
+    expect(r1).toEqual({ ok: false, messageKey: 'auth.toast.weakPassword' })
+
+    // Second attempt with the SAME token + OTP and a valid password must succeed.
+    // If the token had been consumed in attempt 1, this would fail with stepUpRequired.
+    const fdOk = new FormData()
+    fdOk.set('token', issued.token)
+    fdOk.set('otp', issued.otp)
+    fdOk.set('newPassword', 'Newpass1')
+    const r2 = await setPasswordAction(INITIAL_ACTION_RESULT, fdOk)
+    expect(r2.ok).toBe(true)
+    const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    expect(fresh?.hashedPassword).toBeTruthy()
+    expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
+  })
 })
