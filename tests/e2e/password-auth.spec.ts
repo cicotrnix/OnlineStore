@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
-import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 // Auth.js v5 session cookie (HTTP dev = Playwright baseURL http://localhost:3000).
 const SESSION_COOKIE = 'authjs.session-token'
@@ -102,9 +102,7 @@ test.describe('password auth (login + signup + change)', () => {
     }
   })
 
-  test('flujos: wrong password, forgot-password toggle, signup happy path', async ({
-    browser,
-  }) => {
+  test('flujos: wrong password, forgot-password toggle, signup happy path', async ({ browser }) => {
     // ── (a) Wrong password ───────────────────────────────────────────────
     const emailLogin = uniqueEmail('wrong')
     const userLogin = await prisma.user.create({
@@ -180,7 +178,10 @@ test.describe('password auth (login + signup + change)', () => {
       // pero NO toleramos que el form siga visible sin haber creado al user
       // (ya lo verificamos arriba).
       const successText = pageB.getByText(/revisá tu email|check your email|reenviar/i)
-      const visible = await successText.first().isVisible().catch(() => false)
+      const visible = await successText
+        .first()
+        .isVisible()
+        .catch(() => false)
       // Soft check: registramos pero no fallamos si el provider Resend rompió.
       if (!visible) {
         // eslint-disable-next-line no-console
