@@ -77,7 +77,9 @@ export async function quoteOrReviseAction(formData: FormData) {
 export async function markInvoicePaidAction(formData: FormData) {
   const admin = await requirePlatformAdmin()
   const invoiceId = String(formData.get('invoiceId'))
-  const reference = String(formData.get('paidNote') ?? '').trim().slice(0, 255)
+  const reference = String(formData.get('paidNote') ?? '')
+    .trim()
+    .slice(0, 255)
   const invoice = await prisma.invoice.findUniqueOrThrow({
     where: { id: invoiceId },
     select: { orderId: true, amount: true },
