@@ -38,6 +38,12 @@ export default async function SignInPage({ searchParams }: Props) {
         emailPlaceholder={t(locale, 'auth.signIn.emailPlaceholder')}
         submitLabel={t(locale, 'auth.signIn.submit')}
         pendingLabel={t(locale, 'auth.signIn.sending')}
+        passwordPlaceholder={t(locale, 'auth.signIn.passwordPlaceholder')}
+        passwordSubmitLabel={t(locale, 'auth.signIn.passwordSubmit')}
+        passwordPendingLabel={t(locale, 'auth.signIn.passwordSending')}
+        forgotPasswordLabel={t(locale, 'auth.signIn.forgotPassword')}
+        preferEmailLinkLabel={t(locale, 'auth.signIn.preferEmailLink')}
+        noAccountLabel={t(locale, 'auth.signIn.noAccount')}
       />
     </div>
   )

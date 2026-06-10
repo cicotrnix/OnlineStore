@@ -38,6 +38,37 @@ export type MessageKey =
   | 'auth.signIn.submit'
   | 'auth.signIn.checkInbox.title'
   | 'auth.signIn.checkInbox.body'
+  | 'auth.signIn.passwordPlaceholder'
+  | 'auth.signIn.passwordSubmit'
+  | 'auth.signIn.passwordSending'
+  | 'auth.signIn.forgotPassword'
+  | 'auth.signIn.preferEmailLink'
+  | 'auth.signIn.noAccount'
+  // Sign-up
+  | 'auth.signUp.title'
+  | 'auth.signUp.subtitle'
+  | 'auth.signUp.emailPlaceholder'
+  | 'auth.signUp.passwordPlaceholder'
+  | 'auth.signUp.confirmPlaceholder'
+  | 'auth.signUp.submit'
+  | 'auth.signUp.sending'
+  | 'auth.signUp.hasAccount'
+  | 'auth.signUp.confirmHint'
+  | 'auth.signUp.resend'
+  | 'auth.signUp.passwordsDontMatch'
+  | 'auth.signUp.strength.weak'
+  | 'auth.signUp.strength.medium'
+  | 'auth.signUp.strength.strong'
+  // Account password
+  | 'account.password.title'
+  | 'account.password.currentLabel'
+  | 'account.password.newLabel'
+  | 'account.password.confirmLabel'
+  | 'account.password.submitChange'
+  | 'account.password.submitSet'
+  | 'account.password.requestStepUp'
+  | 'account.password.otpLabel'
+  | 'account.password.noPasswordYet'
   // Select org
   | 'selectOrg.title'
   | 'selectOrg.subtitle'
@@ -219,6 +250,20 @@ export type MessageKey =
   | 'auth.toast.linkFailed'
   | 'auth.toast.rateLimited'
   | 'auth.signIn.sending'
+  | 'auth.toast.invalidCredentials'
+  | 'auth.toast.emailNotVerified'
+  | 'auth.toast.accountExists'
+  | 'auth.toast.weakPassword'
+  | 'auth.toast.checkEmailToConfirm'
+  | 'auth.toast.invalidEmail'
+  | 'auth.toast.stepUpRequired'
+  | 'auth.toast.stepUpSent'
+  | 'auth.toast.signedIn'
+  | 'auth.toast.invalidCurrentPassword'
+  | 'auth.toast.passwordAlreadySet'
+  | 'auth.toast.passwordChanged'
+  | 'auth.toast.passwordSet'
+  | 'auth.toast.unauthenticated'
   // Onboarding toasts
   | 'onboarding.toast.submitted'
   | 'onboarding.toast.resubmitted'
@@ -368,6 +413,39 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.signIn.submit': 'Send magic link',
     'auth.signIn.checkInbox.title': 'Check your email',
     'auth.signIn.checkInbox.body': 'We sent a magic link to your inbox. Click it to sign in.',
+    'auth.signIn.passwordPlaceholder': 'Password',
+    'auth.signIn.passwordSubmit': 'Sign in',
+    'auth.signIn.passwordSending': 'Signing in…',
+    'auth.signIn.forgotPassword': 'Forgot your password?',
+    'auth.signIn.preferEmailLink': 'Prefer to receive a link by email',
+    'auth.signIn.noAccount': "Don't have an account? Sign up",
+    // Sign-up
+    'auth.signUp.title': 'Create your account',
+    'auth.signUp.subtitle': "Email + password. We'll send a confirmation link.",
+    'auth.signUp.emailPlaceholder': 'you@company.com',
+    'auth.signUp.passwordPlaceholder': 'Min 8 chars, letter + number',
+    'auth.signUp.confirmPlaceholder': 'Confirm password',
+    'auth.signUp.submit': 'Sign up',
+    'auth.signUp.sending': 'Creating account…',
+    'auth.signUp.hasAccount': 'Already have an account? Sign in',
+    'auth.signUp.confirmHint':
+      "Check your email and click the link to verify. Don't see it? Check spam.",
+    'auth.signUp.resend': 'Resend confirmation',
+    'auth.signUp.passwordsDontMatch': "Passwords don't match.",
+    'auth.signUp.strength.weak': 'Weak',
+    'auth.signUp.strength.medium': 'Medium',
+    'auth.signUp.strength.strong': 'Strong',
+    // Account password
+    'account.password.title': 'Password',
+    'account.password.currentLabel': 'Current password',
+    'account.password.newLabel': 'New password',
+    'account.password.confirmLabel': 'Confirm new password',
+    'account.password.submitChange': 'Update password',
+    'account.password.submitSet': 'Set password',
+    'account.password.requestStepUp': 'Send verification code',
+    'account.password.otpLabel': 'Verification code',
+    'account.password.noPasswordYet':
+      'You sign in with a magic link. Set a password to sign in faster.',
     // Select org
     'selectOrg.title': 'Choose your organization',
     'selectOrg.subtitle': 'Switching organizations later will empty your cart.',
@@ -558,6 +636,20 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.toast.linkFailed': "We couldn't send the magic link. Try again.",
     'auth.toast.rateLimited': 'Too many attempts. Wait a minute and try again.',
     'auth.signIn.sending': 'Sending…',
+    'auth.toast.invalidCredentials': 'Invalid email or password.',
+    'auth.toast.emailNotVerified': 'Confirm your email before signing in.',
+    'auth.toast.accountExists': 'An account with that email already exists. Sign in instead.',
+    'auth.toast.weakPassword': 'Password must be at least 8 characters with a letter and a number.',
+    'auth.toast.checkEmailToConfirm': 'Check your email to confirm your account.',
+    'auth.toast.invalidEmail': 'Enter a valid email.',
+    'auth.toast.stepUpRequired': 'Verification code required.',
+    'auth.toast.stepUpSent': 'We sent a verification code to your email.',
+    'auth.toast.signedIn': 'Signed in.',
+    'auth.toast.invalidCurrentPassword': 'Current password is incorrect.',
+    'auth.toast.passwordAlreadySet': 'You already have a password set.',
+    'auth.toast.passwordChanged': 'Password updated. Other sessions were signed out.',
+    'auth.toast.passwordSet': 'Password created. Other sessions were signed out.',
+    'auth.toast.unauthenticated': 'Please sign in first.',
     // Onboarding
     'onboarding.toast.submitted': 'Application submitted. We will email you once reviewed.',
     'onboarding.toast.resubmitted': 'Certificate resubmitted. Back to pending review.',
@@ -696,6 +788,39 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.signIn.checkInbox.title': 'Revisá tu email',
     'auth.signIn.checkInbox.body':
       'Te enviamos un link mágico a tu bandeja. Hacé clic para entrar.',
+    'auth.signIn.passwordPlaceholder': 'Contraseña',
+    'auth.signIn.passwordSubmit': 'Entrar',
+    'auth.signIn.passwordSending': 'Entrando…',
+    'auth.signIn.forgotPassword': '¿Olvidaste tu contraseña?',
+    'auth.signIn.preferEmailLink': 'Prefiero recibir un link por email',
+    'auth.signIn.noAccount': '¿No tenés cuenta? Registrate',
+    // Sign-up
+    'auth.signUp.title': 'Creá tu cuenta',
+    'auth.signUp.subtitle': 'Email + contraseña. Te mandamos un link de confirmación.',
+    'auth.signUp.emailPlaceholder': 'vos@empresa.com',
+    'auth.signUp.passwordPlaceholder': 'Mín 8 caract., letra + número',
+    'auth.signUp.confirmPlaceholder': 'Confirmá la contraseña',
+    'auth.signUp.submit': 'Registrarme',
+    'auth.signUp.sending': 'Creando cuenta…',
+    'auth.signUp.hasAccount': '¿Ya tenés cuenta? Iniciá sesión',
+    'auth.signUp.confirmHint':
+      'Revisá tu email y hacé click en el link para verificar. ¿No lo ves? Mirá spam.',
+    'auth.signUp.resend': 'Reenviar confirmación',
+    'auth.signUp.passwordsDontMatch': 'Las contraseñas no coinciden.',
+    'auth.signUp.strength.weak': 'Débil',
+    'auth.signUp.strength.medium': 'Media',
+    'auth.signUp.strength.strong': 'Fuerte',
+    // Account password
+    'account.password.title': 'Contraseña',
+    'account.password.currentLabel': 'Contraseña actual',
+    'account.password.newLabel': 'Contraseña nueva',
+    'account.password.confirmLabel': 'Confirmá la contraseña nueva',
+    'account.password.submitChange': 'Actualizar contraseña',
+    'account.password.submitSet': 'Crear contraseña',
+    'account.password.requestStepUp': 'Enviar código de verificación',
+    'account.password.otpLabel': 'Código de verificación',
+    'account.password.noPasswordYet':
+      'Hoy entrás con un link mágico. Creá una contraseña para entrar más rápido.',
     // Select org
     'selectOrg.title': 'Elegí tu organización',
     'selectOrg.subtitle': 'Cambiar de organización en el futuro vaciará tu carrito.',
@@ -887,6 +1012,20 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.toast.linkFailed': 'No pudimos enviar el link. Volvé a intentar.',
     'auth.toast.rateLimited': 'Demasiados intentos. Esperá un minuto y volvé a intentar.',
     'auth.signIn.sending': 'Enviando…',
+    'auth.toast.invalidCredentials': 'Email o contraseña inválidos.',
+    'auth.toast.emailNotVerified': 'Confirmá tu email antes de entrar.',
+    'auth.toast.accountExists': 'Ya existe una cuenta con ese email. Iniciá sesión.',
+    'auth.toast.weakPassword': 'La contraseña debe tener al menos 8 caracteres con letra y número.',
+    'auth.toast.checkEmailToConfirm': 'Revisá tu email para confirmar tu cuenta.',
+    'auth.toast.invalidEmail': 'Ingresá un email válido.',
+    'auth.toast.stepUpRequired': 'Falta el código de verificación.',
+    'auth.toast.stepUpSent': 'Te enviamos un código de verificación a tu email.',
+    'auth.toast.signedIn': 'Sesión iniciada.',
+    'auth.toast.invalidCurrentPassword': 'La contraseña actual es incorrecta.',
+    'auth.toast.passwordAlreadySet': 'Ya tenés una contraseña configurada.',
+    'auth.toast.passwordChanged': 'Contraseña actualizada. Las otras sesiones se cerraron.',
+    'auth.toast.passwordSet': 'Contraseña creada. Las otras sesiones se cerraron.',
+    'auth.toast.unauthenticated': 'Iniciá sesión primero.',
     // Onboarding
     'onboarding.toast.submitted':
       'Solicitud enviada. Te avisamos por email en cuanto la revisemos.',
