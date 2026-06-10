@@ -47,7 +47,7 @@ export default async function OrderDetailPage({ params }: Props) {
         <div className="flex items-center gap-2">
           <OrderStatusBadge status={order.status} />
           <PaymentBadge
-            paymentStatus={(payment?.status as 'CAPTURED' | 'PENDING' | null) ?? null}
+            paymentStatus={payment?.status === 'CAPTURED' ? 'CAPTURED' : payment ? 'PENDING' : null}
             locale={locale}
           />
         </div>

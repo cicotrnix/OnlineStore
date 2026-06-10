@@ -125,7 +125,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <div className="flex justify-between items-center">
               <span className="text-gray-500">Estado</span>
               <PaymentBadge
-                paymentStatus={payment.status as 'CAPTURED' | 'PENDING'}
+                paymentStatus={payment.status === 'CAPTURED' ? 'CAPTURED' : 'PENDING'}
                 locale={locale}
               />
             </div>

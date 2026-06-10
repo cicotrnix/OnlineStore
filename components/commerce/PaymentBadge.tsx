@@ -14,6 +14,7 @@ const LABELS: Record<'paid' | 'pending', Record<Locale, string>> = {
 }
 
 export function PaymentBadge({ paymentStatus, locale }: Props) {
+  if (!paymentStatus) return null
   const isPaid = paymentStatus === 'CAPTURED'
   const label = isPaid ? LABELS.paid[locale] : LABELS.pending[locale]
   const className = isPaid

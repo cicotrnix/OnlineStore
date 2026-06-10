@@ -62,7 +62,13 @@ export default async function AdminInvoicesPage() {
                 </td>
                 <td className="px-5 py-3">
                   <PaymentBadge
-                    paymentStatus={inv.status === 'PAID' ? 'CAPTURED' : 'PENDING'}
+                    paymentStatus={
+                      inv.status === 'PAID'
+                        ? 'CAPTURED'
+                        : inv.status === 'CANCELLED'
+                          ? null
+                          : 'PENDING'
+                    }
                     locale={locale}
                   />
                 </td>
