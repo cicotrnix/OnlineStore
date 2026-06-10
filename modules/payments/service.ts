@@ -394,6 +394,12 @@ export async function reconcileWire(input: {
       select: { id: true, total: true, currency: true, organizationId: true },
     })
     await ensureInvoiceAndEmit(tx, fullOrder)
+    const { settleInvoiceForPaidOrder } = await import('@/modules/accounts')
+    await settleInvoiceForPaidOrder(tx, {
+      orderId: fullOrder.id,
+      paidById: input.adminUserId,
+      reference: input.wireReference,
+    })
     const cogsCents = await calculateCogsCents(tx, order.id)
     await emitEvent(tx, {
       type: 'payment.reconciled',
