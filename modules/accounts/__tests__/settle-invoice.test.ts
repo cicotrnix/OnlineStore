@@ -68,7 +68,7 @@ async function seed() {
 }
 
 describe('settleInvoiceForPaidOrder', () => {
-  it('marca invoice PAID + libera crédito; segunda llamada es no-op (idempotente)', async () => {
+  it('marks invoice PAID, releases credit, and is idempotent on second call', async () => {
     const { org, order, user } = await seed()
 
     await prisma.$transaction((tx) =>
@@ -100,17 +100,17 @@ describe('settleInvoiceForPaidOrder', () => {
     expect(Number(o2.creditUsed)).toBe(60) // NOT double-decremented
   })
 
-  it('no-op cuando no hay invoice para el orderId', async () => {
+  it('no-ops when no invoice exists for the orderId', async () => {
     const { user } = await seed()
     // call with a random orderId that has no invoice
-    await prisma.$transaction((tx) =>
-      settleInvoiceForPaidOrder(tx, {
-        orderId: `nonexistent-order-id-${Date.now()}`,
-        paidById: user.id,
-        reference: 'WX-2',
-      })
-    )
-    // nothing thrown, nothing changed — just verify the call resolves
-    expect(true).toBe(true)
+    await expect(
+      prisma.$transaction((tx) =>
+        settleInvoiceForPaidOrder(tx, {
+          orderId: `nonexistent-order-id-${Date.now()}`,
+          paidById: user.id,
+          reference: 'WX-2',
+        })
+      )
+    ).resolves.toBeUndefined()
   })
 })

@@ -92,6 +92,7 @@ export async function settleInvoiceForPaidOrder(
     select: { userId: true },
   })
   if (members.length > 0) {
+    // Notification dispatch is NOT part of the transaction; if the outer tx rolls back, the notification has already fired. Matches markPaid's behavior.
     await dispatch({
       userIds: members.map((m) => m.userId),
       type: 'INVOICE_PAID',
@@ -143,6 +144,7 @@ export async function markPaid(input: MarkPaidInput): Promise<Invoice> {
       select: { userId: true },
     })
     if (orgMembers.length > 0) {
+      // Notification dispatch is NOT part of the transaction; if the outer tx rolls back, the notification has already fired. Matches markPaid's behavior.
       await dispatch({
         userIds: orgMembers.map((m) => m.userId),
         type: 'INVOICE_PAID',
