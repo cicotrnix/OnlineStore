@@ -1,5 +1,6 @@
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
+import { HeroBattery } from '@/components/home/HeroBattery'
 import { HomeMotion } from '@/components/home/HomeMotion'
 import { auth } from '@/lib/auth/config'
 import { getLocale, t } from '@/lib/i18n'
@@ -82,62 +83,67 @@ export default async function LandingPage() {
       </header>
 
       <main className="flex-1">
-        {/* Hero */}
+        {/* Hero — dark tile with stylized battery + headline + CTAs */}
         <section
           aria-labelledby="hero-tagline"
-          className="mx-auto max-w-5xl px-5 md:px-8 pt-20 md:pt-28 pb-20 md:pb-28 text-center"
+          className="bg-neutral-900 text-surface"
           data-motion="hero"
         >
-          <Image
-            src={store.identity.logo}
-            alt={store.identity.name}
-            width={1600}
-            height={998}
-            priority
-            className="h-20 md:h-28 w-auto mx-auto"
-            data-motion-step="1"
-          />
-          <h1
-            id="hero-tagline"
-            className="mt-8 font-sans text-display font-semibold tracking-[-0.025em] text-ink-950 text-balance"
-            data-motion-step="2"
-          >
-            {t(locale, 'landing.tagline')}
-          </h1>
-          <div aria-hidden className="mt-7 mx-auto h-px w-24 bg-accent" data-motion-step="3" />
-          <p
-            className="mt-8 mx-auto max-w-2xl text-body-lg text-ink-500 text-pretty"
-            data-motion-step="4"
-          >
-            {t(locale, 'landing.intro')}
-          </p>
-
-          <div
-            className="mt-12 flex items-center justify-center gap-3 flex-wrap"
-            data-motion-step="5"
-          >
-            {!session?.user && (
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center justify-center rounded-button bg-ink-950 text-surface px-6 py-3 text-base font-medium hover:-translate-y-px hover:ring-2 hover:ring-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-              >
-                {t(locale, 'landing.cta.register')}
-              </Link>
-            )}
-            <Link
-              href="/catalog"
-              className="inline-flex items-center justify-center rounded-button border-[1.5px] border-accent bg-surface text-ink-950 px-6 py-3 text-base font-medium hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            >
-              {t(locale, 'landing.cta.exploreCatalog')}
-            </Link>
-            {!session?.user && (
-              <Link
-                href="/sign-in"
-                className="text-base font-medium text-ink-700 hover:text-ink-950 underline underline-offset-4 decoration-ink-300 hover:decoration-ink-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
-              >
-                {t(locale, 'landing.cta.signInExisting')}
-              </Link>
-            )}
+          <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-20 md:py-28">
+            <div className="grid items-center gap-14 md:grid-cols-[1.1fr,1fr] md:gap-16">
+              {/* Text (DOM-first for SEO + a11y; visually on the right at md). */}
+              <div className="text-center md:order-2 md:text-left">
+                <h1
+                  id="hero-tagline"
+                  className="font-sans text-display font-semibold tracking-[-0.025em] text-surface text-balance"
+                  data-motion-step="1"
+                >
+                  {t(locale, 'landing.tagline')}
+                </h1>
+                <div
+                  aria-hidden
+                  className="mt-7 mx-auto h-px w-24 bg-accent md:mx-0"
+                  data-motion-step="2"
+                />
+                <p
+                  className="mt-8 mx-auto max-w-2xl text-body-lg text-surface/70 text-pretty md:mx-0"
+                  data-motion-step="3"
+                >
+                  {t(locale, 'landing.intro')}
+                </p>
+                <div
+                  className="mt-12 flex flex-wrap items-center justify-center gap-3 md:justify-start"
+                  data-motion-step="4"
+                >
+                  {!session?.user && (
+                    <Link
+                      href="/sign-up"
+                      className="inline-flex items-center justify-center rounded-button bg-accent text-ink-950 px-6 py-3 text-base font-semibold hover:-translate-y-px transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+                    >
+                      {t(locale, 'landing.cta.register')}
+                    </Link>
+                  )}
+                  <Link
+                    href="/catalog"
+                    className="inline-flex items-center justify-center rounded-button border-[1.5px] border-accent bg-transparent text-surface px-6 py-3 text-base font-medium hover:bg-accent hover:text-ink-950 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+                  >
+                    {t(locale, 'landing.cta.exploreCatalog')}
+                  </Link>
+                  {!session?.user && (
+                    <Link
+                      href="/sign-in"
+                      className="text-base font-medium text-surface/85 hover:text-surface underline underline-offset-4 decoration-surface/30 hover:decoration-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 rounded"
+                    >
+                      {t(locale, 'landing.cta.signInExisting')}
+                    </Link>
+                  )}
+                </div>
+              </div>
+              {/* Battery — decorative; aria-hidden in the component. */}
+              <div className="flex justify-center md:order-1 md:justify-start">
+                <HeroBattery className="h-auto w-40 md:w-56" />
+              </div>
+            </div>
           </div>
         </section>
 
