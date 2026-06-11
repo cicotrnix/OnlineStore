@@ -68,26 +68,47 @@ export function HomeMotion(): null {
         }
       }
 
-      // ── Steps reveal on scroll ── only when motion is allowed.
+      // ── Steps section ── connecting journey line draws + cards stagger reveal
+      // when the section enters the viewport. Default (SSR / reduced-motion):
+      // line already drawn, cards already visible.
       if (!prefersReduced) {
-        const stepItems = gsap.utils.toArray<HTMLElement>(
-          '[data-motion="steps"] [data-motion-item]'
-        )
-        stepItems.forEach((el, i) => {
-          gsap.from(el, {
-            y: 16,
-            autoAlpha: 0,
-            duration: 0.5,
-            ease: 'power2.out',
-            delay: i * 0.06,
-            clearProps: 'transform,opacity,visibility',
-            scrollTrigger: {
-              trigger: el,
-              start: 'top 88%',
-              once: true,
+        const stepsRoot = document.querySelector<HTMLElement>('[data-motion="steps"]')
+        if (stepsRoot) {
+          const horizLine = stepsRoot.querySelector<HTMLElement>('[data-steps-line="horizontal"]')
+          const vertLine = stepsRoot.querySelector<HTMLElement>('[data-steps-line="vertical"]')
+          const items = gsap.utils.toArray<HTMLElement>('[data-motion="steps"] [data-motion-item]')
+
+          // Collapse the lines pre-scroll so the draw is visible on enter.
+          if (horizLine) gsap.set(horizLine, { scaleX: 0 })
+          if (vertLine) gsap.set(vertLine, { scaleY: 0 })
+
+          ScrollTrigger.create({
+            trigger: stepsRoot,
+            start: 'top 82%',
+            once: true,
+            onEnter: () => {
+              const tl = gsap.timeline()
+              if (horizLine) {
+                tl.to(horizLine, { scaleX: 1, duration: 1.1, ease: 'power3.out' }, 0)
+              }
+              if (vertLine) {
+                tl.to(vertLine, { scaleY: 1, duration: 1.1, ease: 'power3.out' }, 0)
+              }
+              tl.from(
+                items,
+                {
+                  y: 16,
+                  autoAlpha: 0,
+                  duration: 0.5,
+                  ease: 'power2.out',
+                  stagger: 0.12,
+                  clearProps: 'transform,opacity,visibility',
+                },
+                0.15
+              )
             },
           })
-        })
+        }
       }
     })
 

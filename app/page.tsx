@@ -2,6 +2,7 @@ import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { HeroBattery } from '@/components/home/HeroBattery'
 import { HomeMotion } from '@/components/home/HomeMotion'
+import { IconFileUpload, IconShieldCheck, IconShoppingCart } from '@/components/home/StepIcons'
 import { auth } from '@/lib/auth/config'
 import { getLocale, t } from '@/lib/i18n'
 import { getStoreConfig } from '@/stores'
@@ -93,6 +94,15 @@ export default async function LandingPage() {
             <div className="grid items-center gap-14 md:grid-cols-[1.1fr,1fr] md:gap-16">
               {/* Text (DOM-first for SEO + a11y; visually on the right at md). */}
               <div className="text-center md:order-2 md:text-left">
+                <Image
+                  src={store.identity.logoLight ?? store.identity.logo}
+                  alt={store.identity.name}
+                  width={1600}
+                  height={998}
+                  priority
+                  className="mx-auto mb-6 h-7 w-auto md:mx-0 md:mb-8"
+                  data-motion-step="0"
+                />
                 <h1
                   id="hero-tagline"
                   className="font-sans text-display font-semibold tracking-[-0.025em] text-surface text-balance"
@@ -156,30 +166,54 @@ export default async function LandingPage() {
             >
               {t(locale, 'landing.howItWorks.title')}
             </h2>
-            <ol className="mt-14 grid gap-6 md:grid-cols-3" data-motion="steps">
-              {(['step1', 'step2', 'step3'] as const).map((step, i) => (
-                <li
-                  key={step}
-                  className="rounded-card bg-surface ring-1 ring-ink-100 px-7 py-8"
-                  data-motion-item
-                >
-                  <div className="flex items-baseline gap-3 text-ink-500">
-                    <span className="font-mono text-meta tracking-widest uppercase">
-                      {t(locale, 'landing.howItWorks.stepLabel')}
-                    </span>
-                    <span className="font-mono text-meta text-ink-950 font-semibold">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-h3 font-semibold text-ink-950 tracking-[-0.01em]">
-                    {t(locale, `landing.howItWorks.${step}.title`)}
-                  </h3>
-                  <p className="mt-2 text-body text-ink-700 text-pretty">
-                    {t(locale, `landing.howItWorks.${step}.body`)}
-                  </p>
-                </li>
-              ))}
-            </ol>
+            <div className="relative mt-14" data-motion="steps">
+              {/* Connecting journey lines — sit BEHIND the cards (DOM order)
+                  so cards' opaque surface clips them: the line is visible only
+                  in the gaps between steps, reading as a connecting path.
+                  HomeMotion draws each line on ScrollTrigger via scaleX (desktop)
+                  or scaleY (mobile). */}
+              <div
+                aria-hidden
+                data-steps-line="horizontal"
+                className="pointer-events-none absolute top-[64px] left-7 right-7 hidden h-px origin-left bg-accent md:block"
+              />
+              <div
+                aria-hidden
+                data-steps-line="vertical"
+                className="pointer-events-none absolute left-[40px] top-7 bottom-7 block w-px origin-top bg-accent md:hidden"
+              />
+              <ol className="relative grid gap-6 md:grid-cols-3">
+                {(
+                  [
+                    { key: 'step1', Icon: IconFileUpload },
+                    { key: 'step2', Icon: IconShieldCheck },
+                    { key: 'step3', Icon: IconShoppingCart },
+                  ] as const
+                ).map(({ key, Icon }, i) => (
+                  <li
+                    key={key}
+                    className="group relative rounded-card bg-surface ring-1 ring-ink-100 px-7 py-8 transition-[transform,box-shadow,outline-color] duration-200 ease-out hover:-translate-y-1 hover:ring-ink-300 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                    data-motion-item
+                  >
+                    <div className="flex items-center gap-3 text-ink-500 transition-colors duration-200 group-hover:text-accent">
+                      <Icon className="h-[22px] w-[22px] shrink-0" />
+                      <span className="font-mono text-meta tracking-widest uppercase">
+                        {t(locale, 'landing.howItWorks.stepLabel')}
+                      </span>
+                      <span className="font-mono text-meta font-semibold text-ink-950 transition-colors duration-200 group-hover:text-accent">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <h3 className="mt-4 text-h3 font-semibold tracking-[-0.01em] text-ink-950">
+                      {t(locale, `landing.howItWorks.${key}.title`)}
+                    </h3>
+                    <p className="mt-2 text-body text-ink-700 text-pretty">
+                      {t(locale, `landing.howItWorks.${key}.body`)}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
         </section>
       </main>
