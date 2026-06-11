@@ -102,6 +102,7 @@ export const themeConfigSchema = z.object({
   }),
   typography: z.object({
     sans: z.string().min(1),
+    mono: z.string().min(1).optional(),
     scale: z.enum(['compact', 'comfortable', 'spacious']),
   }),
   radius: z.object({

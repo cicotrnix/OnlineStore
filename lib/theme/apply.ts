@@ -5,7 +5,7 @@ import type { ThemeConfig } from '@/modules/config'
  * The result is injected as inline CSS in the root <html> element.
  */
 export function themeToCssVars(theme: ThemeConfig): string {
-  return [
+  const vars = [
     `--color-primary: ${theme.colors.primary};`,
     `--color-accent: ${theme.colors.accent};`,
     `--color-surface: ${theme.colors.surface};`,
@@ -15,5 +15,9 @@ export function themeToCssVars(theme: ThemeConfig): string {
     `--radius-card: ${theme.radius.card}px;`,
     `--radius-button: ${theme.radius.button}px;`,
     `--radius-input: ${theme.radius.input}px;`,
-  ].join(' ')
+  ]
+  if (theme.typography.mono) {
+    vars.push(`--font-mono: ${theme.typography.mono};`)
+  }
+  return vars.join(' ')
 }

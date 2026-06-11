@@ -2,8 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Design tokens — see DESIGN.md.
+ * Brand triad (primary/accent/surface/muted/danger) is injected at runtime by
+ * lib/theme/apply.ts from the active store's theme.config.ts.
+ * The ramps, scale, and z-index below are design-system constants shared by
+ * all stores using this codebase.
+ */
 :root {
   color-scheme: light;
+
+  /* Ink ramp — derived in OKLCH from primary slate #1A1F2E. */
+  --ink-950: #1a1f2e;
+  --ink-700: #3b4253;
+  --ink-500: #6b7280;
+  --ink-300: #c5c9d0;
+  --ink-100: #ecedf0;
+
+  /* Neutral ramp — surface (white) + muted (warm-coherent off-white). */
+  --neutral-50: #ffffff;
+  --neutral-100: #f4f7ee;
+  --neutral-200: #e8ece0;
+  --neutral-700: #2b3140;
+  --neutral-900: #14181f;
+
+  /* Type scale — clamp() with hero ceiling at ~88px (impeccable rule ≤6rem). */
+  --font-display: clamp(2.5rem, 4vw + 1rem, 5.5rem);
+  --font-h1: clamp(2rem, 3vw + 0.75rem, 3.5rem);
+  --font-h2: clamp(1.5rem, 2vw + 0.5rem, 2.25rem);
+  --font-h3: 1.25rem;
+  --font-body-lg: 1.125rem;
+  --font-body: 1rem;
+  --font-small: 0.875rem;
+  --font-meta: 0.75rem;
+
+  /* Z-index — semantic scale, never arbitrary 9999. */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-modal-backdrop: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-tooltip: 60;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 html,
@@ -11,7 +61,10 @@ body {
   margin: 0;
   padding: 0;
   background: var(--color-surface);
-  color: #111;
+  color: var(--ink-700);
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {

@@ -18,7 +18,8 @@ export default defineTheme({
     danger: '#A32D2D',
   },
   typography: {
-    sans: 'Inter, system-ui, sans-serif',
+    sans: 'var(--font-geist-sans), system-ui, sans-serif',
+    mono: 'var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace',
     scale: 'comfortable',
   },
   radius: {

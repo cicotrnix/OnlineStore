@@ -4,6 +4,8 @@ import { auth } from '@/lib/auth/config'
 import { getLocale } from '@/lib/i18n'
 import { themeToCssVars } from '@/lib/theme/apply'
 import { getStoreConfig, getStoreTheme } from '@/stores'
+import { GeistMono } from 'geist/font/mono'
+import { GeistSans } from 'geist/font/sans'
 import type { Metadata } from 'next'
 import './globals.css'
 
@@ -23,7 +25,7 @@ export default async function RootLayout({
   const locale = await getLocale({ userId: session?.user?.id ?? null })
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         <style
           // biome-ignore lint/security/noDangerouslySetInnerHtml: theme tokens are statically generated from the active store's theme config
