@@ -23,8 +23,9 @@ export default defineTheme({
     scale: 'comfortable',
   },
   radius: {
-    card: 12,
-    button: 8,
+    // "Back to 100%" — cards 16, buttons pill (999), inputs 8 stays.
+    card: 16,
+    button: 999,
     input: 8,
   },
   density: 'regular',

@@ -1,6 +1,8 @@
 import { Header } from '@/components/commerce/Header'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
-import { HeroBattery } from '@/components/home/HeroBattery'
+import { SpecReadout } from '@/components/commerce/SpecReadout'
+import { StatStrip } from '@/components/commerce/StatStrip'
+import { HeroGauge } from '@/components/home/HeroGauge'
 import { HomeMotion } from '@/components/home/HomeMotion'
 import { IconFileUpload, IconShieldCheck, IconShoppingCart } from '@/components/home/StepIcons'
 import { auth } from '@/lib/auth/config'
@@ -19,6 +21,22 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+// Featured products on the Home — static mock data for the design system
+// showcase. Cards demonstrate the SpecReadout pattern that the Catalog +
+// PDP will later inherit. No service calls; no real prices.
+const FEATURED_PRODUCTS = [
+  { sku: 'PI-200458', model: 'iPhone 15 Pro Max', capacity: '+12%', price: '$16.50', tagged: true },
+  { sku: 'PI-200412', model: 'iPhone 14 Pro', capacity: '+9%', price: '$13.90', tagged: false },
+  { sku: 'PI-200398', model: 'iPhone 13', capacity: '+15%', price: '$11.20', tagged: true },
+  {
+    sku: 'PI-200310',
+    model: 'iPhone 12 / 12 Pro',
+    capacity: '+10%',
+    price: '$10.40',
+    tagged: false,
+  },
+] as const
+
 export default async function LandingPage() {
   const session = await auth()
   const locale = await getLocale({ userId: session?.user?.id ?? null })
@@ -31,90 +49,204 @@ export default async function LandingPage() {
       <Header isSignedIn={Boolean(session?.user)} locale={locale} initialTheme="dark" />
 
       <main className="flex-1">
-        {/* Hero — dark tile with stylized battery + headline + CTAs */}
+        {/* Hero — dark canvas. "Volvé al 100%. Cero ciclos." */}
         <section
           aria-labelledby="hero-tagline"
-          className="-mt-20 bg-neutral-900 text-surface"
+          className="-mt-20 relative overflow-hidden bg-neutral-900 text-surface"
           data-motion="hero"
           data-header-theme="dark"
         >
-          <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-20 md:py-28">
-            <div className="grid items-center gap-14 md:grid-cols-[1.1fr,1fr] md:gap-16">
-              {/* Text (DOM-first for SEO + a11y; visually on the right at md). */}
-              <div className="text-center md:order-2 md:text-left">
-                <h1
-                  id="hero-tagline"
-                  className="font-sans text-display font-semibold tracking-[-0.025em] text-surface text-balance"
+          {/* Lime glow accent behind the gauge */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(80% 60% at 78% 18%, rgba(136,216,16,0.10), transparent 60%)',
+            }}
+          />
+          <div className="relative mx-auto max-w-[1240px] px-5 md:px-8 pt-[140px] md:pt-[160px] pb-20 md:pb-24">
+            <div className="grid items-center gap-14 md:grid-cols-[0.85fr,1.15fr] md:gap-16">
+              {/* Text — DOM-first for SEO + a11y; visually left at md (gauge on right). */}
+              <div className="text-center md:text-left">
+                {/* Eyebrow chip */}
+                <span
+                  className="mb-7 inline-flex items-center gap-[9px] rounded-button border border-accent/30 bg-accent/[0.06] px-[14px] py-[7px] font-mono text-[12px] uppercase tracking-[0.08em] text-accent"
                   data-motion-step="1"
                 >
-                  {t(locale, 'landing.tagline')}
-                </h1>
-                <div
-                  aria-hidden
-                  className="mt-7 mx-auto h-px w-24 bg-accent md:mx-0"
+                  <span aria-hidden className="h-[6px] w-[6px] rounded-full bg-accent" />
+                  {t(locale, 'landing.hero.eyebrow')}
+                </span>
+                <h1
+                  id="hero-tagline"
+                  className="font-sans text-display font-extrabold leading-[0.98] tracking-[-0.045em] text-surface text-balance"
                   data-motion-step="2"
-                />
+                >
+                  {t(locale, 'landing.hero.headlineMain')}{' '}
+                  <span className="text-accent">{t(locale, 'landing.hero.headlineAccent')}</span>
+                  {t(locale, 'landing.hero.headlineTail')}
+                </h1>
                 <p
-                  className="mt-8 mx-auto max-w-2xl text-body-lg text-surface/70 text-pretty md:mx-0"
+                  className="mt-[26px] mx-auto max-w-[46ch] text-body-lg leading-[1.55] text-on-dark-2 text-pretty md:mx-0"
                   data-motion-step="3"
                 >
-                  {t(locale, 'landing.intro')}
+                  {t(locale, 'landing.hero.lead')}
                 </p>
                 <div
-                  className="mt-12 flex flex-wrap items-center justify-center gap-3 md:justify-start"
+                  className="mt-[38px] flex flex-wrap items-center justify-center gap-[14px] md:justify-start"
                   data-motion-step="4"
                 >
                   {!session?.user && (
                     <Link
                       href="/sign-up"
-                      className="inline-flex items-center justify-center rounded-button bg-accent text-ink-950 px-6 py-3 text-base font-semibold hover:-translate-y-px transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+                      className="inline-flex h-11 items-center rounded-button bg-accent text-ink-950 px-[22px] text-[14.5px] font-semibold tracking-[-0.01em] shadow-[0_6px_22px_-8px_rgba(136,216,16,0.6)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_10px_30px_-8px_rgba(136,216,16,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
                     >
                       {t(locale, 'landing.cta.register')}
                     </Link>
                   )}
                   <Link
                     href="/catalog"
-                    className="inline-flex items-center justify-center rounded-button border-[1.5px] border-accent bg-transparent text-surface px-6 py-3 text-base font-medium hover:bg-accent hover:text-ink-950 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+                    className="inline-flex h-11 items-center rounded-button border border-white/[0.22] bg-transparent text-surface px-[22px] text-[14.5px] font-semibold tracking-[-0.01em] transition-colors duration-200 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
                   >
-                    {t(locale, 'landing.cta.exploreCatalog')}
+                    {t(locale, 'landing.cta.exploreCatalog')} →
                   </Link>
-                  {!session?.user && (
-                    <Link
-                      href="/sign-in"
-                      className="text-base font-medium text-surface/85 hover:text-surface underline underline-offset-4 decoration-surface/30 hover:decoration-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 rounded"
-                    >
-                      {t(locale, 'landing.cta.signInExisting')}
-                    </Link>
-                  )}
                 </div>
               </div>
-              {/* Battery — decorative; aria-hidden in the component. */}
-              <div className="flex justify-center md:order-1 md:justify-start">
-                <HeroBattery className="h-auto w-40 md:w-56" />
+              {/* Gauge — decorative; aria-hidden in the component. */}
+              <div className="flex justify-center md:justify-end">
+                <HeroGauge locale={locale} />
               </div>
             </div>
           </div>
         </section>
 
-        {/* Cómo funciona */}
+        {/* Stat strip — instrument-grade tira sobre slate-deep */}
+        <StatStrip
+          locale={locale}
+          stats={[
+            { number: '0', unit: '×', labelKey: 'landing.stats.cycles.label' },
+            { number: '100', unit: '%', labelKey: 'landing.stats.health.label' },
+            { number: '+12', unit: '%', labelKey: 'landing.stats.capacity.label' },
+            { number: '24–48', unit: 'h', labelKey: 'landing.stats.shipping.label' },
+          ]}
+        />
+
+        {/* Featured products — design-system showcase. Static mock data. */}
+        <section aria-labelledby="featured-title" className="bg-surface" data-header-theme="light">
+          <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-20 md:py-24">
+            <div className="mb-10 flex items-end justify-between gap-6" data-reveal>
+              <div>
+                <div className="mb-3 font-mono text-[12.5px] uppercase tracking-[0.1em] text-lime-deep">
+                  {t(locale, 'landing.featured.eyebrow')}
+                </div>
+                <h2
+                  id="featured-title"
+                  className="text-h2 font-extrabold leading-[1.02] tracking-[-0.035em] text-ink-950"
+                >
+                  {t(locale, 'landing.featured.title')}
+                </h2>
+              </div>
+              <Link
+                href="/catalog"
+                className="border-b-2 border-accent pb-[2px] text-[14.5px] font-semibold text-ink-950 transition-colors hover:text-lime-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-sm"
+              >
+                {t(locale, 'landing.featured.linkAll')}
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {FEATURED_PRODUCTS.map((p) => (
+                <Link
+                  href="/catalog"
+                  key={p.sku}
+                  className="group block overflow-hidden rounded-card border border-line bg-surface transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-[5px] hover:border-[#dfe4d9] hover:shadow-[0_26px_50px_-26px_rgba(26,31,46,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                  data-reveal
+                >
+                  {/* Placeholder photo */}
+                  <div
+                    aria-hidden
+                    className="relative flex aspect-[4/3.4] items-center justify-center"
+                    style={{
+                      background: 'radial-gradient(120% 120% at 50% 24%, #fbfcf9, #eef1e7)',
+                    }}
+                  >
+                    {p.tagged && (
+                      <span className="absolute left-3 top-3 rounded-[7px] bg-accent px-[10px] py-[5px] font-mono text-[11px] font-semibold tracking-[0.04em] text-ink-950">
+                        {t(locale, 'landing.featured.tagOnFlex')}
+                      </span>
+                    )}
+                    {/* Mini battery glyph */}
+                    <div className="relative h-[112px] w-[66px] rounded-[12px] border-[2.5px] border-[#cfd4c8] bg-surface">
+                      <span
+                        aria-hidden
+                        className="absolute -top-[7px] left-1/2 h-[6px] w-[24px] -translate-x-1/2 rounded-t-[3px] bg-[#cfd4c8]"
+                      />
+                      <span
+                        aria-hidden
+                        className="absolute bottom-2 left-2 right-2 top-[34%] rounded-[6px] bg-accent"
+                      />
+                    </div>
+                  </div>
+                  <div className="px-[18px] pb-[20px] pt-[18px]">
+                    <div className="font-mono text-[12px] tracking-[0.02em] text-ink-300">
+                      {p.sku}
+                    </div>
+                    <h3 className="mt-[7px] text-[16px] font-semibold leading-[1.3] tracking-[-0.015em] text-ink-950">
+                      Batería Pi-Power · {p.model}
+                    </h3>
+                    <SpecReadout
+                      locale={locale}
+                      rows={[
+                        { value: '100%', labelKey: 'spec.label.health' },
+                        { value: '0', labelKey: 'spec.label.cycles' },
+                        { value: p.capacity, up: true, labelKey: 'spec.label.capacity' },
+                      ]}
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[19px] font-semibold tracking-[-0.02em] text-ink-950">
+                        {p.price}
+                      </span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-button border border-ink-950 text-ink-950 transition-colors duration-200 group-hover:border-ink-950 group-hover:bg-ink-950 group-hover:text-surface">
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          aria-hidden="true"
+                        >
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* How it works — section-head pattern + journey-connected steps */}
         <section
           aria-labelledby="how-it-works-title"
-          className="border-y border-ink-100 bg-muted"
+          className="border-y border-line bg-muted"
           data-header-theme="light"
         >
-          <div className="mx-auto max-w-5xl px-5 md:px-8 py-20 md:py-24">
-            <h2
-              id="how-it-works-title"
-              className="text-h2 font-semibold tracking-[-0.02em] text-ink-950 text-center text-balance"
-            >
-              {t(locale, 'landing.howItWorks.title')}
-            </h2>
-            <div className="relative mt-14" data-motion="steps">
-              {/* Connecting journey lines — sit BEHIND the cards (DOM order)
-                  so cards' opaque surface clips them: the line is visible only
-                  in the gaps between steps, reading as a connecting path.
-                  HomeMotion draws each line on ScrollTrigger via scaleX (desktop)
-                  or scaleY (mobile). */}
+          <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-20 md:py-24">
+            <div className="mb-12 flex items-end justify-between gap-6" data-reveal>
+              <div>
+                <div className="mb-3 font-mono text-[12.5px] uppercase tracking-[0.1em] text-lime-deep">
+                  {t(locale, 'landing.howItWorks.eyebrow')}
+                </div>
+                <h2
+                  id="how-it-works-title"
+                  className="text-h2 font-extrabold leading-[1.02] tracking-[-0.035em] text-ink-950 text-balance"
+                >
+                  {t(locale, 'landing.howItWorks.title')}
+                </h2>
+              </div>
+            </div>
+            <div className="relative" data-motion="steps">
               <div
                 aria-hidden
                 data-steps-line="horizontal"
@@ -135,22 +267,26 @@ export default async function LandingPage() {
                 ).map(({ key, Icon }, i) => (
                   <li
                     key={key}
-                    className="group relative rounded-card bg-surface ring-1 ring-ink-100 px-7 py-8 transition-[transform,box-shadow,outline-color] duration-200 ease-out hover:-translate-y-1 hover:ring-ink-300 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                    className="group relative rounded-card border border-line bg-surface px-7 py-8 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-1 hover:border-ink-100 hover:shadow-[0_20px_40px_-24px_rgba(26,31,46,0.25)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                     data-motion-item
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className="h-[22px] w-[22px] shrink-0 text-ink-500 transition-colors duration-200 group-hover:text-accent" />
-                      <span className="font-mono text-meta tracking-widest uppercase text-ink-500 transition-colors duration-200 group-hover:text-ink-700">
-                        {t(locale, 'landing.howItWorks.stepLabel')}
+                      <span className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-muted text-ink-950 transition-colors duration-200 group-hover:bg-accent/[0.16] group-hover:text-lime-deep">
+                        <Icon className="h-[22px] w-[22px] shrink-0" />
                       </span>
-                      <span className="font-mono text-meta font-semibold text-ink-950">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
+                      <div>
+                        <div className="font-mono text-[12px] uppercase tracking-[0.12em] text-ink-500">
+                          {t(locale, 'landing.howItWorks.stepLabel')}{' '}
+                          <span className="font-semibold text-ink-950">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="mt-4 text-h3 font-semibold tracking-[-0.01em] text-ink-950">
+                    <h3 className="mt-5 text-[20px] font-bold tracking-[-0.02em] text-ink-950">
                       {t(locale, `landing.howItWorks.${key}.title`)}
                     </h3>
-                    <p className="mt-2 text-body text-ink-700 text-pretty">
+                    <p className="mt-2 text-[14.5px] leading-[1.55] text-ink-500 text-pretty">
                       {t(locale, `landing.howItWorks.${key}.body`)}
                     </p>
                   </li>
@@ -161,7 +297,7 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-ink-100 bg-surface" data-header-theme="light">
+      <footer className="border-t border-line bg-surface" data-header-theme="light">
         <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-6 text-meta text-ink-500 flex flex-wrap gap-4 justify-between">
           <span>
             © {new Date().getFullYear()} {store.identity.name}

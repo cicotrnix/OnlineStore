@@ -24,6 +24,9 @@ const config: Config = {
           700: 'var(--neutral-700)',
           900: 'var(--neutral-900)',
         },
+        'lime-deep': 'var(--lime-deep)',
+        'on-dark-2': 'var(--on-dark-2)',
+        line: 'var(--line)',
       },
       fontFamily: {
         sans: ['var(--font-sans)'],

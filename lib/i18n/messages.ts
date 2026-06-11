@@ -23,6 +23,26 @@ export type MessageKey =
   | 'landing.nav.myAccount'
   | 'landing.nav.signIn'
   | 'landing.nav.register'
+  | 'landing.hero.eyebrow'
+  | 'landing.hero.headlineMain'
+  | 'landing.hero.headlineAccent'
+  | 'landing.hero.headlineTail'
+  | 'landing.hero.lead'
+  | 'landing.hero.gaugeLabel'
+  | 'landing.hero.chip1Label'
+  | 'landing.hero.chip2Label'
+  | 'landing.stats.cycles.label'
+  | 'landing.stats.health.label'
+  | 'landing.stats.capacity.label'
+  | 'landing.stats.shipping.label'
+  | 'landing.featured.eyebrow'
+  | 'landing.featured.title'
+  | 'landing.featured.linkAll'
+  | 'landing.featured.tagOnFlex'
+  | 'spec.label.health'
+  | 'spec.label.cycles'
+  | 'spec.label.capacity'
+  | 'landing.howItWorks.eyebrow'
   | 'landing.howItWorks.title'
   | 'landing.howItWorks.stepLabel'
   | 'landing.howItWorks.step1.title'
@@ -399,7 +419,28 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.nav.myAccount': 'My account',
     'landing.nav.signIn': 'Sign in',
     'landing.nav.register': 'Register',
-    'landing.howItWorks.title': 'How it works',
+    'landing.hero.eyebrow': '0 cycles · 100% health',
+    'landing.hero.headlineMain': 'Back to',
+    'landing.hero.headlineAccent': '100%',
+    'landing.hero.headlineTail': '. Zero cycles.',
+    'landing.hero.lead':
+      'Fresh cells, not recycled. Every battery sends the iPhone back to the day it left the factory — with extended capacity and verified model compatibility.',
+    'landing.hero.gaugeLabel': 'battery health',
+    'landing.hero.chip1Label': 'cycle count',
+    'landing.hero.chip2Label': 'capacity vs OEM',
+    'landing.stats.cycles.label': 'charge cycles on arrival',
+    'landing.stats.health.label': 'factory battery health',
+    'landing.stats.capacity.label': 'capacity over original',
+    'landing.stats.shipping.label': 'shipping from Miami',
+    'landing.featured.eyebrow': 'Catalog',
+    'landing.featured.title': 'Most requested',
+    'landing.featured.linkAll': 'View all →',
+    'landing.featured.tagOnFlex': 'Tag-On Flex',
+    'spec.label.health': 'Health',
+    'spec.label.cycles': 'Cycles',
+    'spec.label.capacity': 'Cap.',
+    'landing.howItWorks.eyebrow': 'How it works',
+    'landing.howItWorks.title': 'From registration to reorder, no friction',
     'landing.howItWorks.stepLabel': 'Step',
     'landing.howItWorks.step1.title': 'Register your business',
     'landing.howItWorks.step1.body':
@@ -777,7 +818,28 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.nav.myAccount': 'Mi cuenta',
     'landing.nav.signIn': 'Iniciar sesión',
     'landing.nav.register': 'Registrarse',
-    'landing.howItWorks.title': 'Cómo funciona',
+    'landing.hero.eyebrow': '0 ciclos · 100% de salud',
+    'landing.hero.headlineMain': 'Volvé al',
+    'landing.hero.headlineAccent': '100%',
+    'landing.hero.headlineTail': '. Cero ciclos.',
+    'landing.hero.lead':
+      'Celdas nuevas, no recicladas. Cada batería devuelve el iPhone al día que salió de fábrica — con capacidad extendida y compatibilidad verificada por modelo.',
+    'landing.hero.gaugeLabel': 'salud de batería',
+    'landing.hero.chip1Label': 'cycle count',
+    'landing.hero.chip2Label': 'capacidad vs OEM',
+    'landing.stats.cycles.label': 'ciclos de carga al recibirla',
+    'landing.stats.health.label': 'salud de batería de fábrica',
+    'landing.stats.capacity.label': 'capacidad sobre la original',
+    'landing.stats.shipping.label': 'despacho desde Miami',
+    'landing.featured.eyebrow': 'Catálogo',
+    'landing.featured.title': 'Las más pedidas',
+    'landing.featured.linkAll': 'Ver todo →',
+    'landing.featured.tagOnFlex': 'Tag-On Flex',
+    'spec.label.health': 'Salud',
+    'spec.label.cycles': 'Ciclos',
+    'spec.label.capacity': 'Cap.',
+    'landing.howItWorks.eyebrow': 'Cómo funciona',
+    'landing.howItWorks.title': 'De registro a recompra, sin fricción',
     'landing.howItWorks.stepLabel': 'Paso',
     'landing.howItWorks.step1.title': 'Registrá tu negocio',
     'landing.howItWorks.step1.body':
