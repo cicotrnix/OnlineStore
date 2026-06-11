@@ -48,22 +48,15 @@ export function HeroBattery({ className }: { className?: string }) {
           area reads as glass, not void. Defines the bottom layer of the well. */}
       <rect x="32" y="30" width="156" height="288" rx="16" fill="#1F2533" />
 
-      {/* Charge fill — rx=0 + clipped by the rounded well, so the top edge
-          stays flat as scaleY changes (real charging line, not stretched ovals). */}
+      {/* Charge fill — anchored at the well's bottom edge (y=318). Initial
+          SSR / reduced-motion state is 70% charged: height 202, y = 318-202 = 116.
+          HomeMotion animates `y` and `height` attributes directly (via GSAP's
+          attr plugin); animating SVG attrs is more reliable across renderers
+          than CSS transform-box + transform-origin on <rect>. The clipPath
+          keeps the corners rounded; this rect itself has no rx so the top
+          edge of the fill is always a flat horizontal charging line. */}
       <g clipPath="url(#hero-battery-well)">
-        <rect
-          data-hero-battery-fill
-          x="32"
-          y="30"
-          width="156"
-          height="288"
-          fill="#88D810"
-          style={{
-            transformBox: 'fill-box',
-            transformOrigin: '50% 100%',
-            transform: 'scaleY(0.7)',
-          }}
-        />
+        <rect data-hero-battery-fill x="32" y="116" width="156" height="202" fill="#88D810" />
       </g>
 
       {/* Bolt — slate ink. Sits in the upper-middle so it stays visible

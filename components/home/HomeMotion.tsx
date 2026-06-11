@@ -19,16 +19,27 @@ export function HomeMotion(): null {
       const fill = document.querySelector<SVGRectElement>('[data-hero-battery-fill]')
       const bolt = document.querySelector<SVGPathElement>('[data-hero-battery-bolt]')
 
+      // Well geometry (HeroBattery): y range [30, 318]; full height = 288.
+      // Animate the fill's `y` and `height` attributes directly so the bottom
+      // edge stays anchored at y=318 regardless of charge level. More reliable
+      // across renderers than transform-box + transform-origin on <rect>.
+      const WELL_BOTTOM = 318
+      const WELL_HEIGHT = 288
+      const lvl = (frac: number) => ({
+        y: WELL_BOTTOM - WELL_HEIGHT * frac,
+        height: WELL_HEIGHT * frac,
+      })
+
       if (!prefersReduced && fill) {
-        gsap.set(fill, { scaleY: 0, opacity: 1 })
+        gsap.set(fill, { attr: lvl(0), opacity: 1 })
         const chargeTl = gsap.timeline({ repeat: -1, delay: 0.4 })
-        chargeTl.to(fill, { scaleY: 0.78, duration: 2.4, ease: 'power2.out' })
+        chargeTl.to(fill, { attr: lvl(0.78), duration: 2.4, ease: 'power2.out' })
         chargeTl.to(
           fill,
           { opacity: 0.82, duration: 0.9, yoyo: true, repeat: 1, ease: 'sine.inOut' },
           '<+0.4'
         )
-        chargeTl.to(fill, { scaleY: 0.18, duration: 1.0, ease: 'power2.in' }, '+=0.6')
+        chargeTl.to(fill, { attr: lvl(0.18), duration: 1.0, ease: 'power2.in' }, '+=0.6')
         chargeTl.to({}, { duration: 0.4 })
 
         if (bolt) {
