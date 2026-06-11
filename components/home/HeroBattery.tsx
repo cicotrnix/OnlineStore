@@ -1,16 +1,17 @@
 /**
  * HeroBattery — minimal stylized battery SVG for the Home hero.
  *
- * Visual: vertical battery (cap + outlined body). The inner lime fill rect
- * is anchored at the bottom (`transform-origin: 50% 100%`,
- * `transform-box: fill-box`). It SSRs at ~70% charge so the page looks
- * right without JS / with reduced motion. HomeMotion takes over on mount
- * and runs the rise/hold/empty cycle.
+ * Visual: vertical battery (cap + outlined body). The lime charge fill is a
+ * plain (rx=0) <rect> clipped by the inner-well rounded-rect <clipPath>. The
+ * clip keeps the corners properly rounded while scaleY animates the rect from
+ * the bottom — the top edge stays a flat horizontal line as the fill rises
+ * and falls, like a real battery indicator. SSR default is scaleY(0.7) so the
+ * page looks charged without JS and under prefers-reduced-motion.
  *
  * Identifiers consumed by HomeMotion:
- *   - data-hero-battery       : root <svg> (entry tween target)
+ *   - data-hero-battery       : root <svg>
  *   - data-hero-battery-fill  : the lime <rect> (scaleY + opacity tween)
- *   - data-hero-battery-bolt  : the bolt <path> (subtle pulse target)
+ *   - data-hero-battery-bolt  : the bolt <path> (subtle opacity pulse)
  */
 export function HeroBattery({ className }: { className?: string }) {
   return (
@@ -21,44 +22,55 @@ export function HeroBattery({ className }: { className?: string }) {
       focusable="false"
       className={className}
     >
-      {/* Cap */}
-      <rect x="76" y="0" width="68" height="22" rx="6" fill="#88D810" fillOpacity="0.85" />
-      {/* Body outline */}
+      <defs>
+        <clipPath id="hero-battery-well" clipPathUnits="userSpaceOnUse">
+          <rect x="32" y="30" width="156" height="288" rx="16" />
+        </clipPath>
+      </defs>
+
+      {/* Cap — flush on top of the body, narrower than before for proportion. */}
+      <rect x="82" y="0" width="56" height="18" rx="4" fill="#88D810" />
+
+      {/* Body outline. */}
       <rect
         x="20"
-        y="26"
+        y="18"
         width="180"
-        height="304"
+        height="312"
         rx="26"
         fill="none"
         stroke="#FFFFFF"
         strokeOpacity="0.22"
         strokeWidth="1.5"
       />
-      {/* Inner well — defines the fill bounds. Slate slightly lighter
-          than the tile bg so the empty area reads as glass, not void. */}
-      <rect x="32" y="38" width="156" height="280" rx="16" fill="#1F2533" />
-      {/* Charge fill — anchored at bottom; HomeMotion drives scaleY.
-          Default scaleY(0.7) so SSR / no-JS / reduced-motion look correct. */}
-      <rect
-        data-hero-battery-fill
-        x="32"
-        y="38"
-        width="156"
-        height="280"
-        rx="16"
-        fill="#88D810"
-        style={{
-          transformBox: 'fill-box',
-          transformOrigin: '50% 100%',
-          transform: 'scaleY(0.7)',
-        }}
-      />
-      {/* Bolt — slate ink on lime. Sits in the upper-middle so it stays
-          visible across the rise/empty cycle. */}
+
+      {/* Inner well — slate slightly lighter than the tile bg so the empty
+          area reads as glass, not void. Defines the bottom layer of the well. */}
+      <rect x="32" y="30" width="156" height="288" rx="16" fill="#1F2533" />
+
+      {/* Charge fill — rx=0 + clipped by the rounded well, so the top edge
+          stays flat as scaleY changes (real charging line, not stretched ovals). */}
+      <g clipPath="url(#hero-battery-well)">
+        <rect
+          data-hero-battery-fill
+          x="32"
+          y="30"
+          width="156"
+          height="288"
+          fill="#88D810"
+          style={{
+            transformBox: 'fill-box',
+            transformOrigin: '50% 100%',
+            transform: 'scaleY(0.7)',
+          }}
+        />
+      </g>
+
+      {/* Bolt — slate ink. Sits in the upper-middle so it stays visible
+          across the rise/empty cycle. Re-anchored to the new well geometry. */}
       <path
         data-hero-battery-bolt
-        d="M118 110 L86 188 L106 188 L98 240 L138 158 L116 158 Z"
+        d="M118 100 L86 180 L106 180 L98 234 L138 152 L116 152 Z"
         fill="#1A1F2E"
         fillOpacity="0.92"
       />
