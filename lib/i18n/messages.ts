@@ -24,6 +24,7 @@ export type MessageKey =
   | 'landing.nav.signIn'
   | 'landing.nav.register'
   | 'landing.howItWorks.title'
+  | 'landing.howItWorks.stepLabel'
   | 'landing.howItWorks.step1.title'
   | 'landing.howItWorks.step1.body'
   | 'landing.howItWorks.step2.title'
@@ -399,6 +400,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.nav.signIn': 'Sign in',
     'landing.nav.register': 'Register',
     'landing.howItWorks.title': 'How it works',
+    'landing.howItWorks.stepLabel': 'Step',
     'landing.howItWorks.step1.title': 'Register your business',
     'landing.howItWorks.step1.body':
       'Basic info + resale certificate (or equivalent). One form, one upload.',
@@ -776,6 +778,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.nav.signIn': 'Iniciar sesión',
     'landing.nav.register': 'Registrarse',
     'landing.howItWorks.title': 'Cómo funciona',
+    'landing.howItWorks.stepLabel': 'Paso',
     'landing.howItWorks.step1.title': 'Registrá tu negocio',
     'landing.howItWorks.step1.body':
       'Datos básicos + certificado de reventa (o equivalente). Un solo formulario.',

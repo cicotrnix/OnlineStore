@@ -1,5 +1,6 @@
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
+import { HomeMotion } from '@/components/home/HomeMotion'
 import { auth } from '@/lib/auth/config'
 import { getLocale, t } from '@/lib/i18n'
 import { getStoreConfig } from '@/stores'
@@ -17,53 +18,59 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-/**
- * Landing pública (Onboarding B2B 2026-06-02). Reemplaza la home-storefront
- * anterior — el catálogo y el contenido AI quedan accesibles vía /catalog y
- * /products/[slug] (públicos para SEO), pero esta home es la puerta de
- * entrada para negocios nuevos.
- */
 export default async function LandingPage() {
   const session = await auth()
   const locale = await getLocale({ userId: session?.user?.id ?? null })
+  const store = getStoreConfig()
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto pl-2 pr-6 h-20 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-surface text-ink-700">
+      <HomeMotion />
+
+      <header className="sticky top-0 z-sticky bg-surface/85 backdrop-blur supports-[backdrop-filter]:bg-surface/70 border-b border-ink-100">
+        <div className="mx-auto max-w-[1240px] px-5 md:px-8 h-20 flex items-center justify-between">
           <Link
             href="/"
-            aria-label={getStoreConfig().identity.name}
-            className="-my-2 block shrink-0"
+            aria-label={store.identity.name}
+            className="-my-2 block shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
           >
             <Image
-              src={getStoreConfig().identity.logo}
-              alt={getStoreConfig().identity.name}
+              src={store.identity.logo}
+              alt={store.identity.name}
               width={1600}
               height={998}
               priority
-              className="h-16 md:h-20 w-auto"
+              className="h-14 md:h-16 w-auto"
             />
           </Link>
-          <nav className="flex items-center gap-5 text-sm">
-            <Link href="/catalog" className="text-gray-700 hover:text-gray-900">
+          <nav className="flex items-center gap-6 text-small">
+            <Link
+              href="/catalog"
+              className="text-ink-700 hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
+            >
               {t(locale, 'landing.nav.catalog')}
             </Link>
             {session?.user ? (
               <>
-                <Link href="/orders" className="text-gray-700 hover:text-gray-900">
+                <Link
+                  href="/orders"
+                  className="text-ink-700 hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
+                >
                   {t(locale, 'landing.nav.myAccount')}
                 </Link>
                 <SignOutButton />
               </>
             ) : (
               <>
-                <Link href="/sign-in" className="text-gray-700 hover:text-gray-900">
+                <Link
+                  href="/sign-in"
+                  className="text-ink-700 hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
+                >
                   {t(locale, 'landing.nav.signIn')}
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="rounded-md bg-gray-900 text-white px-3 py-1.5 hover:bg-gray-800"
+                  className="inline-flex items-center rounded-button bg-ink-950 text-surface px-4 py-2 font-medium hover:-translate-y-px hover:ring-2 hover:ring-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 >
                   {t(locale, 'landing.nav.register')}
                 </Link>
@@ -76,44 +83,57 @@ export default async function LandingPage() {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="max-w-5xl mx-auto px-6 py-20 md:py-28 text-center">
+        <section
+          aria-labelledby="hero-tagline"
+          className="mx-auto max-w-5xl px-5 md:px-8 pt-20 md:pt-28 pb-20 md:pb-28 text-center"
+          data-motion="hero"
+        >
           <Image
-            src={getStoreConfig().identity.logo}
-            alt={getStoreConfig().identity.name}
+            src={store.identity.logo}
+            alt={store.identity.name}
             width={1600}
             height={998}
             priority
-            className="h-24 md:h-32 w-auto mx-auto"
+            className="h-20 md:h-28 w-auto mx-auto"
+            data-motion-step="1"
           />
-          <p className="mt-6 text-xl md:text-2xl text-gray-700">{t(locale, 'landing.tagline')}</p>
-          <div
-            aria-hidden
-            className="mt-6 mx-auto h-1 w-24 rounded-full"
-            style={{ background: 'var(--color-accent)' }}
-          />
-          <p className="mt-8 max-w-2xl mx-auto text-base md:text-lg text-gray-600">
+          <h1
+            id="hero-tagline"
+            className="mt-8 font-sans text-display font-semibold tracking-[-0.025em] text-ink-950 text-balance"
+            data-motion-step="2"
+          >
+            {t(locale, 'landing.tagline')}
+          </h1>
+          <div aria-hidden className="mt-7 mx-auto h-px w-24 bg-accent" data-motion-step="3" />
+          <p
+            className="mt-8 mx-auto max-w-2xl text-body-lg text-ink-500 text-pretty"
+            data-motion-step="4"
+          >
             {t(locale, 'landing.intro')}
           </p>
 
-          <div className="mt-10 flex items-center justify-center gap-3 flex-wrap">
+          <div
+            className="mt-12 flex items-center justify-center gap-3 flex-wrap"
+            data-motion-step="5"
+          >
             {!session?.user && (
               <Link
                 href="/sign-up"
-                className="rounded-md bg-gray-900 text-white px-6 py-3 text-base font-medium hover:bg-gray-800"
+                className="inline-flex items-center justify-center rounded-button bg-ink-950 text-surface px-6 py-3 text-base font-medium hover:-translate-y-px hover:ring-2 hover:ring-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
               >
                 {t(locale, 'landing.cta.register')}
               </Link>
             )}
             <Link
               href="/catalog"
-              className="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-800 hover:bg-gray-50"
+              className="inline-flex items-center justify-center rounded-button border-[1.5px] border-accent bg-surface text-ink-950 px-6 py-3 text-base font-medium hover:bg-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               {t(locale, 'landing.cta.exploreCatalog')}
             </Link>
             {!session?.user && (
               <Link
                 href="/sign-in"
-                className="text-base font-medium text-gray-700 hover:text-gray-900 underline"
+                className="text-base font-medium text-ink-700 hover:text-ink-950 underline underline-offset-4 decoration-ink-300 hover:decoration-ink-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
               >
                 {t(locale, 'landing.cta.signInExisting')}
               </Link>
@@ -122,65 +142,72 @@ export default async function LandingPage() {
         </section>
 
         {/* Cómo funciona */}
-        <section className="bg-white border-t border-gray-200">
-          <div className="max-w-5xl mx-auto px-6 py-16">
-            <h2 className="text-2xl font-medium text-gray-900 text-center">
+        <section aria-labelledby="how-it-works-title" className="border-y border-ink-100 bg-muted">
+          <div className="mx-auto max-w-5xl px-5 md:px-8 py-20 md:py-24">
+            <h2
+              id="how-it-works-title"
+              className="text-h2 font-semibold tracking-[-0.02em] text-ink-950 text-center text-balance"
+            >
               {t(locale, 'landing.howItWorks.title')}
             </h2>
-            <ol className="mt-10 grid gap-8 md:grid-cols-3 text-sm text-gray-700">
-              <li className="text-center">
-                <div className="mx-auto w-10 h-10 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center">
-                  1
-                </div>
-                <h3 className="mt-3 font-medium text-gray-900">
-                  {t(locale, 'landing.howItWorks.step1.title')}
-                </h3>
-                <p className="mt-2 text-gray-600">{t(locale, 'landing.howItWorks.step1.body')}</p>
-              </li>
-              <li className="text-center">
-                <div className="mx-auto w-10 h-10 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center">
-                  2
-                </div>
-                <h3 className="mt-3 font-medium text-gray-900">
-                  {t(locale, 'landing.howItWorks.step2.title')}
-                </h3>
-                <p className="mt-2 text-gray-600">{t(locale, 'landing.howItWorks.step2.body')}</p>
-              </li>
-              <li className="text-center">
-                <div className="mx-auto w-10 h-10 rounded-full bg-gray-900 text-white font-medium flex items-center justify-center">
-                  3
-                </div>
-                <h3 className="mt-3 font-medium text-gray-900">
-                  {t(locale, 'landing.howItWorks.step3.title')}
-                </h3>
-                <p className="mt-2 text-gray-600">{t(locale, 'landing.howItWorks.step3.body')}</p>
-              </li>
+            <ol className="mt-14 grid gap-6 md:grid-cols-3" data-motion="steps">
+              {(['step1', 'step2', 'step3'] as const).map((step, i) => (
+                <li
+                  key={step}
+                  className="rounded-card bg-surface ring-1 ring-ink-100 px-7 py-8"
+                  data-motion-item
+                >
+                  <div className="flex items-baseline gap-3 text-ink-500">
+                    <span className="font-mono text-meta tracking-widest uppercase">
+                      {t(locale, 'landing.howItWorks.stepLabel')}
+                    </span>
+                    <span className="font-mono text-meta text-ink-950 font-semibold">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-h3 font-semibold text-ink-950 tracking-[-0.01em]">
+                    {t(locale, `landing.howItWorks.${step}.title`)}
+                  </h3>
+                  <p className="mt-2 text-body text-ink-700 text-pretty">
+                    {t(locale, `landing.howItWorks.${step}.body`)}
+                  </p>
+                </li>
+              ))}
             </ol>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-6 text-xs text-gray-500 flex flex-wrap gap-4 justify-between">
+      <footer className="border-t border-ink-100 bg-surface">
+        <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-6 text-meta text-ink-500 flex flex-wrap gap-4 justify-between">
           <span>
-            © {new Date().getFullYear()} {getStoreConfig().identity.name}
+            © {new Date().getFullYear()} {store.identity.name}
           </span>
-          <div className="flex gap-4">
-            <Link href="/catalog" className="hover:text-gray-700">
+          <div className="flex gap-5">
+            <Link
+              href="/catalog"
+              className="hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
+            >
               {t(locale, 'landing.nav.catalog')}
             </Link>
             {!session?.user && (
-              <Link href="/sign-up" className="hover:text-gray-700">
+              <Link
+                href="/sign-up"
+                className="hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
+              >
                 {t(locale, 'landing.cta.register')}
               </Link>
             )}
             {session?.user ? (
               <SignOutButton
                 label={t(locale, 'landing.footer.signOut')}
-                className="hover:text-gray-700"
+                className="hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
               />
             ) : (
-              <Link href="/sign-in" className="hover:text-gray-700">
+              <Link
+                href="/sign-in"
+                className="hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
+              >
                 {t(locale, 'landing.nav.signIn')}
               </Link>
             )}
