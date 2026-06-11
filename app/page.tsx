@@ -28,14 +28,15 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col bg-surface text-ink-700">
       <HomeMotion />
 
-      <Header isSignedIn={Boolean(session?.user)} locale={locale} onDark />
+      <Header isSignedIn={Boolean(session?.user)} locale={locale} initialTheme="dark" />
 
       <main className="flex-1">
         {/* Hero — dark tile with stylized battery + headline + CTAs */}
         <section
           aria-labelledby="hero-tagline"
-          className="bg-neutral-900 text-surface"
+          className="-mt-20 bg-neutral-900 text-surface"
           data-motion="hero"
+          data-header-theme="dark"
         >
           <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-20 md:py-28">
             <div className="grid items-center gap-14 md:grid-cols-[1.1fr,1fr] md:gap-16">
@@ -96,7 +97,11 @@ export default async function LandingPage() {
         </section>
 
         {/* Cómo funciona */}
-        <section aria-labelledby="how-it-works-title" className="border-y border-ink-100 bg-muted">
+        <section
+          aria-labelledby="how-it-works-title"
+          className="border-y border-ink-100 bg-muted"
+          data-header-theme="light"
+        >
           <div className="mx-auto max-w-5xl px-5 md:px-8 py-20 md:py-24">
             <h2
               id="how-it-works-title"
@@ -156,7 +161,7 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-ink-100 bg-surface">
+      <footer className="border-t border-ink-100 bg-surface" data-header-theme="light">
         <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-6 text-meta text-ink-500 flex flex-wrap gap-4 justify-between">
           <span>
             © {new Date().getFullYear()} {store.identity.name}
