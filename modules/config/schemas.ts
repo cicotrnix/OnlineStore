@@ -6,6 +6,7 @@ export const storeConfigSchema = z.object({
   identity: z.object({
     name: z.string().min(1),
     logo: z.string().min(1),
+    logoLight: z.string().min(1).optional(),
     supportEmail: z.string().email(),
     tagline: z.string().optional(),
     brandVoice: z
@@ -102,6 +103,7 @@ export const themeConfigSchema = z.object({
   }),
   typography: z.object({
     sans: z.string().min(1),
+    mono: z.string().min(1).optional(),
     scale: z.enum(['compact', 'comfortable', 'spacious']),
   }),
   radius: z.object({

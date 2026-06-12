@@ -102,6 +102,33 @@ Antes de tocar código, leer en este orden:
 - Runbooks: event-bus, payments, accounting, shipments, outbound-webhooks.
 - Pendientes ops (Herney provisiona): Stripe live keys, FedEx API, Cloudflare R2, PostHog/GA4, rol Postgres `app_rw` (hardening append-only DB), staging Coolify con Stripe test-mode.
 
+## Rediseño UI en curso (pre-launch)
+
+**Dirección aprobada:** "Back to 100%" — oscuro, técnico, lima como acento único.  
+**Spec maestro:** `docs/specs/2026-06-11-ui-redesign-design-system.md`  
+**Mockup de referencia:** `docs/mockups/pipower-back-to-100.html` *(placeholder — Herney agrega el hi-fi)*
+
+**Método de ejecución:** superficie por superficie — branch `redesign/<superficie>` + PR, review de Herney en localhost antes de merge. No mergear sin confirmación.
+
+**Estado:**
+- **Home (PR #30):** reconciliada con el design system, lista para merge.  
+  Componentes compartidos ya creados: `components/commerce/StatStrip.tsx`, `components/commerce/SpecReadout.tsx`, `components/commerce/Header.tsx` (adaptativo dark/light scroll-aware).
+
+**Orden restante:**
+1. Merge Home (PR #30)
+2. Barrido i18n storefront (claves pendientes)
+3. Catálogo + ProductCard
+4. PDP
+5. Carrito + Checkout (Vaul drawer mobile)
+6. Auth (sign-in / sign-up)
+7. Cuenta / Admin
+
+**Nota DX importante:** vitest necesita `DATABASE_URL` explícito en el entorno.  
+Sin él, ~239 tests fallan con `PrismaClientInitializationError` — **no son regresión**, es un problema de entorno.  
+Correr siempre como: `DATABASE_URL="postgresql://postgres:postgres@localhost:5435/online_store_dev" STORE_ID=pipower pnpm test`
+
+---
+
 ## Decisiones de stack (no abrir sin ADR nuevo)
 
 - TypeScript estricto (`noUncheckedIndexedAccess: true`).

@@ -8,6 +8,7 @@ export default defineStoreConfig({
   identity: {
     name: 'PiPower',
     logo: '/logo-pipower.png',
+    logoLight: '/logo-pipower-light.png',
     supportEmail: 'support@pipower.example',
     tagline: 'Baterías mayoristas para iPhone · USA + LATAM',
     brandVoice: {

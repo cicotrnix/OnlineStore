@@ -18,12 +18,14 @@ export default defineTheme({
     danger: '#A32D2D',
   },
   typography: {
-    sans: 'Inter, system-ui, sans-serif',
+    sans: 'var(--font-geist-sans), system-ui, sans-serif',
+    mono: 'var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace',
     scale: 'comfortable',
   },
   radius: {
-    card: 12,
-    button: 8,
+    // "Back to 100%" — cards 16, buttons pill (999), inputs 8 stays.
+    card: 16,
+    button: 999,
     input: 8,
   },
   density: 'regular',
