@@ -1,12 +1,386 @@
-<!DOCTYPE html>
-<!--
-  PLACEHOLDER — mockup de referencia pendiente de agregar por Herney.
-  Este archivo debe reemplazarse con el hi-fi mockup "Back to 100%"
-  que sirvió de referencia para el diseño de PR #30 (redesign/home).
--->
+<!doctype html>
 <html lang="es">
-<head><meta charset="UTF-8"><title>PiPower — Back to 100% (mockup placeholder)</title></head>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PiPower — dirección "Back to 100%" (mockup hi-fi)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --slate:#1A1F2E; --slate-deep:#12161F; --slate-soft:#222838;
+    --lime:#88D810; --lime-deep:#5fa000;
+    --white:#ffffff; --paper:#F4F7EE; --line:#e8ece2;
+    --ink:#1A1F2E; --ink-2:#5b6472; --ink-3:#9aa1ad;
+    --on-dark:#ffffff; --on-dark-2:#aab2c0; --on-dark-3:#727a8a;
+    --maxw:1240px; --radius:16px;
+    --sans:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--white);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01","cv01"}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+  .mono{font-family:var(--mono)}
+  .note{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:90;background:var(--slate);color:var(--on-dark-2);font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:7px 14px;border-radius:999px;border:1px solid var(--slate-soft);opacity:.92}
+
+  /* HEADER */
+  header{position:absolute;top:0;left:0;right:0;z-index:40}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:84px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:-.03em;font-size:21px;color:var(--on-dark)}
+  .brand .spark{width:13px;height:13px;border-radius:4px;background:var(--lime);box-shadow:0 0 0 4px rgba(136,216,16,.16)}
+  .nav .links{display:flex;align-items:center;gap:32px;font-size:14.5px;color:var(--on-dark-2);font-weight:500}
+  .nav .links a{transition:color .18s ease}
+  .nav .links a:hover{color:var(--on-dark)}
+  .nav .cta{display:flex;align-items:center;gap:16px}
+  .lang{font-family:var(--mono);font-size:12.5px;color:var(--on-dark-2);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 11px}
+  .btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 22px;border-radius:999px;font-size:14.5px;font-weight:600;letter-spacing:-.01em;cursor:pointer;transition:transform .2s ease,background .2s ease,box-shadow .2s ease;border:1px solid transparent;white-space:nowrap}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.lime{background:var(--lime);color:var(--slate);box-shadow:0 6px 22px -8px rgba(136,216,16,.6)}
+  .btn.lime:hover{box-shadow:0 10px 30px -8px rgba(136,216,16,.7)}
+  .btn.ghost-dark{background:transparent;color:var(--on-dark);border-color:rgba(255,255,255,.22)}
+  .btn.ghost-dark:hover{background:rgba(255,255,255,.06)}
+  .btn.dark{background:var(--slate);color:#fff}
+  .btn.dark:hover{background:#000}
+  .btn.ghost{background:transparent;border-color:var(--ink)}
+  .btn.ghost:hover{background:var(--paper)}
+
+  /* HERO */
+  .hero{background:var(--slate);color:var(--on-dark);position:relative;overflow:hidden;padding:140px 0 96px}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 78% 18%,rgba(136,216,16,.10),transparent 60%);pointer-events:none}
+  .hero .grid{display:grid;grid-template-columns:0.85fr 1.15fr;gap:64px;align-items:center;position:relative}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--lime);border:1px solid rgba(136,216,16,.3);background:rgba(136,216,16,.06);padding:7px 14px;border-radius:999px;margin-bottom:30px}
+  .eyebrow .d{width:6px;height:6px;border-radius:50%;background:var(--lime)}
+  h1{font-size:74px;line-height:.98;letter-spacing:-.045em;font-weight:800;max-width:13ch}
+  h1 .accent{color:var(--lime)}
+  .hero p.lead{margin-top:26px;font-size:19px;line-height:1.55;color:var(--on-dark-2);max-width:46ch}
+  .hero .actions{margin-top:38px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+
+  /* BATTERY GAUGE */
+  .gauge{justify-self:center;position:relative;width:300px;height:480px}
+  .batt{position:absolute;inset:0;border:3px solid rgba(255,255,255,.14);border-radius:34px;background:linear-gradient(180deg,#1e2433,#171c28);overflow:hidden;box-shadow:0 40px 80px -30px rgba(0,0,0,.6)}
+  .batt::before{content:"";position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:84px;height:16px;background:rgba(255,255,255,.14);border-radius:8px 8px 0 0}
+  .fill{position:absolute;left:14px;right:14px;bottom:14px;height:0;background:linear-gradient(180deg,#9bea1f,#7cc40d);border-radius:22px;transition:height 2.4s cubic-bezier(.22,.61,.36,1)}
+  .fill.run{height:calc(100% - 28px)}
+  .bolt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:84px;height:84px;color:var(--slate);opacity:.85;z-index:2}
+  .readout{position:absolute;z-index:3;left:0;right:0;bottom:34px;text-align:center;color:var(--slate)}
+  .readout .pct{font-weight:800;font-size:62px;letter-spacing:-.04em;line-height:1}
+  .readout .pct .s{font-size:26px;vertical-align:super;font-weight:700}
+  .readout .lbl{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(26,31,46,.72);margin-top:2px}
+  .gauge .chip{position:absolute;right:-26px;background:var(--white);color:var(--ink);border-radius:14px;padding:11px 15px;box-shadow:0 18px 40px -18px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:1px}
+  .gauge .chip .n{font-family:var(--mono);font-weight:600;font-size:18px;letter-spacing:-.01em}
+  .gauge .chip .t{font-size:11px;color:var(--ink-2);letter-spacing:.02em}
+  .gauge .chip.c1{top:64px}
+  .gauge .chip.c2{bottom:120px;right:-34px}
+  .gauge .chip .n .u{color:var(--lime-deep)}
+
+  /* STATS STRIP */
+  .stats{background:var(--slate-deep);border-top:1px solid rgba(255,255,255,.06)}
+  .stats .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:30px 32px}
+  .stat .n{font-family:var(--mono);font-weight:600;font-size:30px;letter-spacing:-.02em;color:var(--on-dark)}
+  .stat .n .u{color:var(--lime)}
+  .stat .t{font-size:13.5px;color:var(--on-dark-2);margin-top:3px}
+
+  /* SECTIONS */
+  .section{padding:96px 0}
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:40px;gap:24px}
+  .section-head .k{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime-deep);margin-bottom:12px}
+  .section-head h2{font-size:42px;letter-spacing:-.035em;font-weight:800;line-height:1.02}
+  .section-head .link{font-size:14.5px;font-weight:600;color:var(--ink);border-bottom:2px solid var(--lime);padding-bottom:2px}
+
+  /* PRODUCT GRID */
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .24s cubic-bezier(.22,.61,.36,1),box-shadow .24s ease,border-color .24s ease}
+  .card:hover{transform:translateY(-5px);box-shadow:0 26px 50px -26px rgba(26,31,46,.28);border-color:#dfe4d9}
+  .card .ph{aspect-ratio:4/3.4;background:radial-gradient(120% 120% at 50% 24%,#fbfcf9,#eef1e7);position:relative;display:flex;align-items:center;justify-content:center}
+  .card .tag{position:absolute;top:12px;left:12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--slate);background:var(--lime);padding:5px 10px;border-radius:7px}
+  .card .mini{width:66px;height:112px;border:2.5px solid #cfd4c8;border-radius:12px;position:relative;background:#fff}
+  .card .mini::before{content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:24px;height:6px;background:#cfd4c8;border-radius:3px 3px 0 0}
+  .card .mini::after{content:"";position:absolute;left:8px;right:8px;bottom:8px;top:34%;background:var(--lime);border-radius:6px}
+  .card .body{padding:18px 18px 20px}
+  .card .sku{font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.02em}
+  .card h3{font-size:16px;font-weight:600;margin:7px 0 14px;line-height:1.3;letter-spacing:-.015em}
+  .spec{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:14px}
+  .spec div{display:flex;flex-direction:column;gap:1px}
+  .spec .v{font-family:var(--mono);font-weight:600;font-size:15px;letter-spacing:-.01em}
+  .spec .v.up{color:var(--lime-deep)}
+  .spec .l{font-size:10.5px;color:var(--ink-3);letter-spacing:.03em;text-transform:uppercase}
+  .card .row{display:flex;align-items:center;justify-content:space-between}
+  .card .price{font-family:var(--mono);font-size:19px;font-weight:600;letter-spacing:-.02em}
+  .card .add{width:40px;height:40px;border-radius:999px;border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;transition:all .18s ease}
+  .card .add svg{width:18px;height:18px}
+  .card:hover .add{background:var(--slate);color:#fff;border-color:var(--slate)}
+
+  /* HOW IT WORKS */
+  .how{background:var(--paper);border-top:1px solid var(--line)}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
+  .step{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:30px 28px;position:relative;z-index:2;transition:transform .22s ease,box-shadow .22s ease}
+  .step:hover{transform:translateY(-4px);box-shadow:0 20px 40px -24px rgba(26,31,46,.25)}
+  .step .ic{width:44px;height:44px;border-radius:12px;background:var(--paper);display:flex;align-items:center;justify-content:center;color:var(--slate);margin-bottom:20px}
+  .step:hover .ic{background:rgba(136,216,16,.16);color:var(--lime-deep)}
+  .step .ic svg{width:22px;height:22px}
+  .step .kk{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-2);margin-bottom:8px}
+  .step .kk b{color:var(--ink);font-weight:600}
+  .step h4{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+  .step p{font-size:14.5px;color:var(--ink-2);line-height:1.55}
+
+  /* CTA BAND */
+  .band{background:var(--slate);color:var(--on-dark);border-radius:24px;padding:64px 56px;display:flex;align-items:center;justify-content:space-between;gap:40px;position:relative;overflow:hidden}
+  .band::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 120% at 90% 10%,rgba(136,216,16,.14),transparent 55%)}
+  .band .t h3{font-size:38px;letter-spacing:-.035em;font-weight:800;line-height:1.04;position:relative}
+  .band .t p{margin-top:12px;color:var(--on-dark-2);font-size:16.5px;position:relative;max-width:44ch}
+  .band .a{position:relative;display:flex;gap:14px;flex-wrap:wrap}
+
+  /* FOOTER */
+  footer{padding:64px 0 72px;color:var(--ink-2);font-size:14px}
+  footer .top{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;padding-bottom:40px;border-bottom:1px solid var(--line)}
+  footer .brand{color:var(--ink)}
+  footer .brand .spark{box-shadow:0 0 0 4px rgba(136,216,16,.14)}
+  footer .cols{display:flex;gap:64px;flex-wrap:wrap}
+  footer .col h5{font-size:12px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px}
+  footer .col a{display:block;margin-bottom:9px;font-size:14px;color:var(--ink-2);transition:color .16s}
+  footer .col a:hover{color:var(--ink)}
+  footer .bottom{padding-top:24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-3)}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.61,.36,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:1040px){
+    h1{font-size:54px}
+    .hero .grid{grid-template-columns:1fr;gap:48px}
+    .gauge{order:-1}
+    .grid4{grid-template-columns:repeat(2,1fr)}
+    .stats .wrap{grid-template-columns:repeat(2,1fr);gap:28px 24px}
+    .steps{grid-template-columns:1fr}
+    .band{flex-direction:column;align-items:flex-start;padding:44px 32px}
+    .section-head h2{font-size:34px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .fill{transition:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
 <body>
-<p>Mockup pendiente. Ver spec: <code>docs/specs/2026-06-11-ui-redesign-design-system.md</code></p>
+
+<div class="note mono">mockup · dirección "Back to 100%" · no es el sitio real</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#"><span class="spark"></span>PiPower</a>
+    <nav class="links">
+      <a href="#">Catálogo</a>
+      <a href="#">Compatibilidad</a>
+      <a href="#">Mayoristas</a>
+      <a href="#">Soporte</a>
+    </nav>
+    <div class="cta">
+      <span class="lang">ES</span>
+      <a class="btn ghost-dark" href="#">Iniciar sesión</a>
+      <a class="btn lime" href="#">Crear cuenta</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap grid">
+    <div class="copy">
+      <span class="eyebrow"><span class="d"></span>0 ciclos · 100% de salud</span>
+      <h1>Volvé al <span class="accent">100%</span>. Cero ciclos.</h1>
+      <p class="lead">Celdas nuevas, no recicladas. Cada batería devuelve el iPhone al día que salió de fábrica —con capacidad extendida y compatibilidad verificada por modelo.</p>
+      <div class="actions">
+        <a class="btn lime" href="#">Registrá tu negocio</a>
+        <a class="btn ghost-dark" href="#">Explorar catálogo →</a>
+      </div>
+    </div>
+    <div class="gauge">
+      <div class="batt">
+        <div class="fill" id="fill"></div>
+        <svg class="bolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13.5H11l-1 8.5 9-12h-6.5z"/></svg>
+        <div class="readout">
+          <div class="pct"><span id="pct">0</span><span class="s">%</span></div>
+          <div class="lbl">battery health</div>
+        </div>
+      </div>
+      <div class="chip c1"><span class="n">0</span><span class="t">cycle count</span></div>
+      <div class="chip c2"><span class="n"><span class="u">+</span>12%</span><span class="t">capacidad vs OEM</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="wrap">
+    <div class="stat"><div class="n">0<span class="u">×</span></div><div class="t">ciclos de carga al recibirla</div></div>
+    <div class="stat"><div class="n">100<span class="u">%</span></div><div class="t">salud de batería de fábrica</div></div>
+    <div class="stat"><div class="n"><span class="u">+</span>12%</div><div class="t">capacidad sobre la original</div></div>
+    <div class="stat"><div class="n">24–48<span class="u">h</span></div><div class="t">despacho desde Miami</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div>
+        <div class="k">Catálogo</div>
+        <h2>Las más pedidas</h2>
+      </div>
+      <a class="link" href="#">Ver todo →</a>
+    </div>
+    <div class="grid4">
+      <a class="card reveal" href="#">
+        <div class="ph"><span class="tag">Tag-On Flex</span><div class="mini"></div></div>
+        <div class="body">
+          <div class="sku">PI-200458</div>
+          <h3>Batería Pi-Power · iPhone 15 Pro Max</h3>
+          <div class="spec">
+            <div><span class="v">100%</span><span class="l">Salud</span></div>
+            <div><span class="v">0</span><span class="l">Ciclos</span></div>
+            <div><span class="v up">+12%</span><span class="l">Cap.</span></div>
+          </div>
+          <div class="row"><span class="price">$16.50</span><span class="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span></div>
+        </div>
+      </a>
+      <a class="card reveal" href="#">
+        <div class="ph"><div class="mini"></div></div>
+        <div class="body">
+          <div class="sku">PI-200412</div>
+          <h3>Batería Pi-Power · iPhone 14 Pro</h3>
+          <div class="spec">
+            <div><span class="v">100%</span><span class="l">Salud</span></div>
+            <div><span class="v">0</span><span class="l">Ciclos</span></div>
+            <div><span class="v up">+9%</span><span class="l">Cap.</span></div>
+          </div>
+          <div class="row"><span class="price">$13.90</span><span class="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span></div>
+        </div>
+      </a>
+      <a class="card reveal" href="#">
+        <div class="ph"><span class="tag">Tag-On Flex</span><div class="mini"></div></div>
+        <div class="body">
+          <div class="sku">PI-200398</div>
+          <h3>Batería Pi-Power · iPhone 13</h3>
+          <div class="spec">
+            <div><span class="v">100%</span><span class="l">Salud</span></div>
+            <div><span class="v">0</span><span class="l">Ciclos</span></div>
+            <div><span class="v up">+15%</span><span class="l">Cap.</span></div>
+          </div>
+          <div class="row"><span class="price">$11.20</span><span class="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span></div>
+        </div>
+      </a>
+      <a class="card reveal" href="#">
+        <div class="ph"><div class="mini"></div></div>
+        <div class="body">
+          <div class="sku">PI-200310</div>
+          <h3>Batería Pi-Power · iPhone 12 / 12 Pro</h3>
+          <div class="spec">
+            <div><span class="v">100%</span><span class="l">Salud</span></div>
+            <div><span class="v">0</span><span class="l">Ciclos</span></div>
+            <div><span class="v up">+10%</span><span class="l">Cap.</span></div>
+          </div>
+          <div class="row"><span class="price">$10.40</span><span class="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="wrap section">
+    <div class="section-head reveal" style="margin-bottom:48px">
+      <div>
+        <div class="k">Cómo funciona</div>
+        <h2>De registro a recompra, sin fricción</h2>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0 4 4m-4-4-4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+        <div class="kk">STEP <b>01</b></div>
+        <h4>Registrá tu negocio</h4>
+        <p>Datos básicos + certificado de reventa (o equivalente). Un formulario, una carga.</p>
+      </div>
+      <div class="step reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v5c0 4 3 7 7 9 4-2 7-5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div class="kk">STEP <b>02</b></div>
+        <h4>Te aprobamos</h4>
+        <p>Revisamos el certificado a mano. Aprobado, ves el precio mayorista al instante.</p>
+      </div>
+      <div class="step reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.2L22 7H6"/></svg></div>
+        <div class="kk">STEP <b>03</b></div>
+        <h4>Comprá y recomprá</h4>
+        <p>Catálogo completo, precio por cliente, wire o tarjeta. Envío FedEx Ground.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap reveal">
+    <div class="band">
+      <div class="t">
+        <h3>Tu próximo lote vuelve al 100%.</h3>
+        <p>Precios por tramo de volumen para talleres de cualquier tamaño. Sin mínimos absurdos.</p>
+      </div>
+      <div class="a">
+        <a class="btn lime" href="#">Registrá tu negocio</a>
+        <a class="btn ghost-dark" href="#">Hablar con ventas</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <a class="brand" href="#"><span class="spark"></span>PiPower</a>
+        <p style="margin-top:14px;max-width:30ch;color:var(--ink-2)">Baterías mayoristas para iPhone. Celdas nuevas, 0 ciclos, capacidad extendida.</p>
+      </div>
+      <div class="cols">
+        <div class="col"><h5>Tienda</h5><a href="#">Catálogo</a><a href="#">Compatibilidad</a><a href="#">Precios mayoristas</a></div>
+        <div class="col"><h5>Cuenta</h5><a href="#">Iniciar sesión</a><a href="#">Crear cuenta</a><a href="#">Verificar negocio</a></div>
+        <div class="col"><h5>Soporte</h5><a href="#">Envíos</a><a href="#">Devoluciones</a><a href="#">Contacto</a></div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© 2026 PiPower · USA + LATAM</span>
+      <span class="mono">battery health 100% · cycle count 0</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fill = document.getElementById('fill');
+  var pctEl = document.getElementById('pct');
+
+  function runGauge(){
+    if(reduce){ fill.classList.add('run'); pctEl.textContent='100'; return; }
+    requestAnimationFrame(function(){ fill.classList.add('run'); });
+    var start=null, dur=2400;
+    function tick(ts){
+      if(!start) start=ts;
+      var p=Math.min((ts-start)/dur,1);
+      var eased=1-Math.pow(1-p,3);
+      pctEl.textContent=Math.round(eased*100);
+      if(p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  window.addEventListener('load', function(){ setTimeout(runGauge, 250); });
+
+  if(!reduce && 'IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+    },{threshold:.16});
+    document.querySelectorAll('.reveal').forEach(function(el,i){ el.style.transitionDelay=(i%4*60)+'ms'; io.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+  }
+</script>
 </body>
 </html>
