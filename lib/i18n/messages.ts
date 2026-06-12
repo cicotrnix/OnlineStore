@@ -39,6 +39,7 @@ export type MessageKey =
   | 'landing.featured.title'
   | 'landing.featured.linkAll'
   | 'landing.featured.tagOnFlex'
+  | 'landing.featured.loginForPrice'
   | 'spec.label.health'
   | 'spec.label.cycles'
   | 'spec.label.capacity'
@@ -436,6 +437,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.featured.title': 'Most requested',
     'landing.featured.linkAll': 'View all →',
     'landing.featured.tagOnFlex': 'Tag-On Flex',
+    'landing.featured.loginForPrice': 'Sign in to see price',
     'spec.label.health': 'Health',
     'spec.label.cycles': 'Cycles',
     'spec.label.capacity': 'Cap.',
@@ -835,6 +837,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.featured.title': 'Las más pedidas',
     'landing.featured.linkAll': 'Ver todo →',
     'landing.featured.tagOnFlex': 'Tag-On Flex',
+    'landing.featured.loginForPrice': 'Iniciá sesión para ver precios',
     'spec.label.health': 'Salud',
     'spec.label.cycles': 'Ciclos',
     'spec.label.capacity': 'Cap.',

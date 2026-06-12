@@ -1,13 +1,17 @@
 import { Header } from '@/components/commerce/Header'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
-import { SpecReadout } from '@/components/commerce/SpecReadout'
+import { SpecReadout, type SpecRow } from '@/components/commerce/SpecReadout'
 import { StatStrip } from '@/components/commerce/StatStrip'
 import { HeroGauge } from '@/components/home/HeroGauge'
 import { HomeMotion } from '@/components/home/HomeMotion'
 import { IconFileUpload, IconShieldCheck, IconShoppingCart } from '@/components/home/StepIcons'
 import { auth } from '@/lib/auth/config'
+import { prisma } from '@/lib/db/client'
 import { getLocale, t } from '@/lib/i18n'
+import { formatMoney } from '@/lib/money'
+import { filterForOrg } from '@/modules/catalog'
 import { getStoreConfig } from '@/stores'
+import type { Category, Product } from '@prisma/client'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -21,26 +25,22 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-// Featured products on the Home — static mock data for the design system
-// showcase. Cards demonstrate the SpecReadout pattern that the Catalog +
-// PDP will later inherit. No service calls; no real prices.
-const FEATURED_PRODUCTS = [
-  { sku: 'PI-200458', model: 'iPhone 15 Pro Max', capacity: '+12%', price: '$16.50', tagged: true },
-  { sku: 'PI-200412', model: 'iPhone 14 Pro', capacity: '+9%', price: '$13.90', tagged: false },
-  { sku: 'PI-200398', model: 'iPhone 13', capacity: '+15%', price: '$11.20', tagged: true },
-  {
-    sku: 'PI-200310',
-    model: 'iPhone 12 / 12 Pro',
-    capacity: '+10%',
-    price: '$10.40',
-    tagged: false,
-  },
-] as const
-
 export default async function LandingPage() {
   const session = await auth()
   const locale = await getLocale({ userId: session?.user?.id ?? null })
   const store = getStoreConfig()
+
+  const orgId = session?.impersonatingOrgId ?? session?.activeOrgId ?? null
+  const rawProducts = await prisma.product.findMany({
+    where: { isActive: true, isPrivate: false, category: { isPrivate: false } },
+    include: { category: true },
+    orderBy: { createdAt: 'desc' },
+    take: 8,
+  })
+  const visibleProducts = orgId
+    ? await filterForOrg(orgId, rawProducts as (Product & { category: Category })[])
+    : rawProducts
+  const featuredProducts = visibleProducts.slice(0, 4)
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-ink-700">
@@ -131,100 +131,134 @@ export default async function LandingPage() {
           ]}
         />
 
-        {/* Featured products — design-system showcase. Static mock data. */}
-        <section aria-labelledby="featured-title" className="bg-surface" data-header-theme="light">
-          <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-20 md:py-24">
-            <div className="mb-10 flex items-end justify-between gap-6" data-reveal>
-              <div>
-                <div className="mb-3 font-mono text-[12.5px] uppercase tracking-[0.1em] text-lime-deep">
-                  {t(locale, 'landing.featured.eyebrow')}
+        {/* Featured products */}
+        {featuredProducts.length > 0 && (
+          <section
+            aria-labelledby="featured-title"
+            className="bg-surface"
+            data-header-theme="light"
+          >
+            <div className="mx-auto max-w-[1240px] px-5 md:px-8 py-20 md:py-24">
+              <div className="mb-10 flex items-end justify-between gap-6" data-reveal>
+                <div>
+                  <div className="mb-3 font-mono text-[12.5px] uppercase tracking-[0.1em] text-lime-deep">
+                    {t(locale, 'landing.featured.eyebrow')}
+                  </div>
+                  <h2
+                    id="featured-title"
+                    className="text-h2 font-extrabold leading-[1.02] tracking-[-0.035em] text-ink-950"
+                  >
+                    {t(locale, 'landing.featured.title')}
+                  </h2>
                 </div>
-                <h2
-                  id="featured-title"
-                  className="text-h2 font-extrabold leading-[1.02] tracking-[-0.035em] text-ink-950"
-                >
-                  {t(locale, 'landing.featured.title')}
-                </h2>
-              </div>
-              <Link
-                href="/catalog"
-                className="border-b-2 border-accent pb-[2px] text-[14.5px] font-semibold text-ink-950 transition-colors hover:text-lime-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-sm"
-              >
-                {t(locale, 'landing.featured.linkAll')}
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURED_PRODUCTS.map((p) => (
                 <Link
                   href="/catalog"
-                  key={p.sku}
-                  className="group block overflow-hidden rounded-card border border-line bg-surface transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-[5px] hover:border-[#dfe4d9] hover:shadow-[0_26px_50px_-26px_rgba(26,31,46,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                  data-reveal
+                  className="border-b-2 border-accent pb-[2px] text-[14.5px] font-semibold text-ink-950 transition-colors hover:text-lime-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 >
-                  {/* Placeholder photo */}
-                  <div
-                    aria-hidden
-                    className="relative flex aspect-[4/3.4] items-center justify-center"
-                    style={{
-                      background: 'radial-gradient(120% 120% at 50% 24%, #fbfcf9, #eef1e7)',
-                    }}
-                  >
-                    {p.tagged && (
-                      <span className="absolute left-3 top-3 rounded-[7px] bg-accent px-[10px] py-[5px] font-mono text-[11px] font-semibold tracking-[0.04em] text-ink-950">
-                        {t(locale, 'landing.featured.tagOnFlex')}
-                      </span>
-                    )}
-                    {/* Mini battery glyph */}
-                    <div className="relative h-[112px] w-[66px] rounded-[12px] border-[2.5px] border-[#cfd4c8] bg-surface">
-                      <span
-                        aria-hidden
-                        className="absolute -top-[7px] left-1/2 h-[6px] w-[24px] -translate-x-1/2 rounded-t-[3px] bg-[#cfd4c8]"
-                      />
-                      <span
-                        aria-hidden
-                        className="absolute bottom-2 left-2 right-2 top-[34%] rounded-[6px] bg-accent"
-                      />
-                    </div>
-                  </div>
-                  <div className="px-[18px] pb-[20px] pt-[18px]">
-                    <div className="font-mono text-[12px] tracking-[0.02em] text-ink-300">
-                      {p.sku}
-                    </div>
-                    <h3 className="mt-[7px] text-[16px] font-semibold leading-[1.3] tracking-[-0.015em] text-ink-950">
-                      Batería Pi-Power · {p.model}
-                    </h3>
-                    <SpecReadout
-                      locale={locale}
-                      rows={[
-                        { value: '100%', labelKey: 'spec.label.health' },
-                        { value: '0', labelKey: 'spec.label.cycles' },
-                        { value: p.capacity, up: true, labelKey: 'spec.label.capacity' },
-                      ]}
-                    />
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[19px] font-semibold tracking-[-0.02em] text-ink-950">
-                        {p.price}
-                      </span>
-                      <span className="flex h-10 w-10 items-center justify-center rounded-button border border-ink-950 text-ink-950 transition-colors duration-200 group-hover:border-ink-950 group-hover:bg-ink-950 group-hover:text-surface">
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          aria-hidden="true"
-                        >
-                          <path d="M12 5v14M5 12h14" />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
+                  {t(locale, 'landing.featured.linkAll')}
                 </Link>
-              ))}
+              </div>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {featuredProducts.map((p) => {
+                  const attrs = (p.attributes ?? {}) as Record<string, unknown>
+                  const capacity = typeof attrs.capacity === 'string' ? attrs.capacity : null
+                  const tagOnFlex = attrs.tagOnFlex === true
+                  const specRows: SpecRow[] = [
+                    { value: '100%', labelKey: 'spec.label.health' },
+                    { value: '0', labelKey: 'spec.label.cycles' },
+                    ...(capacity
+                      ? [
+                          {
+                            value: capacity,
+                            up: true,
+                            labelKey: 'spec.label.capacity' as SpecRow['labelKey'],
+                          },
+                        ]
+                      : []),
+                  ]
+                  return (
+                    <Link
+                      href={`/products/${p.slug}`}
+                      key={p.id}
+                      className="group block overflow-hidden rounded-card border border-line bg-surface transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-[5px] hover:border-[#dfe4d9] hover:shadow-[0_26px_50px_-26px_rgba(26,31,46,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                      data-reveal
+                    >
+                      {/* Product image or placeholder */}
+                      <div
+                        className="relative flex aspect-[4/3.4] items-center justify-center overflow-hidden"
+                        style={{
+                          background: 'radial-gradient(120% 120% at 50% 24%, #fbfcf9, #eef1e7)',
+                        }}
+                      >
+                        {p.imageUrl ? (
+                          <img
+                            src={p.imageUrl}
+                            alt=""
+                            aria-hidden="true"
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                        ) : (
+                          /* Mini battery glyph fallback */
+                          <div
+                            aria-hidden
+                            className="relative h-[112px] w-[66px] rounded-[12px] border-[2.5px] border-[#cfd4c8] bg-surface"
+                          >
+                            <span
+                              aria-hidden
+                              className="absolute -top-[7px] left-1/2 h-[6px] w-[24px] -translate-x-1/2 rounded-t-[3px] bg-[#cfd4c8]"
+                            />
+                            <span
+                              aria-hidden
+                              className="absolute bottom-2 left-2 right-2 top-[34%] rounded-[6px] bg-accent"
+                            />
+                          </div>
+                        )}
+                        {tagOnFlex && (
+                          <span className="absolute left-3 top-3 rounded-[7px] bg-accent px-[10px] py-[5px] font-mono text-[11px] font-semibold tracking-[0.04em] text-ink-950">
+                            {t(locale, 'landing.featured.tagOnFlex')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="px-[18px] pb-[20px] pt-[18px]">
+                        <div className="font-mono text-[12px] tracking-[0.02em] text-ink-300">
+                          {p.sku}
+                        </div>
+                        <h3 className="mt-[7px] text-[16px] font-semibold leading-[1.3] tracking-[-0.015em] text-ink-950">
+                          {p.name}
+                        </h3>
+                        <SpecReadout locale={locale} rows={specRows} />
+                        <div className="flex items-center justify-between">
+                          {session?.user ? (
+                            <span className="font-mono text-[19px] font-semibold tracking-[-0.02em] text-ink-950">
+                              {formatMoney(p.basePrice, store.currency.base)}
+                            </span>
+                          ) : (
+                            <span className="text-[13px] text-ink-400 italic">
+                              {t(locale, 'landing.featured.loginForPrice')}
+                            </span>
+                          )}
+                          <span className="flex h-10 w-10 items-center justify-center rounded-button border border-ink-950 text-ink-950 transition-colors duration-200 group-hover:border-ink-950 group-hover:bg-ink-950 group-hover:text-surface">
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              aria-hidden="true"
+                            >
+                              <path d="M12 5v14M5 12h14" />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* How it works — section-head pattern + journey-connected steps */}
         <section
