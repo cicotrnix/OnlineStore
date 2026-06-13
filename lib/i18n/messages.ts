@@ -407,6 +407,17 @@ export type MessageKey =
   | 'checkout.toast.empty'
   | 'checkout.toast.notVerified'
   | 'checkout.placing'
+  // Reorder (loop de re-orden)
+  | 'reorder.button'
+  | 'reorder.reason.inactive'
+  | 'reorder.reason.no_access'
+  | 'reorder.reason.out_of_stock'
+  | 'reorder.notice.nothingAvailable'
+  | 'reorder.toast.added'
+  | 'reorder.toast.addedSomeSkipped'
+  | 'reorder.toast.notFound'
+  | 'reorder.toast.notVerified'
+  | 'reorder.toast.failed'
 
 type Dict = Record<MessageKey, string>
 
@@ -820,6 +831,17 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.toast.empty': 'Your cart is empty.',
     'checkout.toast.notVerified': 'Your account must be verified to place orders.',
     'checkout.placing': 'Placing order…',
+    'reorder.button': 'Reorder',
+    'reorder.reason.inactive': 'no longer available',
+    'reorder.reason.no_access': 'no longer in your catalog',
+    'reorder.reason.out_of_stock': 'out of stock',
+    'reorder.notice.nothingAvailable':
+      'None of the products in this order are available to reorder.',
+    'reorder.toast.added': 'Items added to your cart ✓',
+    'reorder.toast.addedSomeSkipped': 'Added to cart. Some items were skipped.',
+    'reorder.toast.notFound': 'Order not found.',
+    'reorder.toast.notVerified': 'Your account must be verified to reorder.',
+    'reorder.toast.failed': 'Could not reorder.',
   },
   'es-419': {
     'localeSwitch.label': 'Idioma',
@@ -1234,6 +1256,17 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.toast.empty': 'Tu carrito está vacío.',
     'checkout.toast.notVerified': 'Tu cuenta debe estar verificada para colocar órdenes.',
     'checkout.placing': 'Colocando orden…',
+    'reorder.button': 'Volver a pedir',
+    'reorder.reason.inactive': 'ya no disponible',
+    'reorder.reason.no_access': 'ya no está en tu catálogo',
+    'reorder.reason.out_of_stock': 'sin stock',
+    'reorder.notice.nothingAvailable':
+      'Ninguno de los productos de este pedido está disponible para re-pedir.',
+    'reorder.toast.added': 'Items agregados a tu carrito ✓',
+    'reorder.toast.addedSomeSkipped': 'Agregado al carrito. Algunos items se omitieron.',
+    'reorder.toast.notFound': 'Pedido no encontrado.',
+    'reorder.toast.notVerified': 'Tu cuenta debe estar verificada para re-pedir.',
+    'reorder.toast.failed': 'No pudimos re-pedir.',
   },
 }
 
