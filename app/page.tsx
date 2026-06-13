@@ -1,4 +1,4 @@
-import { HERO_STATS } from '@/app/_home-stats'
+import { HERO_STATS, heroCapacityClaim } from '@/app/_home-stats'
 import { Header } from '@/components/commerce/Header'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { SpecReadout, type SpecRow } from '@/components/commerce/SpecReadout'
@@ -115,7 +115,7 @@ export default async function LandingPage() {
               </div>
               {/* Gauge — decorative; aria-hidden in the component. */}
               <div className="flex justify-center md:justify-end">
-                <HeroGauge locale={locale} />
+                <HeroGauge locale={locale} capacityClaim={heroCapacityClaim()} />
               </div>
             </div>
           </div>

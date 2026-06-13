@@ -4,8 +4,9 @@ import type { Locale } from '@/lib/i18n/messages'
 /**
  * HeroGauge — the "Back to 100%" signature moment. A vertical battery that
  * fills from 0% to 100% one-time (no cycle) while a counter ticks 0→100 in
- * sync; both freeze at 100%. A floating chip anchors the verifiable claim
- * "0 cycle count" (claims sin fuente como "+12% vs OEM" se omiten).
+ * sync; both freeze at 100%. Floating chips anchor verifiable claims: "0 cycle
+ * count" (siempre) y, si app/page.tsx pasa `capacityClaim`, la capacidad real
+ * (p.ej. "+10%"; el antiguo "+12%" hardcodeado era inventado y se quitó).
  *
  * The motion is driven by HomeMotion.tsx via three hooks rendered here:
  *   - `[data-hero-gauge-fill]` : the lime fill <rect> (animate `y` + `height`)
@@ -15,7 +16,15 @@ import type { Locale } from '@/lib/i18n/messages'
  * SSR default = 100% (filled, counter "100") so the gauge looks correct under
  * `prefers-reduced-motion` (no JS swap) and as a non-JS fallback.
  */
-export function HeroGauge({ locale }: { locale: Locale }) {
+export function HeroGauge({
+  locale,
+  capacityClaim,
+}: {
+  locale: Locale
+  // Claim de capacidad (dato real, p.ej. "+10%"). Si no se pasa, el chip no se
+  // renderiza. El valor lo provee app/page.tsx desde HERO_STATS.
+  capacityClaim?: string
+}) {
   return (
     <div data-hero-gauge className="relative mx-auto h-[440px] w-[280px] md:h-[480px] md:w-[300px]">
       {/* Battery SVG. Cap on top, body, inner well, fill (animated), bolt. */}
@@ -99,8 +108,18 @@ export function HeroGauge({ locale }: { locale: Locale }) {
         </span>
       </div>
 
-      {/* Chip 2 ("+12% capacidad vs OEM") removido: claim de marketing sin
-          fuente verificable (regla "nunca inventar" del design system). */}
+      {/* Chip 2 — capacidad. Solo si app/page.tsx pasa capacityClaim (dato real
+          de specs, p.ej. "+10%"). El antiguo "+12%" hardcodeado era inventado. */}
+      {capacityClaim && (
+        <div className="absolute right-[-18px] bottom-[110px] md:right-[-34px] flex flex-col gap-[2px] rounded-[14px] bg-surface px-[14px] py-[10px] text-ink-700 shadow-[0_18px_40px_-18px_rgba(0,0,0,0.5)]">
+          <span className="font-mono text-[16px] md:text-[18px] font-semibold tracking-[-0.01em] text-ink-950">
+            {capacityClaim}
+          </span>
+          <span className="text-[10.5px] text-ink-500 tracking-[0.02em]">
+            {t(locale, 'landing.hero.chip2Label')}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

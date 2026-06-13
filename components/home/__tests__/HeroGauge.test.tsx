@@ -13,8 +13,14 @@ describe('HeroGauge a11y', () => {
     expect(counter?.getAttribute('aria-live')).toBeNull()
   })
 
-  it('no muestra el claim inventado "+12% capacidad vs OEM" (regla "nunca inventar")', () => {
-    const { container } = render(<HeroGauge locale="en-US" />)
+  it('muestra el claim real +10% cuando se pasa capacityClaim, nunca el inventado +12%', () => {
+    const { container } = render(<HeroGauge locale="en-US" capacityClaim="+10%" />)
+    expect(container.textContent ?? '').toMatch(/\+?10\s*%/)
     expect(container.textContent ?? '').not.toMatch(/\+?12\s*%/)
+  })
+
+  it('sin capacityClaim no muestra chip de capacidad (ni +10% ni +12%)', () => {
+    const { container } = render(<HeroGauge locale="en-US" />)
+    expect(container.textContent ?? '').not.toMatch(/\+?1[02]\s*%/)
   })
 })
