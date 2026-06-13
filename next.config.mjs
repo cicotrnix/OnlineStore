@@ -40,6 +40,12 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // gsap (dep del client-component HomeMotion) es ESM y no resuelve en el bundle
+  // server de producción → `next start` daba 500 "Cannot find module 'gsap'" en
+  // la home. transpilePackages fuerza a Next a transpilar/bundlear gsap en ambos
+  // bundles (server + client). No va en serverComponentsExternalPackages porque
+  // es dep de cliente, no de server components.
+  transpilePackages: ['gsap'],
   // stripe + aws-sdk se cargan dinámicamente con require interno; quedan
   // como externos para evitar bundling de tree-shake mal-comportado.
   experimental: {
