@@ -1,0 +1,53 @@
+
+ RUN  v4.1.7 /Users/cico/Documents/Claude/Projects/Online Store
+
+ ❯ tests/_repro_pay1.test.ts (3 tests | 2 failed) 483ms
+     × WIRE: placeOrder + reconcileWire → stock decrementado UNA sola vez 44ms
+     × CARD: placeOrder + webhook checkout.session.completed → stock decrementado UNA sola vez 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/_repro_pay1.test.ts > PAY-1 reproducción — doble decremento de stock (flujo real placeOrder + captura) > WIRE: placeOrder + reconcileWire → stock decrementado UNA sola vez
+AssertionError: expected 4 to be 7 // Object.is equality
+
+- Expected
++ Received
+
+- 7
++ 4
+
+ ❯ tests/_repro_pay1.test.ts:94:30
+     92|     const pr = await prisma.product.findUniqueOrThrow({ where: { id: p…
+     93|     // Esperado: 7 (una reserva). Con el bug: 4 (placeOrder -3, reconc…
+     94|     expect(pr.stockQuantity).toBe(AFTER_PLACE)
+       |                              ^
+     95|   })
+     96|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/_repro_pay1.test.ts > PAY-1 reproducción — doble decremento de stock (flujo real placeOrder + captura) > CARD: placeOrder + webhook checkout.session.completed → stock decrementado UNA sola vez
+AssertionError: expected 4 to be 7 // Object.is equality
+
+- Expected
++ Received
+
+- 7
++ 4
+
+ ❯ tests/_repro_pay1.test.ts:110:30
+    108|     const pr = await prisma.product.findUniqueOrThrow({ where: { id: p…
+    109|     // Esperado: 7 (una reserva). Con el bug: 4 (placeOrder -3, captur…
+    110|     expect(pr.stockQuantity).toBe(AFTER_PLACE)
+       |                              ^
+    111|   })
+    112| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  01:05:39
+   Duration  1.24s (transform 116ms, setup 40ms, import 199ms, tests 483ms, environment 422ms)
+

@@ -1,0 +1,348 @@
+
+> online-store@4.0.0 lint /Users/cico/Documents/Claude/Projects/Online Store
+> biome check .
+
+./app/(account)/account/__tests__/password-actions.test.ts:15:56 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    13 │ vi.mock('next/headers', () => ({
+    14 │   cookies: vi.fn(async () => ({
+  > 15 │     get: (n: string) => (cookieStore.has(n) ? { value: cookieStore.get(n)! } : undefined),
+       │                                                        ^^^^^^^^^^^^^^^^^^^
+    16 │     set: (n: string, v: string) => cookieStore.set(n, v),
+    17 │   })),
+  
+
+./app/(account)/account/__tests__/password-actions.test.ts:62:45 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    60 │     const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    61 │     expect(fresh?.hashedPassword).toBeTruthy()
+  > 62 │     expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
+       │                                             ^^^^^^^^^^^^^^^^^^^^^^
+    63 │     expect(fresh?.passwordUpdatedAt).toBeInstanceOf(Date)
+    64 │     // Current session stays, other session deleted
+  
+
+./app/(account)/account/__tests__/password-actions.test.ts:62:45 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    60 │     const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    61 │     expect(fresh?.hashedPassword).toBeTruthy()
+  > 62 │     expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
+       │                                             ^^^^^^
+    63 │     expect(fresh?.passwordUpdatedAt).toBeInstanceOf(Date)
+    64 │     // Current session stays, other session deleted
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+     60  60 │       const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+     61  61 │       expect(fresh?.hashedPassword).toBeTruthy()
+     62     │ - ····expect(await·verifyPassword('Newpass1',·fresh!.hashedPassword!)).toBe(true)
+         62 │ + ····expect(await·verifyPassword('Newpass1',·fresh?.hashedPassword!)).toBe(true)
+     63  63 │       expect(fresh?.passwordUpdatedAt).toBeInstanceOf(Date)
+     64  64 │       // Current session stays, other session deleted
+  
+
+./app/(account)/account/__tests__/password-actions.test.ts:119:45 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    117 │     const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    118 │     expect(fresh?.hashedPassword).toBeTruthy()
+  > 119 │     expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
+        │                                             ^^^^^^^^^^^^^^^^^^^^^^
+    120 │     expect(fresh?.passwordUpdatedAt).toBeInstanceOf(Date)
+    121 │     const remaining = await prisma.session.findMany({ where: { userId: user.id } })
+  
+
+./app/(account)/account/__tests__/password-actions.test.ts:119:45 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    117 │     const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    118 │     expect(fresh?.hashedPassword).toBeTruthy()
+  > 119 │     expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
+        │                                             ^^^^^^
+    120 │     expect(fresh?.passwordUpdatedAt).toBeInstanceOf(Date)
+    121 │     const remaining = await prisma.session.findMany({ where: { userId: user.id } })
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    117 117 │       const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    118 118 │       expect(fresh?.hashedPassword).toBeTruthy()
+    119     │ - ····expect(await·verifyPassword('Newpass1',·fresh!.hashedPassword!)).toBe(true)
+        119 │ + ····expect(await·verifyPassword('Newpass1',·fresh?.hashedPassword!)).toBe(true)
+    120 120 │       expect(fresh?.passwordUpdatedAt).toBeInstanceOf(Date)
+    121 121 │       const remaining = await prisma.session.findMany({ where: { userId: user.id } })
+  
+
+./app/(account)/account/__tests__/password-actions.test.ts:186:45 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    184 │     const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    185 │     expect(fresh?.hashedPassword).toBeTruthy()
+  > 186 │     expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
+        │                                             ^^^^^^^^^^^^^^^^^^^^^^
+    187 │   })
+    188 │ })
+  
+
+./app/(account)/account/__tests__/password-actions.test.ts:186:45 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    184 │     const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    185 │     expect(fresh?.hashedPassword).toBeTruthy()
+  > 186 │     expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
+        │                                             ^^^^^^
+    187 │   })
+    188 │ })
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    184 184 │       const fresh = await prisma.user.findUnique({ where: { id: user.id } })
+    185 185 │       expect(fresh?.hashedPassword).toBeTruthy()
+    186     │ - ····expect(await·verifyPassword('Newpass1',·fresh!.hashedPassword!)).toBe(true)
+        186 │ + ····expect(await·verifyPassword('Newpass1',·fresh?.hashedPassword!)).toBe(true)
+    187 187 │     })
+    188 188 │   })
+  
+
+./app/(onboarding)/onboarding/_actions.ts:116:21 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    114 │   const fileBytes = new Uint8Array(await file.arrayBuffer())
+    115 │   await uploadCertificate({
+  > 116 │     organizationId: member!.organizationId,
+        │                     ^^^^^^^
+    117 │     type: docType,
+    118 │     number: docNumber,
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    114 114 │     const fileBytes = new Uint8Array(await file.arrayBuffer())
+    115 115 │     await uploadCertificate({
+    116     │ - ····organizationId:·member!.organizationId,
+        116 │ + ····organizationId:·member?.organizationId,
+    117 117 │       type: docType,
+    118 118 │       number: docNumber,
+  
+
+./app/(storefront)/_actions.ts:40:78 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    38 │   const quantity = Number(formData.get('quantity') ?? 1)
+    39 │   try {
+  > 40 │     await cartService.addItem({ userId: user.id, productId, quantity, orgId: orgId! })
+       │                                                                              ^^^^^^
+    41 │   } catch {
+    42 │     redirect(toastUrl(returnTo, 'error', 'cart.toast.failed'))
+  
+
+./app/(storefront)/_actions.ts:98:14 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+     96 │     order = await checkoutService.confirm({
+     97 │       userId: user.id,
+   > 98 │       orgId: orgId!,
+        │              ^^^^^^
+     99 │       billingAddressId,
+    100 │       shippingAddressId,
+  
+
+./app/(storefront)/_actions.ts:107:32 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    105 │     redirect(toastUrl('/checkout', 'error', 'checkout.toast.failed'))
+    106 │   }
+  > 107 │   redirect(toastUrl(`/orders/${order!.id}`, 'success', 'checkout.toast.orderPlaced'))
+        │                                ^^^^^^
+    108 │ }
+    109 │ 
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    105 105 │       redirect(toastUrl('/checkout', 'error', 'checkout.toast.failed'))
+    106 106 │     }
+    107     │ - ··redirect(toastUrl(`/orders/${order!.id}`,·'success',·'checkout.toast.orderPlaced'))
+        107 │ + ··redirect(toastUrl(`/orders/${order?.id}`,·'success',·'checkout.toast.orderPlaced'))
+    108 108 │   }
+    109 109 │   
+  
+
+./app/admin/__tests__/verification-actions.test.ts:75:23 lint/style/noNonNullAssertion ━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    73 │     const stored = await getStorage().get(doc.fileKey)
+    74 │     expect(stored).not.toBeNull()
+  > 75 │     expect(Array.from(stored!)).toEqual([1, 2, 3, 4])
+       │                       ^^^^^^^
+    76 │ 
+    77 │     const ev = await prisma.domainEvent.findFirst({ where: { type: 'customer.verified' } })
+  
+
+./app/admin/_actions.ts:178:7 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    176 │     adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+    177 │   }
+  > 178 │   if (file!.size > 10 * 1024 * 1024) {
+        │       ^^^^^
+    179 │     adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+    180 │   }
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    176 176 │       adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+    177 177 │     }
+    178     │ - ··if·(file!.size·>·10·*·1024·*·1024)·{
+        178 │ + ··if·(file?.size·>·10·*·1024·*·1024)·{
+    179 179 │       adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+    180 180 │     }
+  
+
+./app/admin/_actions.ts:181:42 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    179 │     adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+    180 │   }
+  > 181 │   const fileBytes = new Uint8Array(await file!.arrayBuffer())
+        │                                          ^^^^^
+    182 │   const { uploadAndAutoApprove } = await import('@/modules/verification')
+    183 │   try {
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    179 179 │       adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+    180 180 │     }
+    181     │ - ··const·fileBytes·=·new·Uint8Array(await·file!.arrayBuffer())
+        181 │ + ··const·fileBytes·=·new·Uint8Array(await·file?.arrayBuffer())
+    182 182 │     const { uploadAndAutoApprove } = await import('@/modules/verification')
+    183 183 │     try {
+  
+
+./app/admin/_actions.ts:189:17 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    187 │       number,
+    188 │       jurisdiction,
+  > 189 │       fileName: file!.name,
+        │                 ^^^^^
+    190 │       fileBytes,
+    191 │       country,
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    187 187 │         number,
+    188 188 │         jurisdiction,
+    189     │ - ······fileName:·file!.name,
+        189 │ + ······fileName:·file?.name,
+    190 190 │         fileBytes,
+    191 191 │         country,
+  
+
+./app/admin/customers/page.tsx:26:72 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    24 │ export default async function AdminCustomersPage({ searchParams }: Props) {
+    25 │   const { status } = await searchParams
+  > 26 │   const activeFilter = STATUS_FILTERS.find((f) => f.key === status) ?? STATUS_FILTERS[0]!
+       │                                                                        ^^^^^^^^^^^^^^^^^^
+    27 │   const where: Prisma.OrganizationWhereInput = activeFilter.status
+    28 │     ? { verificationStatus: activeFilter.status }
+  
+
+./tests/e2e/password-auth.spec.ts:69:32 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    67 │       // Verificá que existe la fila Session en DB (createDbSession).
+    68 │       const dbSession = await prisma.session.findUnique({
+  > 69 │         where: { sessionToken: session!.value },
+       │                                ^^^^^^^^
+    70 │       })
+    71 │       expect(dbSession?.userId).toBe(user.id)
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+     67  67 │         // Verificá que existe la fila Session en DB (createDbSession).
+     68  68 │         const dbSession = await prisma.session.findUnique({
+     69     │ - ········where:·{·sessionToken:·session!.value·},
+         69 │ + ········where:·{·sessionToken:·session?.value·},
+     70  70 │         })
+     71  71 │         expect(dbSession?.userId).toBe(user.id)
+  
+
+./tests/e2e/password-auth.spec.ts:79:18 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    77 │         {
+    78 │           name: SESSION_COOKIE,
+  > 79 │           value: session!.value,
+       │                  ^^^^^^^^
+    80 │           domain: 'localhost',
+    81 │           path: '/',
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+     77  77 │           {
+     78  78 │             name: SESSION_COOKIE,
+     79     │ - ··········value:·session!.value,
+         79 │ + ··········value:·session?.value,
+     80  80 │             domain: 'localhost',
+     81  81 │             path: '/',
+  
+
+./tests/e2e/password-auth.spec.ts:85:32 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    83 │           secure: false,
+    84 │           sameSite: 'Lax',
+  > 85 │           expires: Math.floor((session!.expires ?? Date.now() / 1000 + 86400) as number),
+       │                                ^^^^^^^^
+    86 │         },
+    87 │       ])
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+     83  83 │             secure: false,
+     84  84 │             sameSite: 'Lax',
+     85     │ - ··········expires:·Math.floor((session!.expires·??·Date.now()·/·1000·+·86400)·as·number),
+         85 │ + ··········expires:·Math.floor((session?.expires·??·Date.now()·/·1000·+·86400)·as·number),
+     86  86 │           },
+     87  87 │         ])
+  
+
+./tests/e2e/password-auth.spec.ts:313:45 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    311 │       const after = await prisma.user.findUnique({ where: { id: userCp.id } })
+    312 │       expect(after?.passwordUpdatedAt).not.toBeNull()
+  > 313 │       expect(bcrypt.compareSync('New1234A', after!.hashedPassword!)).toBe(true)
+        │                                             ^^^^^^^^^^^^^^^^^^^^^^
+    314 │       await ctxB.close()
+    315 │ 
+  
+
+The number of diagnostics exceeds the number allowed by Biome.
+Diagnostics not shown: 51.
+Checked 406 files in 104ms. No fixes applied.
+Found 71 warnings.
+EXIT=0

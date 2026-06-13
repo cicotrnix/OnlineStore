@@ -1,0 +1,80 @@
+
+> online-store@4.0.0 test /Users/cico/Documents/Claude/Projects/Online Store
+> vitest run
+
+
+ RUN  v4.1.7 /Users/cico/Documents/Claude/Projects/Online Store
+
+{"level":30,"time":1781289290950,"pid":19712,"hostname":"Mac.attlocal.net","to":"e-1781289290928@t.com","subject":"Orden recibida","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289290968,"pid":19712,"hostname":"Mac.attlocal.net","to":"e-1781289290960@t.com","subject":"Tu pedido fue despachado","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289290982,"pid":19712,"hostname":"Mac.attlocal.net","to":"e-1781289290976@t.com","subject":"Orden recibida","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289291731,"pid":19713,"hostname":"Mac.attlocal.net","to":"co@test.com","subject":"Factura IN-2026-002440 emitida — vence 2026-06-12","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289292430,"pid":19714,"hostname":"Mac.attlocal.net","to":"buyer@test.com","subject":"Factura IN-2026-002441 emitida — vence 2026-06-12","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289292538,"pid":19714,"hostname":"Mac.attlocal.net","to":"buyer@test.com","subject":"Factura IN-2026-002442 emitida — vence 2026-06-12","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289295994,"pid":19719,"hostname":"Mac.attlocal.net","to":"g-1781289295802@t.com","subject":"Factura IN-2026-002443 emitida — vence 2026-06-12","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289296660,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nlsh000z8c7sxz5reloz","eventType":"invoice.issued","debits":"5000","msg":"journal entry posted"}
+{"level":30,"time":1781289296666,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nlsp00168c7sk7p6itjd","eventType":"payment.captured","debits":"7000","msg":"journal entry posted"}
+{"level":30,"time":1781289296693,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nltg00208c7spgsnypzl","eventType":"invoice.issued","debits":"7000","msg":"journal entry posted"}
+{"level":30,"time":1781289296697,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nltk00278c7s7681grnt","eventType":"payment.reconciled","debits":"10000","msg":"journal entry posted"}
+{"level":30,"time":1781289296715,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nlu300308c7sogeifyfy","eventType":"invoice.issued","debits":"5000","msg":"journal entry posted"}
+{"level":30,"time":1781289296720,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nlu700378c7shljq3w7l","eventType":"payment.captured","debits":"7000","msg":"journal entry posted"}
+{"level":30,"time":1781289296727,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nluf003j8c7sk2qdy9bx","eventType":"payment.refunded","debits":"7000","msg":"journal entry posted"}
+{"level":30,"time":1781289296745,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nlux004d8c7s004wsimo","eventType":"invoice.issued","debits":"7000","msg":"journal entry posted"}
+{"level":30,"time":1781289296748,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nlv0004k8c7s4eqru39v","eventType":"payment.reconciled","debits":"10000","msg":"journal entry posted"}
+{"level":30,"time":1781289296754,"pid":19720,"hostname":"Mac.attlocal.net","entryId":"cmqb9nlv5004u8c7sonvrg5z5","eventType":"payment.refunded","debits":"10000","msg":"journal entry posted"}
+{"level":30,"time":1781289297380,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmci000z8c7t7bvev3k4","eventType":"invoice.issued","debits":"10000","msg":"journal entry posted"}
+{"level":30,"time":1781289297388,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmcr00168c7tknv4pehm","eventType":"payment.reconciled","debits":"10000","msg":"journal entry posted"}
+{"level":30,"time":1781289297424,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmds001x8c7txepslkqn","eventType":"invoice.issued","debits":"8500","msg":"journal entry posted"}
+{"level":30,"time":1781289297429,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmdw00248c7trhd350sw","eventType":"payment.reconciled","debits":"8500","msg":"journal entry posted"}
+{"level":30,"time":1781289297450,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmei002v8c7tj8kesnu6","eventType":"invoice.issued","debits":"7000","msg":"journal entry posted"}
+{"level":30,"time":1781289297455,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmem00328c7tkdmutmms","eventType":"payment.reconciled","debits":"10000","msg":"journal entry posted"}
+{"level":30,"time":1781289297476,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmf8003v8c7t6yuygzib","eventType":"invoice.issued","debits":"5000","msg":"journal entry posted"}
+{"level":30,"time":1781289297480,"pid":19721,"hostname":"Mac.attlocal.net","entryId":"cmqb9nmfb00428c7tzf2hml20","eventType":"payment.reconciled","debits":"5000","msg":"journal entry posted"}
+{"level":50,"time":1781289298155,"pid":19722,"hostname":"Mac.attlocal.net","expectedCents":5000,"amountTotal":1,"expectedCurrency":"USD","currency":"USD","msg":"payment mismatch — needs review + auto refund"}
+{"level":40,"time":1781289298800,"pid":19723,"hostname":"Mac.attlocal.net","err":"Invalid Stripe signature","msg":"stripe webhook: invalid signature"}
+{"level":50,"time":1781289298814,"pid":19723,"hostname":"Mac.attlocal.net","expectedCents":5000,"amountTotal":1,"expectedCurrency":"USD","currency":"USD","msg":"payment mismatch — needs review + auto refund"}
+{"level":40,"time":1781289298816,"pid":19723,"hostname":"Mac.attlocal.net","err":"mismatch: 1 USD vs 5000 USD","msg":"stripe webhook: mismatch handled"}
+{"level":40,"time":1781289304371,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrqp000i8coj1zkr9z0e","attempts":1,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304373,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrqp000i8coj1zkr9z0e","attempts":2,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304374,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrqp000i8coj1zkr9z0e","attempts":3,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304375,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrqp000i8coj1zkr9z0e","attempts":4,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304376,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrqp000i8coj1zkr9z0e","attempts":5,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304384,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrr3000l8cojoi56xza2","attempts":1,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304385,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrr3000l8cojoi56xza2","attempts":2,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304387,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrr3000l8cojoi56xza2","attempts":3,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304388,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrr3000l8cojoi56xza2","attempts":4,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":40,"time":1781289304389,"pid":20323,"hostname":"Mac.attlocal.net","deliveryId":"cmqb9nrr3000l8cojoi56xza2","attempts":5,"reason":"HTTP 503","msg":"webhook delivery failed"}
+{"level":50,"time":1781289308533,"pid":20795,"hostname":"Mac.attlocal.net","eventId":"cmqb9nuy900068c1nn5ujpp3k","subscriber":"acct","attempt":1,"err":"boom","msg":"event delivery error"}
+{"level":50,"time":1781289308548,"pid":20795,"hostname":"Mac.attlocal.net","eventId":"cmqb9nuyp000b8c1ncqofivxf","subscriber":"acct","attempt":1,"err":"boom","msg":"event delivery error"}
+{"level":50,"time":1781289308551,"pid":20795,"hostname":"Mac.attlocal.net","eventId":"cmqb9nuyp000b8c1ncqofivxf","subscriber":"acct","attempt":2,"err":"boom","msg":"event delivery error"}
+{"level":50,"time":1781289308553,"pid":20795,"hostname":"Mac.attlocal.net","eventId":"cmqb9nuyp000b8c1ncqofivxf","subscriber":"acct","attempt":3,"err":"boom","msg":"event delivery error"}
+{"level":50,"time":1781289308556,"pid":20795,"hostname":"Mac.attlocal.net","eventId":"cmqb9nuyp000b8c1ncqofivxf","subscriber":"acct","attempt":4,"err":"boom","msg":"event delivery error"}
+{"level":50,"time":1781289308558,"pid":20795,"hostname":"Mac.attlocal.net","eventId":"cmqb9nuyp000b8c1ncqofivxf","subscriber":"acct","attempt":5,"err":"boom","msg":"event delivery error"}
+{"level":50,"time":1781289308569,"pid":20795,"hostname":"Mac.attlocal.net","eventId":"cmqb9nuz9000m8c1n68jlst6u","subscriber":"bad","attempt":1,"err":"x","msg":"event delivery error"}
+{"level":50,"time":1781289314077,"pid":21410,"hostname":"Mac.attlocal.net","jobId":"cmqb9nz8b000b8ciq57o0arvi","productId":"cmqb9nz8a000a8ciqb10u9k2y","attempt":1,"err":"boom","msg":"ai content job error"}
+{"level":50,"time":1781289314086,"pid":21410,"hostname":"Mac.attlocal.net","jobId":"cmqb9nz8l000f8ciq64daqj4n","productId":"cmqb9nz8k000e8ciqqsoej0o3","attempt":1,"err":"boom","msg":"ai content job error"}
+{"level":50,"time":1781289314088,"pid":21410,"hostname":"Mac.attlocal.net","jobId":"cmqb9nz8l000f8ciq64daqj4n","productId":"cmqb9nz8k000e8ciqqsoej0o3","attempt":2,"err":"boom","msg":"ai content job error"}
+{"level":50,"time":1781289314089,"pid":21410,"hostname":"Mac.attlocal.net","jobId":"cmqb9nz8l000f8ciq64daqj4n","productId":"cmqb9nz8k000e8ciqqsoej0o3","attempt":3,"err":"boom","msg":"ai content job error"}
+{"level":50,"time":1781289314091,"pid":21410,"hostname":"Mac.attlocal.net","jobId":"cmqb9nz8l000f8ciq64daqj4n","productId":"cmqb9nz8k000e8ciqqsoej0o3","attempt":4,"err":"boom","msg":"ai content job error"}
+{"level":50,"time":1781289314092,"pid":21410,"hostname":"Mac.attlocal.net","jobId":"cmqb9nz8l000f8ciq64daqj4n","productId":"cmqb9nz8k000e8ciqqsoej0o3","attempt":5,"err":"boom","msg":"ai content job error"}
+{"level":30,"time":1781289314874,"pid":21412,"hostname":"Mac.attlocal.net","entryId":"cmqb9nzuh000h8cis9sb30d8z","eventType":"invoice.issued","debits":"5000","msg":"journal entry posted"}
+{"level":30,"time":1781289314884,"pid":21412,"hostname":"Mac.attlocal.net","entryId":"cmqb9nzur000q8cisbr6s8eew","eventType":"payment.captured","debits":"7000","msg":"journal entry posted"}
+{"level":30,"time":1781289317053,"pid":21548,"hostname":"Mac.attlocal.net","entryId":"cmqb9o1j0000e8cmkephy4lf4","eventType":"invoice.issued","debits":"5000","msg":"journal entry posted"}
+{"level":30,"time":1781289317059,"pid":21548,"hostname":"Mac.attlocal.net","entryId":"cmqb9o1j6000k8cmku7w9c7cv","eventType":"invoice.issued","debits":"100","msg":"journal entry posted"}
+{"level":30,"time":1781289319795,"pid":21915,"hostname":"Mac.attlocal.net","to":"x@x.com","subject":"s","msg":"[email:noop] RESEND_API_KEY not set"}
+{"level":30,"time":1781289323933,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":10,"output_tokens":5},"round":0,"msg":"ai chat tick"}
+{"level":30,"time":1781289323934,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":50,"output_tokens":20},"round":0,"msg":"ai chat tick"}
+{"level":30,"time":1781289323934,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":80,"output_tokens":12},"round":1,"msg":"ai chat tick"}
+{"level":30,"time":1781289323935,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":10,"output_tokens":5},"round":0,"msg":"ai chat tick"}
+{"level":30,"time":1781289323935,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":10,"output_tokens":5},"round":1,"msg":"ai chat tick"}
+{"level":30,"time":1781289323935,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":10,"output_tokens":5},"round":2,"msg":"ai chat tick"}
+{"level":30,"time":1781289323935,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":10,"output_tokens":5},"round":3,"msg":"ai chat tick"}
+{"level":30,"time":1781289323935,"pid":22122,"hostname":"Mac.attlocal.net","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":10,"output_tokens":5},"round":4,"msg":"ai chat tick"}
+{"level":30,"time":1781289324255,"pid":22125,"hostname":"Mac.attlocal.net","model":"claude-sonnet-4-6","usage":{"inputTokens":10,"outputTokens":5},"msg":"ai completion"}
+
+ Test Files  100 passed | 1 skipped (101)
+      Tests  438 passed | 6 skipped (444)
+   Start at  14:34:44
+   Duration  50.26s (transform 774ms, setup 1.81s, import 5.55s, tests 14.42s, environment 22.64s)
+
+EXIT=0

@@ -1,0 +1,5 @@
+
+> online-store@4.0.0 typecheck /Users/cico/Documents/Claude/Projects/Online Store
+> tsc --noEmit
+
+EXIT=0

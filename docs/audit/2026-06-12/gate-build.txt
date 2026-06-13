@@ -1,0 +1,83 @@
+
+> online-store@4.0.0 build /Users/cico/Documents/Claude/Projects/Online Store
+> next build
+
+  [1m[38;2;173;127;168m▲ Next.js 14.2.18[39m[22m
+  - Environments: .env.local
+
+ [37m[1m [22m[39m Creating an optimized production build ...
+ [32m[1m✓[22m[39m Compiled successfully
+ [37m[1m [22m[39m Linting and checking validity of types ...
+ [37m[1m [22m[39m Collecting page data ...
+ [33m[1m⚠[22m[39m Using edge runtime on a page currently disables static generation for that page
+ [37m[1m [22m[39m Generating static pages (0/30) ...
+ [37m[1m [22m[39m Generating static pages (7/30) 
+ [37m[1m [22m[39m Generating static pages (14/30) 
+ [37m[1m [22m[39m Generating static pages (22/30) 
+ [32m[1m✓[22m[39m Generating static pages (30/30)
+ [37m[1m [22m[39m Finalizing page optimization ...
+ [37m[1m [22m[39m Collecting build traces ...
+
+[4mRoute (app)[24m                              [4mSize[24m     [4mFirst Load JS[24m
+┌ ƒ /                                    46.4 kB         [37m[1m155 kB[22m[39m
+├ ƒ /_not-found                          167 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /account                             2.58 kB         [37m[1m118 kB[22m[39m
+├ ƒ /admin                               214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /admin/approvals                     167 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /admin/categories                    970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/customers                     214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /admin/customers/[id]                949 B           [37m[1m104 kB[22m[39m
+├ ƒ /admin/customers/[id]/credit         970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/customers/[id]/prices         970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/invoices                      970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/orders                        214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /admin/orders/[id]                   970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/products                      970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/products/[id]                 970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/quotes                        214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /admin/quotes/[id]                   970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/search                        970 B            [37m[1m97 kB[22m[39m
+├ ƒ /admin/settings                      969 B            [37m[1m97 kB[22m[39m
+├ ƒ /api/ai/chat                         0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/auth/[...nextauth]              0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/health                          0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/trpc/[trpc]                     0 B                [37m[1m0 B[22m[39m
+├ ƒ /api/webhooks/stripe                 0 B                [37m[1m0 B[22m[39m
+├ ƒ /approvals                           167 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /cart                                954 B           [37m[1m109 kB[22m[39m
+├ ƒ /catalog                             1.47 kB         [37m[1m109 kB[22m[39m
+├ ƒ /catalog/[category]                  166 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /checkout                            970 B            [37m[1m97 kB[22m[39m
+├ ○ /icon.svg                            0 B                [37m[1m0 B[22m[39m
+├ ƒ /invite/[token]                      167 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /invoices                            214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /invoices/[id]                       214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /notifications                       214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /onboarding                          970 B            [37m[1m97 kB[22m[39m
+├ ƒ /onboarding/pending                  949 B           [37m[1m104 kB[22m[39m
+├ ƒ /orders                              214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /orders/[id]                         167 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /orders/[id]/payment-pending         214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /products/[slug]                     954 B           [37m[1m109 kB[22m[39m
+├ ƒ /quotes                              214 B          [37m[1m94.1 kB[22m[39m
+├ ƒ /quotes/[id]                         167 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /quotes/draft                        214 B          [37m[1m94.1 kB[22m[39m
+├ ○ /robots.txt                          0 B                [37m[1m0 B[22m[39m
+├ ƒ /search                              777 B          [37m[1m94.7 kB[22m[39m
+├ ƒ /select-org                          167 B          [37m[1m87.3 kB[22m[39m
+├ ƒ /sign-in                             1.92 kB         [37m[1m124 kB[22m[39m
+├ ƒ /sign-up                             2.32 kB         [37m[1m124 kB[22m[39m
+├ ƒ /sitemap.xml                         0 B                [37m[1m0 B[22m[39m
+└ ƒ /unlock                              0 B                [37m[1m0 B[22m[39m
++ First Load JS shared by all            [37m[1m87.1 kB[22m[39m
+  ├ chunks/43aec00f-13b6f18d84326c4d.js  53.6 kB
+  ├ chunks/7861-59788cf97003d767.js      31.6 kB
+  └ other shared chunks (total)          1.9 kB
+
+
+ƒ Middleware                             [37m[1m26.8 kB[22m[39m
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+EXIT=0
