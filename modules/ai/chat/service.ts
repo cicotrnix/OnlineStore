@@ -60,7 +60,6 @@ function extractText(content: AnthropicContent[]): string {
 
 export async function runChat(input: RunChatInput): Promise<RunChatResult> {
   if (!process.env.ANTHROPIC_API_KEY) throw new AIDisabledError()
-  if (await isBudgetExceeded()) throw new AIBudgetExceededError(currentPeriodYm())
 
   const storeConfig = getStoreConfig()
   const client = getClient()
@@ -71,6 +70,10 @@ export async function runChat(input: RunChatInput): Promise<RunChatResult> {
   }))
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+    // AI-2: chequear el presupuesto en CADA round (antes solo antes del 1º).
+    // Un loop de tool-use de hasta MAX_TOOL_ROUNDS puede gastar mucho entre
+    // rounds; cortar apenas se excede.
+    if (await isBudgetExceeded()) throw new AIBudgetExceededError(currentPeriodYm())
     const msg = await client.messages.create({
       model: storeConfig.ai.chatModel,
       max_tokens: 1024,

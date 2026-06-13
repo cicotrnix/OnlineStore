@@ -23,9 +23,20 @@ export async function isBudgetExceeded(): Promise<boolean> {
 
 export async function recordUsage(tokens: number): Promise<void> {
   const periodYm = currentPeriodYm()
-  await prisma.aiUsage.upsert({
-    where: { periodYm },
-    create: { periodYm, tokensUsed: tokens },
-    update: { tokensUsed: { increment: tokens } },
-  })
+  // AI-2: el upsert no es atómico — dos requests al inicio del mes pueden chocar
+  // en el INSERT de la fila del período (P2002). Reintentar: en el 2º intento la
+  // fila ya existe y va por el path de update (increment).
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await prisma.aiUsage.upsert({
+        where: { periodYm },
+        create: { periodYm, tokensUsed: tokens },
+        update: { tokensUsed: { increment: tokens } },
+      })
+      return
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      if (code !== 'P2002') throw err
+    }
+  }
 }

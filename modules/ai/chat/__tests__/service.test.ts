@@ -106,4 +106,23 @@ describe('runChat', () => {
     })
     expect(r.text).toMatch(/limit/i)
   })
+
+  it('AI-2: corta si el presupuesto se excede en un round posterior (no solo el 1º)', async () => {
+    const { isBudgetExceeded } = await import('@/modules/ai/budget')
+    // Round 0: ok. Round 1 (tras gastar tokens): excedido → throw.
+    vi.mocked(isBudgetExceeded).mockResolvedValueOnce(false).mockResolvedValueOnce(true)
+    const { handleTool } = await import('../tools')
+    vi.mocked(handleTool).mockResolvedValue({ ok: true, data: {} })
+    messagesCreate.mockResolvedValue({
+      stop_reason: 'tool_use',
+      content: [{ type: 'tool_use', id: 'tu_b', name: 'searchProducts', input: { query: 'x' } }],
+      usage: { input_tokens: 10, output_tokens: 5 },
+    })
+    const { runChat } = await import('../service')
+    await expect(
+      runChat({ messages: [{ role: 'user', content: 'x' }], orgId: null, locale: 'en-US' })
+    ).rejects.toThrow(/budget/i)
+    // Solo alcanzó a llamar al modelo una vez (round 0); el round 1 cortó antes.
+    expect(messagesCreate).toHaveBeenCalledTimes(1)
+  })
 })

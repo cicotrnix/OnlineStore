@@ -1,16 +1,12 @@
 import { auth } from '@/lib/auth/config'
 import { getLocale } from '@/lib/i18n'
 import { AI_CHAT_LIMITS, checkRateLimit } from '@/lib/rate-limit'
-import { runChat } from '@/modules/ai/chat'
+import { chatBodySchema, runChat } from '@/modules/ai/chat'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
-
-interface Body {
-  messages: { role: 'user' | 'assistant'; content: string }[]
-}
 
 const CHUNK_SIZE = 16
 const CHUNK_DELAY_MS = 25
@@ -30,8 +26,16 @@ export async function POST(req: Request) {
     )
   }
 
-  const body = (await req.json()) as Body
-  if (!Array.isArray(body.messages) || body.messages.length === 0) {
+  // AI-2: validar el body con zod (roles, content string, máximos de mensajes
+  // y de chars) antes de gastar tokens.
+  let raw: unknown
+  try {
+    raw = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
+  }
+  const parsed = chatBodySchema.safeParse(raw)
+  if (!parsed.success) {
     return NextResponse.json({ error: 'invalid_body' }, { status: 400 })
   }
 
@@ -39,7 +43,7 @@ export async function POST(req: Request) {
 
   let result: Awaited<ReturnType<typeof runChat>>
   try {
-    result = await runChat({ messages: body.messages, orgId, locale })
+    result = await runChat({ messages: parsed.data.messages, orgId, locale })
   } catch (err) {
     const code = err instanceof Error ? err.name : 'Unknown'
     return NextResponse.json({ error: code, message: String(err) }, { status: 503 })
