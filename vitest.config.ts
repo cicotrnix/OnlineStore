@@ -8,7 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
     globals: true,
-    exclude: ['node_modules', '.next', 'tests/e2e/**'],
+    exclude: ['node_modules', '.next', 'tests/e2e/**', 'tests/e2e-prod/**'],
     // Modules share one Postgres DB; run files serially to avoid cross-test races.
     fileParallelism: false,
     coverage: {
