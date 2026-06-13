@@ -10,6 +10,13 @@ vi.mock('@/lib/auth/helpers', () => ({
   getCurrentUser: vi.fn(async () => authUser),
 }))
 
+// _actions.ts importa resolveActiveOrgId (reorderAction); evita cargar la cadena
+// de next-auth (next/server) en jsdom. Este test solo cubre startCardCheckout.
+vi.mock('@/lib/auth/active-org', () => ({
+  resolveActiveOrgId: vi.fn(async () => 'org_placeholder'),
+  requireActiveOrgId: vi.fn(async () => 'org_placeholder'),
+}))
+
 vi.mock('next/navigation', () => ({
   redirect: vi.fn((url: string) => {
     throw new Error(`REDIRECT:${url}`)
