@@ -77,7 +77,9 @@ export function HeroGauge({ locale }: { locale: Locale }) {
           Slate text is AAA against the lime fill at the bottom. */}
       <div className="absolute inset-x-0 bottom-[44px] text-center">
         <div className="font-sans font-extrabold tracking-[-0.04em] leading-none text-ink-950">
-          <span data-hero-pct className="text-[52px] md:text-[58px]" aria-live="polite">
+          {/* Sin aria-live: GSAP muta este contador por frame (0→100); con
+              aria-live un lector de pantalla recibiría una ráfaga de anuncios. */}
+          <span data-hero-pct className="text-[52px] md:text-[58px]">
             100
           </span>
           <span className="text-[22px] md:text-[26px] font-bold align-super">%</span>
