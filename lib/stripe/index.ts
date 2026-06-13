@@ -11,6 +11,7 @@
  * de verdad; idempotencia por eventId; refund con key estable.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto'
+import { getStoreConfig } from '@/stores'
 import Stripe from 'stripe'
 
 export interface StripeCheckoutSessionInput {
@@ -186,6 +187,31 @@ class RealStripe implements StripeClient {
 let cached: StripeClient | null = null
 const fakeSingleton = new FakeStripe()
 
+function stripeEnabledInConfig(): boolean {
+  try {
+    return getStoreConfig().payments.stripe.enabled === true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Decisión 3 / ADR 0038 (corregido): el fail-fast solo dispara cuando Stripe
+ * está REALMENTE en uso. Condición = producción AND payments.stripe.enabled AND
+ * sin claves. Así, el launch wire-only de Pi-Power (`stripe.enabled=false`, sin
+ * claves) arranca contra el Fake sin brickearse; y un prod con tarjeta habilitada
+ * pero sin claves falla ruidosamente en vez de degradar al Fake forjable.
+ * En dev/test (no-producción) nunca lanza: el flujo de tarjeta se prueba contra
+ * el Fake aunque `enabled` sea true.
+ */
+export function stripeFailFastInProd(
+  hasKeys: boolean,
+  nodeEnv: string | undefined = process.env.NODE_ENV,
+  enabled: boolean = stripeEnabledInConfig()
+): boolean {
+  return !hasKeys && nodeEnv === 'production' && enabled
+}
+
 export function getStripeClient(): StripeClient {
   if (cached) return cached
   const secretKey = process.env.STRIPE_SECRET_KEY
@@ -194,14 +220,9 @@ export function getStripeClient(): StripeClient {
     cached = new RealStripe(secretKey, webhookSecret)
     return cached
   }
-  // Decisión 3 / ADR 0038: fail-fast estricto. En PRODUCCIÓN nunca degradar al
-  // FakeStripe forjable: lanzar al boot si faltan claves. Para demos se usa
-  // staging (con claves test-mode), no un "prod demo". En dev/test se mantiene
-  // el fallback noop aunque payments.stripe.enabled sea true (así se prueba el
-  // flujo de tarjeta contra el Fake sin claves reales).
-  if (process.env.NODE_ENV === 'production') {
+  if (stripeFailFastInProd(false)) {
     throw new Error(
-      'Stripe fail-fast: STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET son obligatorias en producción. No se degrada al FakeStripe.'
+      'Stripe fail-fast: STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET son obligatorias en producción cuando payments.stripe.enabled=true. No se degrada al FakeStripe.'
     )
   }
   cached = fakeSingleton

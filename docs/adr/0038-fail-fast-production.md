@@ -17,7 +17,8 @@ La filosofía "deploy inerte sin claves" (noop-safe) es excelente para DX y demo
 
 **En `NODE_ENV=production`, ningún fake/fallback silencioso en el camino del dinero. No hay path de "prod demo": para demos se usa staging (con claves test-mode).**
 
-- `getStripeClient()`: si faltan `STRIPE_SECRET_KEY` o `STRIPE_WEBHOOK_SECRET` y `NODE_ENV==='production'` → **throw** al boot, nunca `FakeStripe`. En dev/test se mantiene el fallback al fake (incluso con `payments.stripe.enabled=true`, para poder probar el flujo de tarjeta contra el fake sin claves reales — la "o" del enunciado original se descartó porque rompía ese DX y contradecía "en no-producción mantener el fallback noop").
+- `getStripeClient()`: lanza **solo cuando Stripe está realmente en uso**. Condición = `NODE_ENV==='production'` **AND** `payments.stripe.enabled` **AND** sin claves (`stripeFailFastInProd`). Si se cumple → throw al boot/uso, nunca `FakeStripe`. En dev/test se mantiene el fallback al fake (incluso con `enabled=true`, para probar el flujo de tarjeta contra el fake sin claves reales).
+  - **Wire-only (Pi-Power al launch):** `stripe.enabled=false` + sin claves + producción → **NO lanza**, cae al Fake. Esto es deliberado: con la tarjeta deshabilitada no existen Payments de Stripe (el endpoint del webhook solo encontraría "unknown payment" → no-op) y `reconcileWire` (el flujo wire) no toca Stripe. Gatear el throw solo por `NODE_ENV` brickearía este launch — por eso la condición incluye `enabled`. La versión inicial usaba el OR del enunciado (`production || enabled`), descartado porque rompía el DX de dev/test; la versión publicada usa el AND `production && enabled`.
 - `lib/db/client.ts`: `appendOnlyEnforced(nodeEnv, guard)` — el guard append-only **no se puede desactivar en producción**. `APPEND_ONLY_GUARD=off` solo surte efecto fuera de producción (lo necesita `cleanDb`).
 - `FakeStripe.verifyWebhook`: comparación de firma con `crypto.timingSafeEqual` (descartando primero por longitud), en vez de `!==`.
 - `.env.example`: `STRIPE_SECRET_KEY` / `STRIPE_PUBLISHABLE_KEY` / `STRIPE_WEBHOOK_SECRET` documentadas como obligatorias en producción, con los eventos que debe enviar el endpoint del Dashboard (`checkout.session.completed`, `payment_intent.payment_failed`, `charge.refunded`).
@@ -30,10 +31,10 @@ La filosofía "deploy inerte sin claves" (noop-safe) es excelente para DX y demo
 ## Consecuencias
 
 - **Positivas:** imposible operar producción con el `FakeStripe` forjable; el ledger no se puede dejar sin protección por una env var; firma de webhook constant-time.
-- **A vigilar:** un deploy de producción al que le falte una clave Stripe **no arranca** (es el comportamiento deseado: falla ruidosa > pago fantasma). El runbook de launch debe listar las `STRIPE_*` como obligatorias.
+- **A vigilar:** un deploy de producción **con `stripe.enabled=true`** al que le falte una clave **falla ruidosamente al usar Stripe** (comportamiento deseado: falla ruidosa > pago fantasma). El runbook debe listar las `STRIPE_*` como obligatorias **cuando se habilite la tarjeta**. El launch wire-only no se ve afectado.
 
 ## Evidencia / verificación
 
-- `lib/stripe/__tests__/fail-fast.test.ts`: prod sin claves → throw; no-prod sin claves → fake; verify rechaza firma de longitud distinta sin lanzar.
+- `lib/stripe/__tests__/fail-fast.test.ts`: matriz pura de `stripeFailFastInProd` (prod+enabled+sin-claves → lanza; prod+**disabled**+sin-claves → NO lanza ← caso wire-only; no-prod → nunca lanza) + integración: launch wire-only (prod, `enabled=false`, sin claves) cae al Fake sin lanzar; prod + `enabled=true` sin claves lanza; verify rechaza firma de longitud distinta sin lanzar.
 - `lib/db/__tests__/append-only-guard.test.ts`: `appendOnlyEnforced('production','off')===true`; `('test','off')===false`.
-- `tests/inert-without-keys.test.ts`: actualizado — stripe ahora lanza en producción sin claves (antes caía al fake).
+- `tests/inert-without-keys.test.ts`: stripe en wire-only (prod + `stripe.enabled=false`, sin claves) cae al Fake (no lanza).

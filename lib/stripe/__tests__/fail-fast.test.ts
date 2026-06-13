@@ -1,15 +1,68 @@
-// Decisión 3 (ADR 0038): fail-fast estricto en producción. Sin claves Stripe,
-// producción NO debe degradar al FakeStripe forjable; debe lanzar al boot.
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { _resetStripe, getStripeClient } from '../index'
+// Decisión 3 (ADR 0038, corregido): fail-fast solo cuando Stripe está en uso.
+// Caso crítico: el launch wire-only de Pi-Power (stripe.enabled=false, sin
+// claves) NO debe brickearse en producción.
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+const cfg = vi.hoisted(() => ({ stripeEnabled: false }))
+
+vi.mock('@/stores', async () => {
+  const actual = await vi.importActual<typeof import('@/stores')>('@/stores')
+  return {
+    ...actual,
+    getStoreConfig: () => {
+      const base = actual.getStoreConfig()
+      return {
+        ...base,
+        payments: {
+          ...base.payments,
+          stripe: { ...base.payments.stripe, enabled: cfg.stripeEnabled },
+        },
+      }
+    },
+  }
+})
+
+import { _getFakeStripe, _resetStripe, getStripeClient, stripeFailFastInProd } from '../index'
+
+beforeEach(() => {
+  cfg.stripeEnabled = false
+})
 
 afterEach(() => {
   vi.unstubAllEnvs()
   _resetStripe()
 })
 
-describe('getStripeClient fail-fast en producción', () => {
-  it('lanza en producción si faltan las claves Stripe (nunca FakeStripe)', () => {
+describe('stripeFailFastInProd (lógica pura)', () => {
+  // (hasKeys, nodeEnv, enabled) → ¿lanza?
+  it('prod + tarjeta habilitada + sin claves → lanza', () => {
+    expect(stripeFailFastInProd(false, 'production', true)).toBe(true)
+  })
+  it('prod + tarjeta DESHABILITADA (wire-only) + sin claves → NO lanza', () => {
+    expect(stripeFailFastInProd(false, 'production', false)).toBe(false)
+  })
+  it('prod + habilitada + CON claves → NO lanza', () => {
+    expect(stripeFailFastInProd(true, 'production', true)).toBe(false)
+  })
+  it('no-producción → NO lanza aunque esté habilitada y falten claves', () => {
+    expect(stripeFailFastInProd(false, 'test', true)).toBe(false)
+    expect(stripeFailFastInProd(false, 'development', true)).toBe(false)
+  })
+})
+
+describe('getStripeClient (integración)', () => {
+  it('LAUNCH WIRE-ONLY: producción + stripe.enabled=false + sin claves → FakeStripe, NO lanza', () => {
+    cfg.stripeEnabled = false
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('STRIPE_SECRET_KEY', '')
+    vi.stubEnv('STRIPE_WEBHOOK_SECRET', '')
+    _resetStripe()
+    expect(() => getStripeClient()).not.toThrow()
+    expect(getStripeClient()).toBe(_getFakeStripe())
+  })
+
+  it('producción + stripe.enabled=true + sin claves → lanza (no degrada al Fake forjable)', () => {
+    cfg.stripeEnabled = true
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('STRIPE_SECRET_KEY', '')
     vi.stubEnv('STRIPE_WEBHOOK_SECRET', '')
@@ -17,22 +70,20 @@ describe('getStripeClient fail-fast en producción', () => {
     expect(() => getStripeClient()).toThrow(/stripe/i)
   })
 
-  it('en NO-producción cae al FakeStripe cuando faltan claves (DX preservado)', () => {
+  it('no-producción + sin claves → FakeStripe (DX preservado)', () => {
+    cfg.stripeEnabled = true
     vi.stubEnv('NODE_ENV', 'test')
     vi.stubEnv('STRIPE_SECRET_KEY', '')
     vi.stubEnv('STRIPE_WEBHOOK_SECRET', '')
     _resetStripe()
-    const client = getStripeClient()
-    expect(client).toBeDefined()
-    expect(typeof (client as { verifyWebhook: unknown }).verifyWebhook).toBe('function')
+    expect(getStripeClient()).toBe(_getFakeStripe())
   })
 })
 
 describe('FakeStripe.verifyWebhook usa comparación de firma segura', () => {
-  it('rechaza firma de longitud distinta sin lanzar (timingSafeEqual-safe)', async () => {
+  it('rechaza firma de longitud distinta sin lanzar (timingSafeEqual-safe)', () => {
     vi.stubEnv('NODE_ENV', 'test')
     _resetStripe()
-    const { _getFakeStripe } = await import('../index')
     const fake = _getFakeStripe()
     const { body } = fake._signPayload({ id: 'evt_1', type: 't', data: { object: {} } })
     expect(fake.verifyWebhook(body, 'short')).toBeNull()

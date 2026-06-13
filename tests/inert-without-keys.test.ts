@@ -55,11 +55,11 @@ describe('deploy inerte sin claves externas', () => {
     expect(url).toMatch(/^fake:\/\//)
   })
 
-  it('stripe LANZA en producción sin claves (Decisión 3 / ADR 0038: no degrada al Fake)', async () => {
+  it('stripe cae al FakeStripe en wire-only (prod + stripe.enabled=false, sin claves)', async () => {
+    // Pi-Power lanza wire-only: stripe.enabled=false. El fail-fast (ADR 0038)
+    // solo dispara con stripe.enabled=true, así que aquí NO lanza: cae al Fake.
     const m = await import('@/lib/stripe')
-    // Antes caía al FakeStripe forjable (PAY-2/TST-7). Ahora producción sin
-    // claves es un error de boot, no un fallback silencioso.
-    expect(() => m.getStripeClient()).toThrow(/stripe/i)
+    expect(m.getStripeClient()).toBe(m._getFakeStripe())
   })
 
   it('fedex cae al FakeFedex', async () => {
