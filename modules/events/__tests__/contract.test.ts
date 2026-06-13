@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { EVENT_TYPES } from '../contract'
 
 describe('event contract v1', () => {
-  it('incluye los 12 eventos canónicos (v1 + customer.rejected del onboarding B2B)', () => {
+  it('incluye los 13 eventos canónicos (v1 + customer.rejected + order.cancelled OPS-1)', () => {
     expect(EVENT_TYPES).toEqual([
       'customer.verified',
       'customer.rejected',
       'order.placed',
+      'order.cancelled',
       'payment.authorized',
       'payment.captured',
       'payment.reconciled',

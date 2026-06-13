@@ -122,6 +122,18 @@ export async function cancelOrderAction(formData: FormData) {
   adminToast(formData, '/admin/orders', 'success', 'admin.toast.orderCancelled')
 }
 
+// OPS-1 (ADR 0036): el admin pospone el vencimiento de pago de una orden wire
+// cuando el comprador avisa que su transferencia viene en camino, para que el
+// cron cancel-stale-pending-orders no libere su stock reservado.
+export async function extendPaymentDueAction(formData: FormData) {
+  await requirePlatformAdmin()
+  const orderId = String(formData.get('orderId'))
+  const dueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  await ordersService.extendPaymentDue({ orderId, dueAt })
+  revalidatePath(`/admin/orders/${orderId}`)
+  adminToast(formData, `/admin/orders/${orderId}`, 'success', 'admin.toast.paymentDueExtended')
+}
+
 export async function approveOrganizationAction(formData: FormData) {
   const admin = await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))

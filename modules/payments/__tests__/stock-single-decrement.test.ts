@@ -1,12 +1,8 @@
-// AUDITORÍA 2026-06-12 — Reproducción del P0 PAY-1 (doble decremento de stock).
-// Recorre el FLUJO REAL: cartService.addItem → ordersService.placeOrder →
-// (wire) reconcileWire  /  (card) createCardCheckout + handleStripeWebhook.
-// A diferencia de modules/payments/__tests__/service.test.ts, NO crea la orden
-// directamente: la pasa por placeOrder, que YA decrementa stock. Si el segundo
-// decremento existe, el stock baja DOS veces.
-//
-// Estas aserciones expresan el comportamiento CORRECTO (un único decremento).
-// Si el bug existe, FALLAN — esa falla es la evidencia del P0.
+// Regresión del P0 PAY-1 (auditoría 2026-06-12, Decisión 1).
+// El stock se RESERVA en placeOrder (punto único). El webhook de captura y
+// reconcileWire solo validan + confirman: NO vuelven a tocar stock.
+// Recorre el flujo real (cartService.addItem → placeOrder → pago) en vez de
+// crear la orden con prisma.order.create, que es lo que ocultaba el bug.
 import { prisma } from '@/lib/db/client'
 import { _getFakeStripe, _resetStripe } from '@/lib/stripe'
 import { cartService } from '@/modules/cart'
@@ -19,15 +15,17 @@ import { beforeEach, describe, expect, it } from 'vitest'
 const UNIT = '50.00'
 const QTY = 3
 const START_STOCK = 10
-const AFTER_PLACE = START_STOCK - QTY // 7 — un único decremento esperado
-const TOTAL_CENTS = 50_00 * QTY // 15000
+const AFTER_PLACE = START_STOCK - QTY // 7 — un único decremento
+const TOTAL_CENTS = 5000 * QTY // 15000
 
 async function seedRealFlow() {
-  const user = await prisma.user.create({ data: { email: `repro-${Date.now()}@t.com` } })
+  const user = await prisma.user.create({
+    data: { email: `sd-${Date.now()}-${Math.random()}@t.com` },
+  })
   const org = await prisma.organization.create({
     data: {
-      name: 'Repro Org',
-      slug: `repro-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      name: 'SD Org',
+      slug: `sd-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       verificationStatus: 'VERIFIED',
     },
   })
@@ -49,13 +47,12 @@ async function seedRealFlow() {
     data: {
       sku: `S-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       slug: `s-${Date.now()}-${Math.random()}`,
-      name: 'Repro Product',
+      name: 'SD Product',
       basePrice: new Decimal(UNIT),
       stockQuantity: START_STOCK,
       categoryId: cat.id,
     },
   })
-  // Flujo real: carrito → placeOrder (decrementa stock + deja PENDING_PAYMENT).
   await cartService.addItem({
     userId: user.id,
     productId: product.id,
@@ -76,14 +73,19 @@ beforeEach(async () => {
   _resetStripe()
 })
 
-describe('PAY-1 reproducción — doble decremento de stock (flujo real placeOrder + captura)', () => {
-  it('placeOrder decrementa stock exactamente una vez (sanity)', async () => {
-    const { product } = await seedRealFlow()
+describe('stock se reserva en placeOrder (punto único de decremento)', () => {
+  it('placeOrder decrementa una vez y fija paymentDueAt (~placedAt + 3 días)', async () => {
+    const { product, order } = await seedRealFlow()
     const pr = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
     expect(pr.stockQuantity).toBe(AFTER_PLACE)
+    const full = await prisma.order.findUniqueOrThrow({ where: { id: order.id } })
+    expect(full.paymentDueAt).not.toBeNull()
+    const days = (full.paymentDueAt!.getTime() - full.placedAt.getTime()) / 86_400_000
+    expect(days).toBeGreaterThan(2.9)
+    expect(days).toBeLessThan(3.1)
   })
 
-  it('WIRE: placeOrder + reconcileWire → stock decrementado UNA sola vez', async () => {
+  it('WIRE: placeOrder + reconcileWire → stock baja UNA sola vez', async () => {
     const { product, order } = await seedRealFlow()
     const admin = await prisma.user.create({
       data: { email: `admin-${Date.now()}@t.com`, isPlatformAdmin: true },
@@ -95,11 +97,12 @@ describe('PAY-1 reproducción — doble decremento de stock (flujo real placeOrd
       adminUserId: admin.id,
     })
     const pr = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
-    // Esperado: 7 (una reserva). Con el bug: 4 (placeOrder -3, reconcile -3).
     expect(pr.stockQuantity).toBe(AFTER_PLACE)
+    const o = await prisma.order.findUniqueOrThrow({ where: { id: order.id } })
+    expect(o.status).toBe('CONFIRMED')
   })
 
-  it('CARD: placeOrder + webhook checkout.session.completed → stock decrementado UNA sola vez', async () => {
+  it('CARD: placeOrder + webhook checkout.session.completed → stock baja UNA sola vez', async () => {
     const { product, order } = await seedRealFlow()
     await createCardCheckout({ orderId: order.id, successUrl: 'http://s', cancelUrl: 'http://c' })
     const payment = await prisma.payment.findFirstOrThrow({ where: { orderId: order.id } })
@@ -111,7 +114,8 @@ describe('PAY-1 reproducción — doble decremento de stock (flujo real placeOrd
     const { body, signature } = _getFakeStripe()._signPayload(event)
     await handleStripeWebhook(body, signature)
     const pr = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
-    // Esperado: 7 (una reserva). Con el bug: 4 (placeOrder -3, captura -3).
     expect(pr.stockQuantity).toBe(AFTER_PLACE)
+    const o = await prisma.order.findUniqueOrThrow({ where: { id: order.id } })
+    expect(o.status).toBe('CONFIRMED')
   })
 })

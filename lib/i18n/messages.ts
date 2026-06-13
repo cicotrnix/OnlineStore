@@ -333,6 +333,9 @@ export type MessageKey =
   // Admin orders
   | 'admin.toast.orderStatusChanged'
   | 'admin.toast.orderCancelled'
+  | 'admin.toast.paymentDueExtended'
+  | 'admin.action.extendPaymentDue'
+  | 'admin.order.paymentDue'
   // Admin invoices / quotes
   | 'admin.toast.invoicePaid'
   | 'admin.toast.quoteSent'
@@ -740,6 +743,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.tierUpserted': 'Price tier saved ✓',
     'admin.toast.orderStatusChanged': 'Order status updated ✓',
     'admin.toast.orderCancelled': 'Order cancelled.',
+    'admin.toast.paymentDueExtended': 'Payment window extended +7 days ✓',
+    'admin.action.extendPaymentDue': 'Wire on the way (+7 days)',
+    'admin.order.paymentDue': 'Payment due',
     'admin.toast.invoicePaid': 'Invoice marked paid ✓',
     'admin.toast.quoteSent': 'Quote sent ✓',
     'admin.toast.quoteRevised': 'Quote revised ✓',
@@ -1143,6 +1149,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.tierUpserted': 'Tier de precio guardado ✓',
     'admin.toast.orderStatusChanged': 'Estado de la orden actualizado ✓',
     'admin.toast.orderCancelled': 'Orden cancelada.',
+    'admin.toast.paymentDueExtended': 'Ventana de pago extendida +7 días ✓',
+    'admin.action.extendPaymentDue': 'Wire en camino (+7 días)',
+    'admin.order.paymentDue': 'Vence el pago',
     'admin.toast.invoicePaid': 'Factura marcada como pagada ✓',
     'admin.toast.quoteSent': 'Cotización enviada ✓',
     'admin.toast.quoteRevised': 'Cotización revisada ✓',

@@ -3,6 +3,7 @@ import type { DomainEventRecord, DomainEventType, Subscriber } from '@/modules/e
 
 const TRACKED: readonly DomainEventType[] = [
   'order.placed',
+  'order.cancelled',
   'payment.captured',
   'payment.reconciled',
   'payment.refunded',

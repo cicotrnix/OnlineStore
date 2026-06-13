@@ -97,7 +97,9 @@ describe('POST /api/webhooks/stripe', () => {
     const o = await prisma.order.findUniqueOrThrow({ where: { id: order.id } })
     expect(o.status).toBe('CONFIRMED')
     const pr = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
-    expect(pr.stockQuantity).toBe(4)
+    // ADR 0036: el stock se reserva en placeOrder; la captura no lo toca. Este
+    // fixture crea la orden directo (sin placeOrder), así que el stock no cambia.
+    expect(pr.stockQuantity).toBe(5)
     const ev = await prisma.domainEvent.findFirst({ where: { type: 'payment.captured' } })
     expect(ev).not.toBeNull()
   })

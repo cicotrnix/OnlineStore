@@ -359,6 +359,7 @@ model Order {
   total             Decimal       @db.Decimal(12, 2)
   currency          String
   placedAt          DateTime      @default(now())
+  paymentDueAt      DateTime?
   confirmedAt       DateTime?
   shippedAt         DateTime?
   deliveredAt       DateTime?

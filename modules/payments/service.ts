@@ -272,32 +272,18 @@ export async function handleStripeWebhook(
     })
     if (current?.status === 'CAPTURED') return
 
-    // Decrementa stock atómico vía ordersService (FOR UPDATE + atomic stock).
-    // Si la orden ya está PAID/CONFIRMED, no decrementamos otra vez.
     await tx.payment.update({
       where: { id: payment.id },
       data: { status: 'CAPTURED' },
     })
 
+    // El stock ya quedó reservado en placeOrder (punto único de decremento,
+    // ADR 0036). La captura solo confirma la orden, nunca vuelve a tocar stock.
     if (payment.order.status === 'PENDING_PAYMENT') {
-      // Confirma la orden: status CONFIRMED + decrementa stock vía SQL atómico.
-      // Re-usamos la convención de Fase 1.
-      const order = await tx.order.update({
+      await tx.order.update({
         where: { id: payment.order.id },
         data: { status: 'CONFIRMED', confirmedAt: new Date() },
       })
-      // Stock decrement por línea.
-      const lines = await tx.orderLine.findMany({ where: { orderId: order.id } })
-      for (const ln of lines) {
-        const r = await tx.$executeRawUnsafe(
-          `UPDATE "Product" SET "stockQuantity" = "stockQuantity" - $1 WHERE id = $2 AND "stockQuantity" >= $1`,
-          ln.quantity,
-          ln.productId
-        )
-        if (r === 0) {
-          throw new Error(`insufficient stock at capture for product ${ln.productId}`)
-        }
-      }
     }
 
     // Emite invoice.issued (idempotente por orderId UNIQUE en Invoice).
@@ -373,20 +359,13 @@ export async function reconcileWire(input: {
         payload: { wireReference: input.wireReference, amountCents: input.amountCents },
       },
     })
+    // El stock ya quedó reservado en placeOrder (punto único, ADR 0036).
+    // La conciliación del wire solo confirma la orden, no toca stock.
     if (order.status === 'PENDING_PAYMENT') {
       await tx.order.update({
         where: { id: order.id },
         data: { status: 'CONFIRMED', confirmedAt: new Date() },
       })
-      const lines = await tx.orderLine.findMany({ where: { orderId: order.id } })
-      for (const ln of lines) {
-        const r = await tx.$executeRawUnsafe(
-          `UPDATE "Product" SET "stockQuantity" = "stockQuantity" - $1 WHERE id = $2 AND "stockQuantity" >= $1`,
-          ln.quantity,
-          ln.productId
-        )
-        if (r === 0) throw new Error(`insufficient stock at reconcile for ${ln.productId}`)
-      }
     }
     // Necesitamos organizationId para Invoice — refetch order completo.
     const fullOrder = await tx.order.findUniqueOrThrow({

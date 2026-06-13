@@ -1,4 +1,8 @@
-import { cancelOrderAction, transitionOrderStatusAction } from '@/app/admin/_actions'
+import {
+  cancelOrderAction,
+  extendPaymentDueAction,
+  transitionOrderStatusAction,
+} from '@/app/admin/_actions'
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { PaymentBadge } from '@/components/commerce/PaymentBadge'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
@@ -96,6 +100,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 <SubmitButton pendingLabel={t(locale, 'common.pending')}>→ {s}</SubmitButton>
               </form>
             ))}
+            {order.status === 'PENDING_PAYMENT' && (
+              <form action={extendPaymentDueAction}>
+                <input type="hidden" name="orderId" value={order.id} />
+                <SubmitButton pendingLabel={t(locale, 'common.pending')}>
+                  {t(locale, 'admin.action.extendPaymentDue')}
+                </SubmitButton>
+              </form>
+            )}
             {CAN_CANCEL.has(order.status) && (
               <form action={cancelOrderAction}>
                 <input type="hidden" name="orderId" value={order.id} />
@@ -109,6 +121,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               </form>
             )}
           </CardBody>
+          {order.status === 'PENDING_PAYMENT' && order.paymentDueAt && (
+            <CardBody className="border-t border-gray-100 text-xs text-gray-500">
+              {t(locale, 'admin.order.paymentDue')}: {order.paymentDueAt.toLocaleString()}
+            </CardBody>
+          )}
         </Card>
       )}
 

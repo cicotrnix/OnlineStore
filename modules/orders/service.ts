@@ -20,6 +20,57 @@ const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   CANCELLED: [],
 }
 
+/**
+ * Ventana por defecto de pago para órdenes PENDING_PAYMENT (wire/ACH). Tras
+ * vencerla sin pago, el cron `cancel-stale-pending-orders` libera el stock
+ * reservado en placeOrder. Editable por orden vía `extendPaymentDue` (admin).
+ */
+const PAYMENT_DUE_DAYS = 3
+const PAYMENT_DUE_MS = PAYMENT_DUE_DAYS * 24 * 60 * 60 * 1000
+
+/**
+ * Restaura el stock de una orden cancelable, la marca CANCELLED y emite
+ * `order.cancelled` en la MISMA transacción. Punto único de cancelación: lo
+ * usan tanto el admin (cancel) como el cron (cancelStalePendingOrders).
+ */
+async function cancelOrderInTx(
+  tx: import('@prisma/client').Prisma.TransactionClient,
+  orderId: string,
+  byUserId: string | null
+) {
+  const order = await tx.order.findUnique({ where: { id: orderId }, include: { lines: true } })
+  if (!order) throw new Error('Order not found')
+  if (!VALID_TRANSITIONS[order.status as OrderStatus]?.includes('CANCELLED')) {
+    throw new Error(`Cannot cancel order in status ${order.status}`)
+  }
+
+  for (const line of order.lines) {
+    await tx.product.update({
+      where: { id: line.productId },
+      data: { stockQuantity: { increment: line.quantity } },
+    })
+  }
+
+  const updated = await tx.order.update({
+    where: { id: orderId },
+    data: { status: 'CANCELLED', cancelledAt: new Date(), cancelledByUserId: byUserId },
+  })
+
+  const { emitEvent } = await import('@/modules/events')
+  await emitEvent(tx, {
+    type: 'order.cancelled',
+    aggregateType: 'Order',
+    aggregateId: orderId,
+    payload: {
+      orderNumber: updated.orderNumber,
+      organizationId: updated.organizationId,
+      reason: byUserId ? 'admin' : 'payment-window-expired',
+    },
+  })
+
+  return updated
+}
+
 export const ordersService = {
   async placeOrder(input: PlaceOrderInput) {
     const { userId, orgId, billingAddressId, shippingAddressId, poNumber, notes } =
@@ -75,6 +126,7 @@ export const ordersService = {
           organizationId: orgId,
           placedByUserId: userId,
           status: 'PENDING_PAYMENT',
+          paymentDueAt: new Date(Date.now() + PAYMENT_DUE_MS),
           poNumber: poNumber ?? null,
           notes: notes ?? null,
           billingAddressId,
@@ -146,31 +198,42 @@ export const ordersService = {
   },
 
   async cancel(input: { orderId: string; byUserId: string }) {
-    return prisma.$transaction(async (tx) => {
-      const order = await tx.order.findUnique({
-        where: { id: input.orderId },
-        include: { lines: true },
-      })
-      if (!order) throw new Error('Order not found')
-      if (!VALID_TRANSITIONS[order.status as OrderStatus]?.includes('CANCELLED')) {
-        throw new Error(`Cannot cancel order in status ${order.status}`)
-      }
+    return prisma.$transaction((tx) => cancelOrderInTx(tx, input.orderId, input.byUserId))
+  },
 
-      for (const line of order.lines) {
-        await tx.product.update({
-          where: { id: line.productId },
-          data: { stockQuantity: { increment: line.quantity } },
-        })
+  /**
+   * Cron OPS-1: cancela órdenes PENDING_PAYMENT cuya ventana de pago venció
+   * (paymentDueAt < ahora), restaurando stock y emitiendo order.cancelled.
+   * El admin puede posponer una orden concreta vía `extendPaymentDue`.
+   */
+  async cancelStalePendingOrders(now: Date = new Date()) {
+    const stale = await prisma.order.findMany({
+      where: { status: 'PENDING_PAYMENT', paymentDueAt: { not: null, lt: now } },
+      select: { id: true },
+    })
+    let cancelled = 0
+    for (const { id } of stale) {
+      try {
+        await prisma.$transaction((tx) => cancelOrderInTx(tx, id, null))
+        cancelled += 1
+      } catch {
+        // Estado cambió entre el SELECT y la tx (carrera con pago/cancel manual):
+        // la orden ya no es cancelable, se omite.
       }
+    }
+    return { scanned: stale.length, cancelled }
+  },
 
-      return tx.order.update({
-        where: { id: input.orderId },
-        data: {
-          status: 'CANCELLED',
-          cancelledAt: new Date(),
-          cancelledByUserId: input.byUserId,
-        },
-      })
+  /** Override de admin: extiende la ventana de pago de una orden PENDING_PAYMENT. */
+  async extendPaymentDue(input: { orderId: string; dueAt: Date }) {
+    const order = await prisma.order.findUnique({ where: { id: input.orderId } })
+    if (!order) throw new Error('Order not found')
+    if (order.status !== 'PENDING_PAYMENT') {
+      throw new Error(`Cannot extend payment window for order in status ${order.status}`)
+    }
+    return prisma.order.update({
+      where: { id: input.orderId },
+      data: { paymentDueAt: input.dueAt },
     })
   },
 

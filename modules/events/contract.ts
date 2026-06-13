@@ -3,6 +3,7 @@ export const EVENT_TYPES = [
   'customer.verified',
   'customer.rejected',
   'order.placed',
+  'order.cancelled',
   'payment.authorized',
   'payment.captured',
   'payment.reconciled',

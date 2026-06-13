@@ -112,7 +112,9 @@ describe('payments PSDD', () => {
     const o = await prisma.order.findUniqueOrThrow({ where: { id: order.id } })
     expect(o.status).toBe('CONFIRMED')
     const pr = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
-    expect(pr.stockQuantity).toBe(4)
+    // ADR 0036: stock reservado en placeOrder; captura no lo toca. Fixture sin
+    // placeOrder → stock sin cambios.
+    expect(pr.stockQuantity).toBe(5)
     const ev = await prisma.domainEvent.findFirst({ where: { type: 'payment.captured' } })
     expect(ev).not.toBeNull()
   })
@@ -130,7 +132,8 @@ describe('payments PSDD', () => {
     await handleStripeWebhook(body, signature)
     await handleStripeWebhook(body, signature) // replay
     const pr = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
-    expect(pr.stockQuantity).toBe(4)
+    // ADR 0036: captura no toca stock (reservado en placeOrder); fixture sin placeOrder.
+    expect(pr.stockQuantity).toBe(5)
     const captured = await prisma.domainEvent.findMany({ where: { type: 'payment.captured' } })
     expect(captured).toHaveLength(1)
   })
@@ -168,7 +171,8 @@ describe('payments PSDD', () => {
       adminUserId: u.id,
     })
     const pr = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
-    expect(pr.stockQuantity).toBe(2)
+    // ADR 0036: reconcileWire no toca stock (reservado en placeOrder); fixture sin placeOrder.
+    expect(pr.stockQuantity).toBe(3)
     const reconciled = await prisma.domainEvent.findMany({
       where: { type: 'payment.reconciled' },
     })

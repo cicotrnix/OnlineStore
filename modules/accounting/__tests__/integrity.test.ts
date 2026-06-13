@@ -135,9 +135,10 @@ describe('integridad contable end-to-end via bus', () => {
     expect(byCode.get(ACCOUNT_CODES.COGS)?.debitCents).toBe(2000n)
     expect(byCode.get(ACCOUNT_CODES.INVENTORY)?.creditCents).toBe(2000n)
 
-    // Stock bajó.
+    // ADR 0036: el stock se reserva en placeOrder; la captura no lo toca. Este
+    // fixture crea la orden directo (sin placeOrder), así que el stock no cambia.
     const p = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
-    expect(p.stockQuantity).toBe(4)
+    expect(p.stockQuantity).toBe(5)
   })
 
   it('wire: reconcileWire → AR=0 + Banco=total, COGS/Inv si hay costo', async () => {
