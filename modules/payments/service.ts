@@ -329,9 +329,24 @@ export async function reconcileWire(input: {
   })
   if (!order) throw new Error('order not found')
 
-  const eventId = `wire-${input.wireReference}`
-  const dup = await prisma.paymentEvent.findUnique({ where: { eventId } })
-  if (dup) return
+  // PAY-3: validar ref no vacía (evita el eventId 'wire-' colisionable).
+  const wireReference = input.wireReference.trim()
+  if (!wireReference) throw new Error('wireReference required')
+
+  // Idempotencia POR ORDEN: el eventId incluye el orderId, así una ref vacía o
+  // repetida entre órdenes distintas ya no colisiona en silencio.
+  const eventId = `wire-${order.id}-${wireReference}`
+  const dup = await prisma.paymentEvent.findUnique({
+    where: { eventId },
+    include: { payment: { select: { orderId: true } } },
+  })
+  if (dup) {
+    // Defensa: si el evento pertenece a otra orden, fallar ruidoso (no no-op).
+    if (dup.payment.orderId !== order.id) {
+      throw new Error(`wire eventId collision across orders: ${eventId}`)
+    }
+    return
+  }
 
   const expectedCents = decimalToCents(order.total)
   if (input.amountCents !== expectedCents) {
@@ -347,16 +362,16 @@ export async function reconcileWire(input: {
         status: 'CAPTURED',
         amountCents: BigInt(expectedCents),
         currency: order.currency,
-        wireReference: input.wireReference,
+        wireReference: wireReference,
       },
-      update: { status: 'CAPTURED', wireReference: input.wireReference, method: 'WIRE' },
+      update: { status: 'CAPTURED', wireReference: wireReference, method: 'WIRE' },
     })
     await tx.paymentEvent.create({
       data: {
         paymentId: payment.id,
         eventId,
         type: 'wire.reconciled',
-        payload: { wireReference: input.wireReference, amountCents: input.amountCents },
+        payload: { wireReference: wireReference, amountCents: input.amountCents },
       },
     })
     // El stock ya quedó reservado en placeOrder (punto único, ADR 0036).
@@ -378,7 +393,7 @@ export async function reconcileWire(input: {
     await settleInvoiceForPaidOrder(tx, {
       orderId: fullOrder.id,
       paidById: input.adminUserId,
-      reference: input.wireReference,
+      reference: wireReference,
     })
     const cogsCents = await calculateCogsCents(tx, order.id)
     await emitEvent(tx, {
@@ -387,7 +402,7 @@ export async function reconcileWire(input: {
       aggregateId: payment.id,
       payload: {
         orderId: order.id,
-        wireReference: input.wireReference,
+        wireReference: wireReference,
         amountCents: input.amountCents,
         currency: order.currency,
         cogsCents: Number(cogsCents),

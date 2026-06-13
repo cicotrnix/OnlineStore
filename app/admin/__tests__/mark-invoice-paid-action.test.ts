@@ -147,9 +147,9 @@ describe('markInvoicePaidAction — routes through reconcileWire', () => {
     const updatedOrg = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
     expect(Number(updatedOrg.creditUsed)).toBe(100)
 
-    // 5. PaymentEvent row with eventId = 'wire-' + reference (idempotency dedup key)
+    // 5. PaymentEvent con eventId POR ORDEN (PAY-3): 'wire-' + orderId + '-' + ref
     const pe = await prisma.paymentEvent.findUnique({
-      where: { eventId: `wire-${wireReference}` },
+      where: { eventId: `wire-${order.id}-${wireReference}` },
     })
     expect(pe).not.toBeNull()
   })

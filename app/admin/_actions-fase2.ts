@@ -80,6 +80,11 @@ export async function markInvoicePaidAction(formData: FormData) {
   const reference = String(formData.get('paidNote') ?? '')
     .trim()
     .slice(0, 255)
+  // PAY-3: la referencia de wire es obligatoria (la idempotencia depende de
+  // ella). Vacía → toast de error claro, no un 500 desde reconcileWire.
+  if (!reference) {
+    adminToast(formData, '/admin/invoices', 'error', 'admin.toast.wireRefRequired')
+  }
   const invoice = await prisma.invoice.findUniqueOrThrow({
     where: { id: invoiceId },
     select: { orderId: true, amount: true },

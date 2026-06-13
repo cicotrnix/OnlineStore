@@ -338,6 +338,7 @@ export type MessageKey =
   | 'admin.order.paymentDue'
   // Admin invoices / quotes
   | 'admin.toast.invoicePaid'
+  | 'admin.toast.wireRefRequired'
   | 'admin.toast.quoteSent'
   | 'admin.toast.quoteRevised'
   // Admin credit / customer
@@ -753,6 +754,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.extendPaymentDue': 'Wire on the way (+7 days)',
     'admin.order.paymentDue': 'Payment due',
     'admin.toast.invoicePaid': 'Invoice marked paid ✓',
+    'admin.toast.wireRefRequired': 'A wire reference is required to mark this invoice paid.',
     'admin.toast.quoteSent': 'Quote sent ✓',
     'admin.toast.quoteRevised': 'Quote revised ✓',
     'admin.toast.creditSaved': 'Credit settings saved ✓',
@@ -1165,6 +1167,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.extendPaymentDue': 'Wire en camino (+7 días)',
     'admin.order.paymentDue': 'Vence el pago',
     'admin.toast.invoicePaid': 'Factura marcada como pagada ✓',
+    'admin.toast.wireRefRequired':
+      'Se requiere la referencia de la transferencia para marcar la factura pagada.',
     'admin.toast.quoteSent': 'Cotización enviada ✓',
     'admin.toast.quoteRevised': 'Cotización revisada ✓',
     'admin.toast.creditSaved': 'Configuración de crédito guardada ✓',

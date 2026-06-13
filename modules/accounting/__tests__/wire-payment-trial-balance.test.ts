@@ -243,9 +243,10 @@ describe('wire payment — accounting trial-balance invariants', () => {
     const byCode = new Map(tb.rows.map((r) => [r.accountCode, r]))
     expect(byCode.get(ACCOUNT_CODES.ACCOUNTS_RECEIVABLE)?.balanceCents).toBe(0n)
 
-    // Only one paymentEvent → only one journal entry for payment.reconciled
+    // Only one paymentEvent → only one journal entry for payment.reconciled.
+    // PAY-3: eventId es por orden ('wire-' + orderId + '-' + ref).
     const paymentEventCount = await prisma.paymentEvent.count({
-      where: { eventId: `wire-${wireReference}` },
+      where: { eventId: `wire-${order.id}-${wireReference}` },
     })
     expect(paymentEventCount).toBe(1)
   })

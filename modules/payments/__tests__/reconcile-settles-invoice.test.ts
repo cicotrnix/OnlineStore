@@ -124,7 +124,9 @@ describe('reconcileWire — settles invoice atomically', () => {
     expect(Number(updatedOrg.creditUsed)).toBe(200)
 
     // 5. PaymentEvent row exists for the wire reference (idempotency dedup key)
-    const pe = await prisma.paymentEvent.findUnique({ where: { eventId: `wire-${wireReference}` } })
+    const pe = await prisma.paymentEvent.findUnique({
+      where: { eventId: `wire-${order.id}-${wireReference}` },
+    })
     expect(pe).not.toBeNull()
   })
 
@@ -153,7 +155,7 @@ describe('reconcileWire — settles invoice atomically', () => {
 
     // Only one paymentEvent row
     const count = await prisma.paymentEvent.count({
-      where: { eventId: `wire-${wireReference}` },
+      where: { eventId: `wire-${order.id}-${wireReference}` },
     })
     expect(count).toBe(1)
 
