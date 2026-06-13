@@ -31,7 +31,9 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'pnpm dev',
+    // STRIPE_ENABLED=true habilita el flujo de tarjeta (FakeStripe en dev) para
+    // el e2e de compra; sin claves reales y NODE_ENV=development → no fail-fast.
+    command: 'STRIPE_ENABLED=true pnpm dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

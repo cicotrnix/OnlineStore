@@ -47,7 +47,20 @@ function resolveEntry(): StoreEntry {
 }
 
 export function getStoreConfig(): StoreConfig {
-  return resolveEntry().config
+  const config = resolveEntry().config
+  // Override para staging/e2e: habilita Stripe sin editar la store config (p.ej.
+  // el e2e de compra con FakeStripe). En producción, si STRIPE_ENABLED=true sin
+  // claves, el fail-fast de getStripeClient (ADR 0038) lanza igual.
+  if (process.env.STRIPE_ENABLED === 'true' && !config.payments.stripe.enabled) {
+    return {
+      ...config,
+      payments: {
+        ...config.payments,
+        stripe: { ...config.payments.stripe, enabled: true },
+      },
+    }
+  }
+  return config
 }
 
 export function getStoreTheme(): ThemeConfig {
