@@ -8,6 +8,11 @@ const storeConfig = getStoreConfig()
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  // Self-hosted detrás de proxy (Coolify/Traefik): sin esto Auth.js lanza
+  // UntrustedHost y rompe la sesión (y la home en prod). Equivale a la env
+  // AUTH_TRUST_HOST=true (documentada en .env.example) — la dejamos en código
+  // para que el deploy funcione sin depender de una env var.
+  trustHost: true,
   session: { strategy: 'database' },
   providers: [
     Resend({
