@@ -8,6 +8,9 @@ export interface BaseTemplateProps {
   link?: string | null
   userName: string
   cta?: string
+  /** CTA secundario opcional (botón outline). P.ej. "Volver a pedir". */
+  secondaryCta?: string
+  secondaryLink?: string | null
   /** Locale del destinatario. Default: 'en-US' (chrome en EN). */
   locale?: Locale
 }
@@ -18,6 +21,8 @@ export function BaseTemplate({
   link,
   userName,
   cta,
+  secondaryCta,
+  secondaryLink,
   locale = 'en-US',
 }: BaseTemplateProps): JSX.Element {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? ''
@@ -63,6 +68,23 @@ export function BaseTemplate({
               >
                 {ctaText}
               </Link>
+              {secondaryCta && secondaryLink ? (
+                <Link
+                  href={`${appUrl}${secondaryLink}`}
+                  style={{
+                    border: '1px solid #0F6E56',
+                    color: '#0F6E56',
+                    padding: '11px 20px',
+                    borderRadius: 8,
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                    display: 'inline-block',
+                    marginLeft: 12,
+                  }}
+                >
+                  {secondaryCta}
+                </Link>
+              ) : null}
             </Section>
           ) : null}
         </Container>

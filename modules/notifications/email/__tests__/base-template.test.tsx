@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { OrderPlacedEmail } from '../templates'
 import { BaseTemplate } from '../templates/_base'
 
 afterEach(() => {
@@ -46,5 +47,38 @@ describe('BaseTemplate — CTA href', () => {
     vi.stubEnv('NEXTAUTH_URL', 'https://pipower.shop')
     const html = renderToStaticMarkup(BaseTemplate({ title: 't', body: 'b', userName: 'Buyer' }))
     expect(html).not.toContain('https://pipower.shop')
+  })
+})
+
+describe('OrderPlacedEmail — CTA "Volver a pedir" secundario', () => {
+  it('incluye el CTA secundario que linkea al detalle del pedido (no ejecuta la acción)', () => {
+    vi.stubEnv('NEXTAUTH_URL', 'https://pipower.shop')
+    const html = renderToStaticMarkup(
+      OrderPlacedEmail({
+        title: 'Order received',
+        body: 'b',
+        link: '/orders/abc',
+        userName: 'Buyer',
+        locale: 'en-US',
+      })
+    )
+    expect(html).toContain('Reorder')
+    expect(html).toContain('View order')
+    // ambos CTAs llevan al detalle del pedido (donde está el botón in-app)
+    expect(html).toContain('https://pipower.shop/orders/abc')
+  })
+
+  it('localiza el CTA secundario en ES', () => {
+    vi.stubEnv('NEXTAUTH_URL', 'https://pipower.shop')
+    const html = renderToStaticMarkup(
+      OrderPlacedEmail({
+        title: 't',
+        body: 'b',
+        link: '/orders/abc',
+        userName: 'Buyer',
+        locale: 'es-419',
+      })
+    )
+    expect(html).toContain('Volver a pedir')
   })
 })

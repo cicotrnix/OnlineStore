@@ -33,7 +33,20 @@ export const InvoicePaidEmail = make({ en: 'View invoice', es: 'Ver factura' })
 export const CreditWarningEmail = make({ en: 'View account', es: 'Ver cuenta' })
 export const CreditBlockedEmail = make({ en: 'View account', es: 'Ver cuenta' })
 
-export const OrderPlacedEmail = make({ en: 'View order', es: 'Ver orden' })
+// ORDER_PLACED lleva un CTA secundario "Volver a pedir" → el mismo detalle del
+// pedido (/orders/[id]), donde está el botón in-app. El email NO ejecuta la
+// acción; solo lleva al botón.
+export function OrderPlacedEmail(props: BaseTemplateProps): JSX.Element {
+  const es = props.locale === 'es-419'
+  return (
+    <BaseTemplate
+      {...props}
+      cta={es ? 'Ver orden' : 'View order'}
+      secondaryCta={es ? 'Volver a pedir' : 'Reorder'}
+      secondaryLink={props.link}
+    />
+  )
+}
 export const PaymentCapturedEmail = make({ en: 'View receipt', es: 'Ver recibo' })
 export const PaymentReconciledEmail = make({ en: 'View receipt', es: 'Ver recibo' })
 export const InvoiceIssuedEmail = make({ en: 'Pay via wire', es: 'Pagar via wire' })
