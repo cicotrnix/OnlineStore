@@ -66,7 +66,7 @@ export function ProductCard({
             className="object-cover"
           />
         ) : (
-          <span className="text-xs text-gray-400">{noImageLabel}</span>
+          <span className="text-xs text-gray-600">{noImageLabel}</span>
         )}
       </Link>
       <CardBody className="flex-1 flex flex-col gap-3">
