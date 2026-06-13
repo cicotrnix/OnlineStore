@@ -3,8 +3,28 @@ import { _getFakeStripe, _resetStripe } from '@/lib/stripe'
 import { createCardCheckout } from '@/modules/payments'
 import { cleanDb } from '@/tests/helpers/cleanDb'
 import { Decimal } from '@prisma/client/runtime/library'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { POST } from '../route'
+
+// El webhook se gatea por payments.stripe.enabled (ADR 0038). Los happy-paths
+// requieren la tarjeta habilitada; un test cubre el caso wire-only (404).
+const cfg = vi.hoisted(() => ({ stripeEnabled: true }))
+vi.mock('@/stores', async () => {
+  const actual = await vi.importActual<typeof import('@/stores')>('@/stores')
+  return {
+    ...actual,
+    getStoreConfig: () => {
+      const base = actual.getStoreConfig()
+      return {
+        ...base,
+        payments: {
+          ...base.payments,
+          stripe: { ...base.payments.stripe, enabled: cfg.stripeEnabled },
+        },
+      }
+    },
+  }
+})
 
 async function makeOrder() {
   const user = await prisma.user.create({ data: { email: `wr-${Date.now()}@t.com` } })
@@ -75,6 +95,7 @@ function makeRequest(body: string, signature: string): Request {
 beforeEach(async () => {
   await cleanDb()
   _resetStripe()
+  cfg.stripeEnabled = true
 })
 
 describe('POST /api/webhooks/stripe', () => {
@@ -127,5 +148,19 @@ describe('POST /api/webhooks/stripe', () => {
     expect(res.status).toBe(200)
     const p = await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })
     expect(p.status).toBe('NEEDS_REVIEW')
+  })
+
+  it('wire-only (stripe.enabled=false) → 404, no procesa el webhook', async () => {
+    cfg.stripeEnabled = false
+    const event = {
+      id: `evt_${Date.now()}`,
+      type: 'checkout.session.completed',
+      data: { object: { id: 'cs_x', amount_total: 5000, currency: 'usd' } },
+    }
+    const { body, signature } = _getFakeStripe()._signPayload(event)
+    const res = await POST(makeRequest(body, signature))
+    expect(res.status).toBe(404)
+    const captured = await prisma.domainEvent.findMany({ where: { type: 'payment.captured' } })
+    expect(captured).toHaveLength(0)
   })
 })

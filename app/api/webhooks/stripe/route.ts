@@ -4,6 +4,7 @@ import {
   PaymentWebhookInvalidError,
   handleStripeWebhook,
 } from '@/modules/payments'
+import { getStoreConfig } from '@/stores'
 import { NextResponse } from 'next/server'
 
 // Necesitamos body crudo + SDK Stripe → Node runtime obligatorio.
@@ -22,6 +23,12 @@ export const dynamic = 'force-dynamic'
  * - 500 error inesperado → Stripe reintenta con backoff.
  */
 export async function POST(req: Request): Promise<NextResponse> {
+  // Wire-only (ADR 0038): con la tarjeta deshabilitada el webhook no debe existir.
+  // 404 cierra la superficie (sin FakeStripe forjable) cuando stripe.enabled=false.
+  if (!getStoreConfig().payments.stripe.enabled) {
+    return NextResponse.json({ ok: false, reason: 'stripe disabled' }, { status: 404 })
+  }
+
   const rawBody = await req.text()
   const signature = req.headers.get('stripe-signature') ?? ''
 
