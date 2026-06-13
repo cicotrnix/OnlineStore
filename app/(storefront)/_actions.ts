@@ -6,11 +6,13 @@ import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { toastUrl } from '@/lib/feedback/action-result'
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, isSupportedLocale } from '@/lib/i18n'
+import { logger } from '@/lib/observability/logger'
 import { cartService } from '@/modules/cart'
 import { checkoutService } from '@/modules/checkout'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { cartErrorKey, checkoutErrorKey } from './_action-errors'
 
 function safeReturnTo(raw: FormDataEntryValue | null, fallback: string): string {
   const v = typeof raw === 'string' ? raw : ''
@@ -38,8 +40,12 @@ export async function addToCartAction(formData: FormData) {
   const quantity = Number(formData.get('quantity') ?? 1)
   try {
     await cartService.addItem({ userId: user.id, productId, quantity, orgId: orgId! })
-  } catch {
-    redirect(toastUrl(returnTo, 'error', 'cart.toast.failed'))
+  } catch (err) {
+    logger.error(
+      { err, userId: user.id, orgId, productId, action: 'addToCart' },
+      'cart action failed'
+    )
+    redirect(toastUrl(returnTo, 'error', cartErrorKey(err)))
   }
   revalidatePath('/cart')
   revalidatePath('/catalog')
@@ -52,8 +58,12 @@ export async function updateCartQuantityAction(formData: FormData) {
   const quantity = Number(formData.get('quantity'))
   try {
     await cartService.updateQuantity({ userId: user.id, productId, quantity })
-  } catch {
-    redirect(toastUrl('/cart', 'error', 'cart.toast.failed'))
+  } catch (err) {
+    logger.error(
+      { err, userId: user.id, productId, action: 'updateCartQuantity' },
+      'cart action failed'
+    )
+    redirect(toastUrl('/cart', 'error', cartErrorKey(err)))
   }
   revalidatePath('/cart')
   redirect(toastUrl('/cart', 'success', 'cart.toast.updated'))
@@ -64,8 +74,12 @@ export async function removeCartItemAction(formData: FormData) {
   const productId = String(formData.get('productId'))
   try {
     await cartService.removeItem(user.id, productId)
-  } catch {
-    redirect(toastUrl('/cart', 'error', 'cart.toast.failed'))
+  } catch (err) {
+    logger.error(
+      { err, userId: user.id, productId, action: 'removeCartItem' },
+      'cart action failed'
+    )
+    redirect(toastUrl('/cart', 'error', cartErrorKey(err)))
   }
   revalidatePath('/cart')
   redirect(toastUrl('/cart', 'success', 'cart.toast.removed'))
@@ -101,8 +115,9 @@ export async function placeOrderAction(formData: FormData) {
       poNumber,
       notes,
     })
-  } catch {
-    redirect(toastUrl('/checkout', 'error', 'checkout.toast.failed'))
+  } catch (err) {
+    logger.error({ err, userId: user.id, orgId, action: 'placeOrder' }, 'checkout action failed')
+    redirect(toastUrl('/checkout', 'error', checkoutErrorKey(err)))
   }
   redirect(toastUrl(`/orders/${order!.id}`, 'success', 'checkout.toast.orderPlaced'))
 }

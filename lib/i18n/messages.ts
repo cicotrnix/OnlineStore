@@ -391,6 +391,8 @@ export type MessageKey =
   | 'cart.toast.updated'
   | 'cart.toast.removed'
   | 'cart.toast.failed'
+  | 'cart.toast.insufficientStock'
+  | 'cart.toast.notVerified'
   | 'cart.confirm.remove'
   // Product CTAs
   | 'product.add'
@@ -399,6 +401,10 @@ export type MessageKey =
   // Checkout
   | 'checkout.toast.orderPlaced'
   | 'checkout.toast.failed'
+  | 'checkout.toast.insufficientStock'
+  | 'checkout.toast.inactive'
+  | 'checkout.toast.empty'
+  | 'checkout.toast.notVerified'
   | 'checkout.placing'
 
 type Dict = Record<MessageKey, string>
@@ -797,6 +803,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'cart.toast.updated': 'Cart updated.',
     'cart.toast.removed': 'Item removed.',
     'cart.toast.failed': 'Could not update the cart.',
+    'cart.toast.insufficientStock': 'Not enough stock for that quantity.',
+    'cart.toast.notVerified': 'Your account must be verified to add items.',
     'cart.confirm.remove': 'Remove this item from the cart?',
     // Product CTAs
     'product.add': 'Add',
@@ -805,6 +813,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Checkout
     'checkout.toast.orderPlaced': 'Order placed ✓',
     'checkout.toast.failed': 'We could not place the order.',
+    'checkout.toast.insufficientStock': 'Not enough stock for one of the items.',
+    'checkout.toast.inactive': 'One of the items is no longer available.',
+    'checkout.toast.empty': 'Your cart is empty.',
+    'checkout.toast.notVerified': 'Your account must be verified to place orders.',
     'checkout.placing': 'Placing order…',
   },
   'es-419': {
@@ -1203,6 +1215,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'cart.toast.updated': 'Carrito actualizado.',
     'cart.toast.removed': 'Item eliminado.',
     'cart.toast.failed': 'No pudimos actualizar el carrito.',
+    'cart.toast.insufficientStock': 'No hay stock suficiente para esa cantidad.',
+    'cart.toast.notVerified': 'Tu cuenta debe estar verificada para agregar items.',
     'cart.confirm.remove': '¿Quitar este item del carrito?',
     // Product CTAs
     'product.add': 'Agregar',
@@ -1211,6 +1225,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Checkout
     'checkout.toast.orderPlaced': 'Orden colocada ✓',
     'checkout.toast.failed': 'No pudimos colocar la orden.',
+    'checkout.toast.insufficientStock': 'No hay stock suficiente para uno de los items.',
+    'checkout.toast.inactive': 'Uno de los items ya no está disponible.',
+    'checkout.toast.empty': 'Tu carrito está vacío.',
+    'checkout.toast.notVerified': 'Tu cuenta debe estar verificada para colocar órdenes.',
     'checkout.placing': 'Colocando orden…',
   },
 }
