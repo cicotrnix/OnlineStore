@@ -10,7 +10,7 @@
  * PSDD (ADR 0027) preservado en ambos modos: webhook firmado = única fuente
  * de verdad; idempotencia por eventId; refund con key estable.
  */
-import { createHmac } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 import Stripe from 'stripe'
 
 export interface StripeCheckoutSessionInput {
@@ -84,7 +84,11 @@ class FakeStripe implements StripeClient {
 
   verifyWebhook(rawBody: string, signature: string): StripeWebhookEvent | null {
     const expected = createHmac('sha256', this.signingSecret).update(rawBody).digest('hex')
-    if (expected !== signature) return null
+    // Comparación constant-time (Decisión 3 / ADR 0038). timingSafeEqual exige
+    // buffers de igual longitud, así que primero descartamos por longitud.
+    const a = Buffer.from(expected)
+    const b = Buffer.from(signature)
+    if (a.length !== b.length || !timingSafeEqual(a, b)) return null
     try {
       return JSON.parse(rawBody) as StripeWebhookEvent
     } catch {
@@ -188,9 +192,19 @@ export function getStripeClient(): StripeClient {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
   if (secretKey && webhookSecret) {
     cached = new RealStripe(secretKey, webhookSecret)
-  } else {
-    cached = fakeSingleton
+    return cached
   }
+  // Decisión 3 / ADR 0038: fail-fast estricto. En PRODUCCIÓN nunca degradar al
+  // FakeStripe forjable: lanzar al boot si faltan claves. Para demos se usa
+  // staging (con claves test-mode), no un "prod demo". En dev/test se mantiene
+  // el fallback noop aunque payments.stripe.enabled sea true (así se prueba el
+  // flujo de tarjeta contra el Fake sin claves reales).
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'Stripe fail-fast: STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET son obligatorias en producción. No se degrada al FakeStripe.'
+    )
+  }
+  cached = fakeSingleton
   return cached
 }
 

@@ -12,11 +12,23 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 const APPEND_ONLY_MODELS = ['JournalEntry', 'JournalLine', 'PaymentEvent', 'AuditLog']
 const APPEND_ONLY_BLOCKED = ['update', 'updateMany', 'delete', 'deleteMany', 'upsert']
 
+/**
+ * Decisión 3 / ADR 0038: el guard append-only NO se puede desactivar en
+ * producción. `APPEND_ONLY_GUARD=off` (que `cleanDb` necesita en tests) solo
+ * surte efecto fuera de producción; en prod el guard siempre está activo.
+ */
+export function appendOnlyEnforced(
+  nodeEnv = process.env.NODE_ENV,
+  guard = process.env.APPEND_ONLY_GUARD
+): boolean {
+  return !(guard === 'off' && nodeEnv !== 'production')
+}
+
 function makeClient(): PrismaClient {
   const c = new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   })
-  if (process.env.APPEND_ONLY_GUARD === 'off') return c
+  if (!appendOnlyEnforced()) return c
   return c.$extends({
     query: {
       $allModels: {

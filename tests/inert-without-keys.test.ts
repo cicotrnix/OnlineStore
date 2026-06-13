@@ -55,9 +55,11 @@ describe('deploy inerte sin claves externas', () => {
     expect(url).toMatch(/^fake:\/\//)
   })
 
-  it('stripe cae al FakeStripe', async () => {
+  it('stripe LANZA en producción sin claves (Decisión 3 / ADR 0038: no degrada al Fake)', async () => {
     const m = await import('@/lib/stripe')
-    expect(m.getStripeClient()).toBe(m._getFakeStripe())
+    // Antes caía al FakeStripe forjable (PAY-2/TST-7). Ahora producción sin
+    // claves es un error de boot, no un fallback silencioso.
+    expect(() => m.getStripeClient()).toThrow(/stripe/i)
   })
 
   it('fedex cae al FakeFedex', async () => {
