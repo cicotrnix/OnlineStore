@@ -12,4 +12,9 @@ describe('HeroGauge a11y', () => {
     expect(counter).not.toBeNull()
     expect(counter?.getAttribute('aria-live')).toBeNull()
   })
+
+  it('no muestra el claim inventado "+12% capacidad vs OEM" (regla "nunca inventar")', () => {
+    const { container } = render(<HeroGauge locale="en-US" />)
+    expect(container.textContent ?? '').not.toMatch(/\+?12\s*%/)
+  })
 })

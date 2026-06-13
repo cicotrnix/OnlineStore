@@ -4,8 +4,8 @@ import type { Locale } from '@/lib/i18n/messages'
 /**
  * HeroGauge — the "Back to 100%" signature moment. A vertical battery that
  * fills from 0% to 100% one-time (no cycle) while a counter ticks 0→100 in
- * sync; both freeze at 100%. Two floating chips around the gauge anchor the
- * narrative: "0 cycle count" + "+12% capacidad vs OEM".
+ * sync; both freeze at 100%. A floating chip anchors the verifiable claim
+ * "0 cycle count" (claims sin fuente como "+12% vs OEM" se omiten).
  *
  * The motion is driven by HomeMotion.tsx via three hooks rendered here:
  *   - `[data-hero-gauge-fill]` : the lime fill <rect> (animate `y` + `height`)
@@ -99,15 +99,8 @@ export function HeroGauge({ locale }: { locale: Locale }) {
         </span>
       </div>
 
-      {/* Chip 2 — "+12% / capacidad vs OEM" */}
-      <div className="absolute right-[-18px] bottom-[110px] md:right-[-34px] flex flex-col gap-[2px] rounded-[14px] bg-surface px-[14px] py-[10px] text-ink-700 shadow-[0_18px_40px_-18px_rgba(0,0,0,0.5)]">
-        <span className="font-mono text-[16px] md:text-[18px] font-semibold tracking-[-0.01em] text-ink-950">
-          <span className="text-lime-deep">+</span>12%
-        </span>
-        <span className="text-[10.5px] text-ink-500 tracking-[0.02em]">
-          {t(locale, 'landing.hero.chip2Label')}
-        </span>
-      </div>
+      {/* Chip 2 ("+12% capacidad vs OEM") removido: claim de marketing sin
+          fuente verificable (regla "nunca inventar" del design system). */}
     </div>
   )
 }

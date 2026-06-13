@@ -1,3 +1,4 @@
+import { HERO_STATS } from '@/app/_home-stats'
 import { Header } from '@/components/commerce/Header'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { SpecReadout, type SpecRow } from '@/components/commerce/SpecReadout'
@@ -120,16 +121,9 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* Stat strip — instrument-grade tira sobre slate-deep */}
-        <StatStrip
-          locale={locale}
-          stats={[
-            { number: '0', unit: '×', labelKey: 'landing.stats.cycles.label' },
-            { number: '100', unit: '%', labelKey: 'landing.stats.health.label' },
-            { number: '+12', unit: '%', labelKey: 'landing.stats.capacity.label' },
-            { number: '24–48', unit: 'h', labelKey: 'landing.stats.shipping.label' },
-          ]}
-        />
+        {/* Stat strip — instrument-grade tira sobre slate-deep. Stats en
+            app/_home-stats.ts: solo claims verificables (regla "nunca inventar"). */}
+        <StatStrip locale={locale} stats={HERO_STATS} />
 
         {/* Featured products */}
         {featuredProducts.length > 0 && (
