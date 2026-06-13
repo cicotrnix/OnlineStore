@@ -28,10 +28,10 @@ export function ReorderButton({ orderId, locale, variant = 'secondary' }: Props)
         toast.error(t(locale, res.messageKey as MessageKey))
         return
       }
-      // Nada viable → no navega; aviso inline con motivos genéricos.
+      // Nada viable → no navega; aviso inline persistente (sin toast, para no
+      // duplicar el mismo mensaje).
       if (res.result.added.length === 0) {
         setNothingAvailable(true)
-        toast.info(t(locale, 'reorder.notice.nothingAvailable'))
         return
       }
       // Hay items: toast (con aviso de omitidos si los hay) y a revisar en /cart.
