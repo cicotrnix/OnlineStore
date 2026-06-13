@@ -1,16 +1,19 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { Card, CardBody } from '@/components/ui/Card'
 import { requireActiveOrgId } from '@/lib/auth/active-org'
+import { getLocale } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
+import { ReorderButton } from './ReorderButton'
 
 export const dynamic = 'force-dynamic'
 
 export default async function OrdersListPage() {
   const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
-  await requireVerifiedCustomer()
+  const customer = await requireVerifiedCustomer()
+  const locale = await getLocale({ userId: customer.userId })
   const orgId = await requireActiveOrgId()
   const orders = await ordersService.listForOrg(orgId)
 
@@ -23,8 +26,8 @@ export default async function OrdersListPage() {
       ) : (
         <ul className="mt-6 space-y-3">
           {orders.map((order) => (
-            <li key={order.id}>
-              <Link href={`/orders/${order.id}`}>
+            <li key={order.id} className="flex items-stretch gap-3">
+              <Link href={`/orders/${order.id}`} className="flex-1">
                 <Card className="hover:border-gray-400 transition-colors">
                   <CardBody className="flex items-center justify-between gap-4">
                     <div>
@@ -43,6 +46,9 @@ export default async function OrdersListPage() {
                   </CardBody>
                 </Card>
               </Link>
+              <div className="flex items-center">
+                <ReorderButton orderId={order.id} locale={locale} variant="secondary" />
+              </div>
             </li>
           ))}
         </ul>

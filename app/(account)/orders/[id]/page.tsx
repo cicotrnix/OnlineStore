@@ -8,6 +8,7 @@ import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { getStoreConfig } from '@/stores'
 import { notFound } from 'next/navigation'
+import { ReorderButton } from '../ReorderButton'
 import { startCardCheckoutAction } from '../_actions'
 
 export const dynamic = 'force-dynamic'
@@ -51,6 +52,10 @@ export default async function OrderDetailPage({ params }: Props) {
             locale={locale}
           />
         </div>
+      </div>
+
+      <div className="mt-6">
+        <ReorderButton orderId={order.id} locale={locale} variant="primary" />
       </div>
 
       <Card className="mt-8">
