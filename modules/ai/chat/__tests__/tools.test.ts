@@ -55,7 +55,7 @@ describe('chat tools', () => {
     }
   })
 
-  it('getProductDetail devuelve specs + precio base anónimo', async () => {
+  it('getProductDetail NO expone precio al anónimo (ADR 0034: precio gated por verificación)', async () => {
     const p = await makeProduct(`b-${Date.now()}`)
     const { handleTool } = await import('../tools')
     const r = await handleTool(
@@ -65,9 +65,48 @@ describe('chat tools', () => {
     )
     expect(r.ok).toBe(true)
     if (r.ok) {
-      expect(r.data.id).toBe(p.id)
-      expect(r.data.basePrice).toBeTruthy()
-      expect(r.data.priceResolved).toBeTruthy()
+      expect(r.data.id).toBe(p.id) // specs/visibilidad sí
+      expect(r.data.priceVisible).toBe(false)
+      expect(r.data.priceResolved).toBeUndefined()
+      expect(r.data.basePrice).toBeUndefined()
+    }
+  })
+
+  it('getProductDetail NO expone precio a org PENDING/REJECTED', async () => {
+    const p = await makeProduct(`pend-${Date.now()}`)
+    const org = await prisma.organization.create({
+      data: { name: 'O', slug: `pend-${Date.now()}`, verificationStatus: 'PENDING' },
+    })
+    const { handleTool } = await import('../tools')
+    const r = await handleTool(
+      'getProductDetail',
+      { productId: p.id },
+      { orgId: org.id, locale: 'en-US' }
+    )
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      expect(r.data.priceVisible).toBe(false)
+      expect(r.data.priceResolved).toBeUndefined()
+      expect(r.data.basePrice).toBeUndefined()
+    }
+  })
+
+  it('searchProducts NO incluye precio al anónimo', async () => {
+    await makeProduct(`anonp-${Date.now()}`)
+    const { handleTool } = await import('../tools')
+    const r = await handleTool(
+      'searchProducts',
+      { query: 'Battery' },
+      { orgId: null, locale: 'en-US' }
+    )
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      const results = r.data.results as Array<Record<string, unknown>>
+      expect(results.length).toBeGreaterThan(0)
+      for (const x of results) {
+        expect(x.priceVisible).toBe(false)
+        expect(x.priceResolved).toBeUndefined()
+      }
     }
   })
 
@@ -137,10 +176,10 @@ describe('chat tools', () => {
     expect(r.ok).toBe(false)
   })
 
-  it('getProductDetail devuelve customer price cuando hay CustomerPrice', async () => {
+  it('getProductDetail devuelve customer price a org VERIFIED con CustomerPrice', async () => {
     const p = await makeProduct(`pp-${Date.now()}`)
     const org = await prisma.organization.create({
-      data: { name: 'O', slug: `pp-${Date.now()}` },
+      data: { name: 'O', slug: `pp-${Date.now()}`, verificationStatus: 'VERIFIED' },
     })
     await prisma.customerPrice.create({
       data: {
@@ -157,7 +196,8 @@ describe('chat tools', () => {
     )
     expect(r.ok).toBe(true)
     if (r.ok) {
-      // base es 10.00; con CustomerPrice debe resolver a 7.50
+      // org VERIFIED → precio visible. base 10.00; con CustomerPrice resuelve a 7.50.
+      expect(r.data.priceVisible).toBe(true)
       expect(String(r.data.priceResolved)).toBe('7.5')
       expect(String(r.data.basePrice)).toBe('10')
     }

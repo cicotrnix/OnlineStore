@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/client'
 import type { Locale } from '@/lib/i18n'
 import { filterForOrg } from '@/modules/catalog'
 import { pricingService } from '@/modules/pricing'
+import { isVerified } from '@/modules/verification'
 import { getStoreConfig } from '@/stores'
 import type { Category, Product } from '@prisma/client'
 
@@ -50,16 +51,20 @@ export const TOOL_SCHEMAS = [
   },
 ] as const
 
-async function resolveForOrgSafe(orgId: string | null, productId: string): Promise<string> {
-  if (!orgId) {
-    const p = await prisma.product.findUnique({
-      where: { id: productId },
-      select: { basePrice: true },
-    })
-    return p?.basePrice.toString() ?? '0'
-  }
-  const price = await pricingService.resolveForOrg(orgId, productId)
-  return price.toString()
+/**
+ * ADR 0034: el precio mayorista es gated por verificación. Solo orgs VERIFIED
+ * reciben precio. Anónimos y orgs PENDING/REJECTED reciben { priceVisible:false }
+ * (equivalente a loginForPrice) — nunca el basePrice ni el precio resuelto.
+ * La visibilidad de productos (filterForOrg) es independiente y NO se toca aquí.
+ */
+async function priceFieldsFor(
+  orgId: string | null,
+  productId: string
+): Promise<Record<string, unknown>> {
+  const verified = orgId ? await isVerified(orgId) : false
+  if (!verified) return { priceVisible: false }
+  const price = await pricingService.resolveForOrg(orgId as string, productId)
+  return { priceVisible: true, priceResolved: price.toString() }
 }
 
 async function searchProducts(args: { query: string }, ctx: ToolContext): Promise<ToolResult> {
@@ -84,7 +89,7 @@ async function searchProducts(args: { query: string }, ctx: ToolContext): Promis
       sku: p.sku,
       name: p.name,
       stock: p.stockQuantity,
-      priceResolved: await resolveForOrgSafe(ctx.orgId, p.id),
+      ...(await priceFieldsFor(ctx.orgId, p.id)),
       compatibleModels: p.compatibleModels,
     }))
   )
@@ -102,14 +107,16 @@ async function getProductDetail(
   if (!product || !product.isActive) return { ok: false, hint: supportHint() }
   const visible = await filterForOrg(ctx.orgId, [product as Product & { category: Category }])
   if (visible.length === 0) return { ok: false, hint: supportHint() }
+  const priceFields = await priceFieldsFor(ctx.orgId, product.id)
   return {
     ok: true,
     data: {
       id: product.id,
       sku: product.sku,
       name: product.name,
-      basePrice: product.basePrice.toString(),
-      priceResolved: await resolveForOrgSafe(ctx.orgId, product.id),
+      // basePrice solo se expone junto al precio resuelto a orgs VERIFIED.
+      ...(priceFields.priceVisible ? { basePrice: product.basePrice.toString() } : {}),
+      ...priceFields,
       stock: product.stockQuantity,
       compatibleModels: product.compatibleModels,
       attributes: product.attributes ?? {},
@@ -131,7 +138,7 @@ async function checkCompatibility(args: { model: string }, ctx: ToolContext): Pr
       sku: p.sku,
       name: p.name,
       stock: p.stockQuantity,
-      priceResolved: await resolveForOrgSafe(ctx.orgId, p.id),
+      ...(await priceFieldsFor(ctx.orgId, p.id)),
       compatibleModels: p.compatibleModels,
     }))
   )
