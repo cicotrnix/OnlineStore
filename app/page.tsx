@@ -1,5 +1,5 @@
 import { HERO_STATS, heroCapacityClaim } from '@/app/_home-stats'
-import { Header } from '@/components/commerce/Header'
+import { HeaderContainer } from '@/components/commerce/HeaderContainer'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { SpecReadout, type SpecRow } from '@/components/commerce/SpecReadout'
 import { StatStrip } from '@/components/commerce/StatStrip'
@@ -47,16 +47,7 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col bg-surface text-ink-700">
       <HomeMotion />
 
-      {/* Stopgap: la home migra a <HeaderContainer variant="home"> en la pieza 5
-          (con el retiro de landing.nav.*). Por ahora pasa los props nuevos. */}
-      <Header
-        variant="home"
-        isSignedIn={Boolean(session?.user)}
-        locale={locale}
-        initialTheme="dark"
-        cartCount={0}
-        flags={{ rfq: false, credit: false, approvals: false }}
-      />
+      <HeaderContainer variant="home" initialTheme="dark" />
 
       <main className="flex-1">
         {/* Hero — dark canvas. "Volvé al 100%. Cero ciclos." */}
@@ -344,7 +335,7 @@ export default async function LandingPage() {
               href="/catalog"
               className="hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
             >
-              {t(locale, 'landing.nav.catalog')}
+              {t(locale, 'header.catalog')}
             </Link>
             {!session?.user && (
               <Link
@@ -364,7 +355,7 @@ export default async function LandingPage() {
                 href="/sign-in"
                 className="hover:text-ink-950 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
               >
-                {t(locale, 'landing.nav.signIn')}
+                {t(locale, 'header.signIn')}
               </Link>
             )}
           </div>

@@ -19,10 +19,6 @@ export type MessageKey =
   | 'landing.cta.register'
   | 'landing.cta.exploreCatalog'
   | 'landing.cta.signInExisting'
-  | 'landing.nav.catalog'
-  | 'landing.nav.myAccount'
-  | 'landing.nav.signIn'
-  | 'landing.nav.register'
   // Header unificado (chrome único storefront + account + home)
   | 'header.catalog'
   | 'header.searchPlaceholder'
@@ -454,10 +450,6 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.cta.register': 'Register your business',
     'landing.cta.exploreCatalog': 'Explore catalog',
     'landing.cta.signInExisting': 'Already a customer? Sign in',
-    'landing.nav.catalog': 'Catalog',
-    'landing.nav.myAccount': 'My account',
-    'landing.nav.signIn': 'Sign in',
-    'landing.nav.register': 'Register',
     'header.catalog': 'Catalog',
     'header.searchPlaceholder': 'Search products…',
     'header.cart': 'Cart',
@@ -891,10 +883,6 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.cta.register': 'Registrá tu negocio',
     'landing.cta.exploreCatalog': 'Explorar catálogo',
     'landing.cta.signInExisting': '¿Ya tenés cuenta? Entrar',
-    'landing.nav.catalog': 'Catálogo',
-    'landing.nav.myAccount': 'Mi cuenta',
-    'landing.nav.signIn': 'Iniciar sesión',
-    'landing.nav.register': 'Registrarse',
     'header.catalog': 'Catálogo',
     'header.searchPlaceholder': 'Buscar productos…',
     'header.cart': 'Carrito',
