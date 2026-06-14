@@ -84,7 +84,7 @@ Es un workstream de **data/seed** que CC implementa junto al restyle (mismo bran
 | iPhone 15 Pro Max · Flex Programmed incl. | | $17.12 | in stock |
 
 **Categoría Plug & Play** (`plug_and_play: true`, sin soldadura) — iPhone 13 → 15 Pro Max · **coming soon** · precios pendientes (Herney).
-**Categoría Tag-on Flex** — un producto Tag-on por **todos** los modelos (incl. 15, como extra aparte de las celdas que ya lo traen) · precio fijo **$3.50** · in stock.
+**Categoría Tag-on Flex** — **un producto por modelo** (cada modelo lleva un tag-on físicamente distinto → SKU propio), todos a **$3.50**, in stock. Incl. 15 (extra, aparte de las celdas que ya lo traen). Modelos (**11 SKUs; 12/12 Pro combinados** — misma parte que comparten también en cell/plug&play; verificado: batería 12 y 12 Pro intercambiable): 12/12 Pro · 12 Pro Max · 13 · 13 Pro · 13 Pro Max · 14 · 14 Pro · 14 Pro Max · 15 · 15 Pro · 15 Pro Max. Imágenes **pendientes** → placeholder hasta obtenerlas.
 **Eliminado:** la variante iPhone 15 sin Flex Programmed (todos los 15 lo incluyen).
 
 **Prereqs de data (dependen de Herney, anotados):**
