@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { PIPOWER_CATEGORIES, PIPOWER_PRODUCTS } from '@/lib/catalog/pipower-catalog'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { Decimal } from '@prisma/client/runtime/library'
 
 const prisma = new PrismaClient()
@@ -97,247 +98,48 @@ async function main() {
     },
   })
 
-  // Categories — Pi-Power: 3 líneas de producto
-  const batteryCell = await prisma.category.create({
-    data: { slug: 'battery-cell', name: 'Battery Cell', sortOrder: 1 },
-  })
-  const plugAndPlay = await prisma.category.create({
-    data: { slug: 'plug-and-play', name: 'Plug & Play', sortOrder: 2 },
-  })
-  const tagOnFlex = await prisma.category.create({
-    data: { slug: 'tag-on-flex', name: 'Tag-on Flex', sortOrder: 3 },
-  })
+  // Catálogo Pi-Power desde la fuente ÚNICA (DRY con scripts/load-pipower-catalog.ts).
+  // El seed crea todo limpio (tras el wipe); el loader prod hace upsert por SKU.
+  const categoryBySlug = new Map<string, { id: string }>()
+  for (const c of PIPOWER_CATEGORIES) {
+    const cat = await prisma.category.create({
+      data: { slug: c.slug, name: c.name, sortOrder: c.sortOrder },
+    })
+    categoryBySlug.set(c.slug, cat)
+  }
 
-  // Battery Cell (11). Sello 0-cycle·100% es constante (lo pinta el card, no es
-  // data). Capacidad +X%: NO se muestra hasta fuente formal del fabricante
-  // (FU-010) → nombre "High Capacity" SIN número. Las iPhone 12 están 'incoming'
-  // (las tenemos pero agotadas, llegando). Imágenes locales reales en
-  // public/products/ (FU-011 resuelto, sin remotePatterns). El 12 Pro Max reusa
-  // la imagen del combinado 12/12-pro por ahora.
-  const img = (f: string) => `/products/${f}`
-  const SPOT = { spot_welding_required: true }
-  const cellDesc = (model: string) =>
-    `Celda de alta capacidad para ${model}. 0 ciclos, 100% de salud de fábrica. Requiere soldadura por puntos (spot welding).`
+  const productBySku = new Map<string, Awaited<ReturnType<typeof prisma.product.create>>>()
+  for (const p of PIPOWER_PRODUCTS) {
+    const cat = categoryBySlug.get(p.categorySlug)
+    if (!cat) throw new Error(`seed: categoría ${p.categorySlug} no creada`)
+    const created = await prisma.product.create({
+      data: {
+        sku: p.sku,
+        slug: p.slug,
+        name: p.name,
+        description: p.description,
+        basePrice: new Decimal(p.basePrice),
+        stockQuantity: p.stockQuantity,
+        imageUrl: p.imageUrl,
+        categoryId: cat.id,
+        attributes:
+          p.attributes === null ? Prisma.JsonNull : (p.attributes as Prisma.InputJsonObject),
+      },
+    })
+    productBySku.set(p.sku, created)
+  }
+  const products = [...productBySku.values()]
+  const bySku = (sku: string) => {
+    const p = productBySku.get(sku)
+    if (!p) throw new Error(`seed: producto ${sku} no encontrado`)
+    return p
+  }
 
-  const iphone1212pro = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-1212P',
-      slug: 'iphone-12-12-pro',
-      name: 'iPhone 12 / 12 Pro High Capacity Battery',
-      description: cellDesc('iPhone 12 / 12 Pro'),
-      basePrice: new Decimal('9.24'),
-      stockQuantity: 0,
-      imageUrl: img('iphone-12-12-pro.png'),
-      categoryId: batteryCell.id,
-      attributes: { ...SPOT, incoming: true },
-    },
-  })
-  const iphone12ProMax = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-12PM',
-      slug: 'iphone-12-pro-max',
-      name: 'iPhone 12 Pro Max High Capacity Battery',
-      description: cellDesc('iPhone 12 Pro Max'),
-      basePrice: new Decimal('13.01'),
-      stockQuantity: 0,
-      imageUrl: img('iphone-12-12-pro.png'),
-      categoryId: batteryCell.id,
-      attributes: { ...SPOT, incoming: true },
-    },
-  })
-  const iphone13 = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-13',
-      slug: 'iphone-13',
-      name: 'iPhone 13 High Capacity Battery',
-      description: cellDesc('iPhone 13'),
-      basePrice: new Decimal('9.00'),
-      stockQuantity: 120,
-      imageUrl: img('iphone-13.png'),
-      categoryId: batteryCell.id,
-      attributes: SPOT,
-    },
-  })
-  const iphone13Pro = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-13P',
-      slug: 'iphone-13-pro',
-      name: 'iPhone 13 Pro High Capacity Battery',
-      description: cellDesc('iPhone 13 Pro'),
-      basePrice: new Decimal('11.34'),
-      stockQuantity: 100,
-      imageUrl: img('iphone-13-pro.png'),
-      categoryId: batteryCell.id,
-      attributes: SPOT,
-    },
-  })
-  const iphone13ProMax = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-13PM',
-      slug: 'iphone-13-pro-max',
-      name: 'iPhone 13 Pro Max High Capacity Battery',
-      description: cellDesc('iPhone 13 Pro Max'),
-      basePrice: new Decimal('15.25'),
-      stockQuantity: 100,
-      imageUrl: img('iphone-13-pro-max.png'),
-      categoryId: batteryCell.id,
-      attributes: SPOT,
-    },
-  })
-  const iphone14 = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-14',
-      slug: 'iphone-14',
-      name: 'iPhone 14 High Capacity Battery',
-      description: cellDesc('iPhone 14'),
-      basePrice: new Decimal('9.03'),
-      stockQuantity: 110,
-      imageUrl: img('iphone-14.png'),
-      categoryId: batteryCell.id,
-      attributes: SPOT,
-    },
-  })
-  const iphone14Pro = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-14P',
-      slug: 'iphone-14-pro',
-      name: 'iPhone 14 Pro High Capacity Battery',
-      description: cellDesc('iPhone 14 Pro'),
-      basePrice: new Decimal('12.17'),
-      stockQuantity: 90,
-      imageUrl: img('iphone-14-pro.png'),
-      categoryId: batteryCell.id,
-      attributes: SPOT,
-    },
-  })
-  const iphone14ProMax = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-14PM',
-      slug: 'iphone-14-pro-max',
-      name: 'iPhone 14 Pro Max High Capacity Battery',
-      description: cellDesc('iPhone 14 Pro Max'),
-      basePrice: new Decimal('14.40'),
-      stockQuantity: 90,
-      imageUrl: img('iphone-14-pro-max.png'),
-      categoryId: batteryCell.id,
-      attributes: SPOT,
-    },
-  })
-  const iphone15 = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-15',
-      slug: 'iphone-15',
-      name: 'iPhone 15 High Capacity Battery (Flex Programmed)',
-      description: `${cellDesc('iPhone 15')} Incluye flex programado.`,
-      basePrice: new Decimal('11.20'),
-      stockQuantity: 80,
-      imageUrl: img('iphone-15-flex.png'),
-      categoryId: batteryCell.id,
-      attributes: { ...SPOT, flex_programmed: true },
-    },
-  })
-  const iphone15Pro = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-15P',
-      slug: 'iphone-15-pro',
-      name: 'iPhone 15 Pro High Capacity Battery (Flex Programmed)',
-      description: `${cellDesc('iPhone 15 Pro')} Incluye flex programado.`,
-      basePrice: new Decimal('14.07'),
-      stockQuantity: 70,
-      imageUrl: img('iphone-15-pro-flex.png'),
-      categoryId: batteryCell.id,
-      attributes: { ...SPOT, flex_programmed: true },
-    },
-  })
-  const iphone15ProMax = await prisma.product.create({
-    data: {
-      sku: 'PP-BC-15PM',
-      slug: 'iphone-15-pro-max',
-      name: 'iPhone 15 Pro Max High Capacity Battery (Flex Programmed)',
-      description: `${cellDesc('iPhone 15 Pro Max')} Incluye flex programado.`,
-      basePrice: new Decimal('17.12'),
-      stockQuantity: 60,
-      imageUrl: img('iphone-15-pro-max-flex.png'),
-      categoryId: batteryCell.id,
-      attributes: { ...SPOT, flex_programmed: true },
-    },
-  })
-
-  // Plug & Play (coming soon) — sin soldadura. Precios PENDIENTES (Herney):
-  // basePrice 0.00 es placeholder INERTE — coming_soon nunca muestra precio ni
-  // permite ordenar. Subset representativo (13/14/15) para poblar la categoría y
-  // probar el filtro; el rango completo 13→15 Pro Max queda pendiente de precios.
-  // Imagen: placeholder (glyph) hasta tener arte propio de la línea.
-  const PNP = { plug_and_play: true, coming_soon: true }
-  const pnp13 = await prisma.product.create({
-    data: {
-      sku: 'PP-PP-13',
-      slug: 'iphone-13-plug-and-play',
-      name: 'iPhone 13 Plug & Play Battery',
-      description: 'Reemplazo sin soldadura. Próximamente.',
-      basePrice: new Decimal('0.00'),
-      stockQuantity: 0,
-      categoryId: plugAndPlay.id,
-      attributes: PNP,
-    },
-  })
-  const pnp14 = await prisma.product.create({
-    data: {
-      sku: 'PP-PP-14',
-      slug: 'iphone-14-plug-and-play',
-      name: 'iPhone 14 Plug & Play Battery',
-      description: 'Reemplazo sin soldadura. Próximamente.',
-      basePrice: new Decimal('0.00'),
-      stockQuantity: 0,
-      categoryId: plugAndPlay.id,
-      attributes: PNP,
-    },
-  })
-  const pnp15 = await prisma.product.create({
-    data: {
-      sku: 'PP-PP-15',
-      slug: 'iphone-15-plug-and-play',
-      name: 'iPhone 15 Plug & Play Battery',
-      description: 'Reemplazo sin soldadura. Próximamente.',
-      basePrice: new Decimal('0.00'),
-      stockQuantity: 0,
-      categoryId: plugAndPlay.id,
-      attributes: PNP,
-    },
-  })
-
-  // Tag-on Flex — accesorio flex para TODOS los modelos. $3.50, in stock.
-  // (Las celdas 15 ya lo incluyen; este es el extra suelto.) Imagen: placeholder.
-  const tagOn = await prisma.product.create({
-    data: {
-      sku: 'PP-TO-1',
-      slug: 'tag-on-flex-cable',
-      name: 'Tag-on Flex (todos los modelos)',
-      description:
-        'Flex tag-on universal para celdas que no lo incluyen. Compatible con todos los modelos.',
-      basePrice: new Decimal('3.50'),
-      stockQuantity: 200,
-      categoryId: tagOnFlex.id,
-    },
-  })
-
-  const products = [
-    iphone1212pro,
-    iphone12ProMax,
-    iphone13,
-    iphone13Pro,
-    iphone13ProMax,
-    iphone14,
-    iphone14Pro,
-    iphone14ProMax,
-    iphone15,
-    iphone15Pro,
-    iphone15ProMax,
-    pnp13,
-    pnp14,
-    pnp15,
-    tagOn,
-  ]
+  // Aliases para las fixtures demo (Fase 2) — referencian productos por SKU.
+  const iphone13 = bySku('PP-BC-13')
+  const iphone14 = bySku('PP-BC-14')
+  const iphone14Pro = bySku('PP-BC-14P')
+  const iphone12ProMax = bySku('PP-BC-12PM')
 
   // CustomerPrice override: RepairHub negocia mejor precio en iPhone 13 y 14
   await prisma.customerPrice.create({
