@@ -10,24 +10,24 @@ test.describe('storefront — anonymous browsing', () => {
     await page.goto('/catalog')
     await expect(page.getByRole('heading', { name: /catálogo/i })).toBeVisible()
     // At least the demo seed products should render
-    await expect(page.getByText(/Crema facial/i).first()).toBeVisible()
+    await expect(page.getByText(/iPhone 13/i).first()).toBeVisible()
   })
 
   test('category filter via pill', async ({ page }) => {
     await page.goto('/catalog')
     await page
-      .getByRole('link', { name: /Limpieza/i })
+      .getByRole('link', { name: /Battery Cell/i })
       .first()
       .click()
-    await expect(page).toHaveURL(/category=limpieza/)
-    await expect(page.getByText(/Jabón líquido/i).first()).toBeVisible()
+    await expect(page).toHaveURL(/category=battery-cell/)
+    await expect(page.getByText(/iPhone 14/i).first()).toBeVisible()
   })
 
   test('product detail page renders (anónimo ve CTA en vez de precio — Onboarding B2B)', async ({
     page,
   }) => {
-    await page.goto('/products/crema-facial-hidratante')
-    await expect(page.getByRole('heading', { name: /Crema facial hidratante/i })).toBeVisible()
+    await page.goto('/products/iphone-13')
+    await expect(page.getByRole('heading', { name: /iPhone 13/i })).toBeVisible()
     // Onboarding B2B 2026-06-02: el anónimo ve specs/contenido pero NO precio.
     await expect(page.getByText(/ver precios mayoristas/i).first()).toBeVisible()
   })

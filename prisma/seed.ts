@@ -97,141 +97,286 @@ async function main() {
     },
   })
 
-  // Categories
-  const cosmeticos = await prisma.category.create({
-    data: { slug: 'cosmeticos', name: 'Cosméticos', sortOrder: 1 },
+  // Categories — Pi-Power: 3 líneas de producto
+  const batteryCell = await prisma.category.create({
+    data: { slug: 'battery-cell', name: 'Battery Cell', sortOrder: 1 },
   })
-  const limpieza = await prisma.category.create({
-    data: { slug: 'limpieza', name: 'Limpieza', sortOrder: 2 },
+  const plugAndPlay = await prisma.category.create({
+    data: { slug: 'plug-and-play', name: 'Plug & Play', sortOrder: 2 },
+  })
+  const tagOnFlex = await prisma.category.create({
+    data: { slug: 'tag-on-flex', name: 'Tag-on Flex', sortOrder: 3 },
   })
 
-  // Products
-  const products = await Promise.all([
-    prisma.product.create({
-      data: {
-        sku: 'COS-001',
-        slug: 'crema-facial-hidratante',
-        name: 'Crema facial hidratante 50ml',
-        description: 'Hidratante diaria con ácido hialurónico y vitamina E. Caja de 12 unidades.',
-        basePrice: new Decimal('15.50'),
-        stockQuantity: 200,
-        imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600',
-        categoryId: cosmeticos.id,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        sku: 'COS-002',
-        slug: 'protector-solar-spf50',
-        name: 'Protector solar SPF 50+ 150ml',
-        description: 'Resistente al agua. Display de 24 unidades.',
-        basePrice: new Decimal('22.00'),
-        stockQuantity: 150,
-        imageUrl: 'https://images.unsplash.com/photo-1556228852-80b6e5eeff06?w=600',
-        categoryId: cosmeticos.id,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        sku: 'COS-003',
-        slug: 'serum-vitamina-c',
-        name: 'Serum vitamina C 30ml',
-        description: 'Iluminador y antioxidante. Caja de 6 unidades.',
-        basePrice: new Decimal('28.75'),
-        stockQuantity: 90,
-        imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600',
-        categoryId: cosmeticos.id,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        sku: 'LMP-001',
-        slug: 'jabon-liquido-galon',
-        name: 'Jabón líquido neutro 3.78L',
-        description: 'Para manos y superficies. Galón.',
-        basePrice: new Decimal('9.99'),
-        stockQuantity: 300,
-        imageUrl: 'https://images.unsplash.com/photo-1585820114365-839e3a30c587?w=600',
-        categoryId: limpieza.id,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        sku: 'LMP-002',
-        slug: 'desinfectante-spray',
-        name: 'Desinfectante multiuso 750ml',
-        description: 'Caja de 24 botellas con atomizador.',
-        basePrice: new Decimal('5.25'),
-        stockQuantity: 500,
-        imageUrl: 'https://images.unsplash.com/photo-1583947581924-860bda6a26df?w=600',
-        categoryId: limpieza.id,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        sku: 'LMP-003',
-        slug: 'papel-toalla-rollo',
-        name: 'Papel toalla industrial 2 capas',
-        description: 'Paca de 6 rollos premium.',
-        basePrice: new Decimal('18.00'),
-        stockQuantity: 250,
-        imageUrl: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=600',
-        categoryId: limpieza.id,
-      },
-    }),
-  ])
+  // Battery Cell (11). Sello 0-cycle·100% es constante (lo pinta el card, no es
+  // data). Capacidad +X%: NO se muestra hasta fuente formal del fabricante
+  // (FU-010) → nombre "High Capacity" SIN número. Las iPhone 12 están 'incoming'
+  // (las tenemos pero agotadas, llegando). Imágenes locales reales en
+  // public/products/ (FU-011 resuelto, sin remotePatterns). El 12 Pro Max reusa
+  // la imagen del combinado 12/12-pro por ahora.
+  const img = (f: string) => `/products/${f}`
+  const SPOT = { spot_welding_required: true }
+  const cellDesc = (model: string) =>
+    `Celda de alta capacidad para ${model}. 0 ciclos, 100% de salud de fábrica. Requiere soldadura por puntos (spot welding).`
 
-  // CustomerPrice override: RepairHub has cheaper crema facial
+  const iphone1212pro = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-1212P',
+      slug: 'iphone-12-12-pro',
+      name: 'iPhone 12 / 12 Pro High Capacity Battery',
+      description: cellDesc('iPhone 12 / 12 Pro'),
+      basePrice: new Decimal('9.24'),
+      stockQuantity: 0,
+      imageUrl: img('iphone-12-12-pro.png'),
+      categoryId: batteryCell.id,
+      attributes: { ...SPOT, incoming: true },
+    },
+  })
+  const iphone12ProMax = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-12PM',
+      slug: 'iphone-12-pro-max',
+      name: 'iPhone 12 Pro Max High Capacity Battery',
+      description: cellDesc('iPhone 12 Pro Max'),
+      basePrice: new Decimal('13.01'),
+      stockQuantity: 0,
+      imageUrl: img('iphone-12-12-pro.png'),
+      categoryId: batteryCell.id,
+      attributes: { ...SPOT, incoming: true },
+    },
+  })
+  const iphone13 = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-13',
+      slug: 'iphone-13',
+      name: 'iPhone 13 High Capacity Battery',
+      description: cellDesc('iPhone 13'),
+      basePrice: new Decimal('9.00'),
+      stockQuantity: 120,
+      imageUrl: img('iphone-13.png'),
+      categoryId: batteryCell.id,
+      attributes: SPOT,
+    },
+  })
+  const iphone13Pro = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-13P',
+      slug: 'iphone-13-pro',
+      name: 'iPhone 13 Pro High Capacity Battery',
+      description: cellDesc('iPhone 13 Pro'),
+      basePrice: new Decimal('11.34'),
+      stockQuantity: 100,
+      imageUrl: img('iphone-13-pro.png'),
+      categoryId: batteryCell.id,
+      attributes: SPOT,
+    },
+  })
+  const iphone13ProMax = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-13PM',
+      slug: 'iphone-13-pro-max',
+      name: 'iPhone 13 Pro Max High Capacity Battery',
+      description: cellDesc('iPhone 13 Pro Max'),
+      basePrice: new Decimal('15.25'),
+      stockQuantity: 100,
+      imageUrl: img('iphone-13-pro-max.png'),
+      categoryId: batteryCell.id,
+      attributes: SPOT,
+    },
+  })
+  const iphone14 = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-14',
+      slug: 'iphone-14',
+      name: 'iPhone 14 High Capacity Battery',
+      description: cellDesc('iPhone 14'),
+      basePrice: new Decimal('9.03'),
+      stockQuantity: 110,
+      imageUrl: img('iphone-14.png'),
+      categoryId: batteryCell.id,
+      attributes: SPOT,
+    },
+  })
+  const iphone14Pro = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-14P',
+      slug: 'iphone-14-pro',
+      name: 'iPhone 14 Pro High Capacity Battery',
+      description: cellDesc('iPhone 14 Pro'),
+      basePrice: new Decimal('12.17'),
+      stockQuantity: 90,
+      imageUrl: img('iphone-14-pro.png'),
+      categoryId: batteryCell.id,
+      attributes: SPOT,
+    },
+  })
+  const iphone14ProMax = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-14PM',
+      slug: 'iphone-14-pro-max',
+      name: 'iPhone 14 Pro Max High Capacity Battery',
+      description: cellDesc('iPhone 14 Pro Max'),
+      basePrice: new Decimal('14.40'),
+      stockQuantity: 90,
+      imageUrl: img('iphone-14-pro-max.png'),
+      categoryId: batteryCell.id,
+      attributes: SPOT,
+    },
+  })
+  const iphone15 = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-15',
+      slug: 'iphone-15',
+      name: 'iPhone 15 High Capacity Battery (Flex Programmed)',
+      description: `${cellDesc('iPhone 15')} Incluye flex programado.`,
+      basePrice: new Decimal('11.20'),
+      stockQuantity: 80,
+      imageUrl: img('iphone-15-flex.png'),
+      categoryId: batteryCell.id,
+      attributes: { ...SPOT, flex_programmed: true },
+    },
+  })
+  const iphone15Pro = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-15P',
+      slug: 'iphone-15-pro',
+      name: 'iPhone 15 Pro High Capacity Battery (Flex Programmed)',
+      description: `${cellDesc('iPhone 15 Pro')} Incluye flex programado.`,
+      basePrice: new Decimal('14.07'),
+      stockQuantity: 70,
+      imageUrl: img('iphone-15-pro-flex.png'),
+      categoryId: batteryCell.id,
+      attributes: { ...SPOT, flex_programmed: true },
+    },
+  })
+  const iphone15ProMax = await prisma.product.create({
+    data: {
+      sku: 'PP-BC-15PM',
+      slug: 'iphone-15-pro-max',
+      name: 'iPhone 15 Pro Max High Capacity Battery (Flex Programmed)',
+      description: `${cellDesc('iPhone 15 Pro Max')} Incluye flex programado.`,
+      basePrice: new Decimal('17.12'),
+      stockQuantity: 60,
+      imageUrl: img('iphone-15-pro-max-flex.png'),
+      categoryId: batteryCell.id,
+      attributes: { ...SPOT, flex_programmed: true },
+    },
+  })
+
+  // Plug & Play (coming soon) — sin soldadura. Precios PENDIENTES (Herney):
+  // basePrice 0.00 es placeholder INERTE — coming_soon nunca muestra precio ni
+  // permite ordenar. Subset representativo (13/14/15) para poblar la categoría y
+  // probar el filtro; el rango completo 13→15 Pro Max queda pendiente de precios.
+  // Imagen: placeholder (glyph) hasta tener arte propio de la línea.
+  const PNP = { plug_and_play: true, coming_soon: true }
+  const pnp13 = await prisma.product.create({
+    data: {
+      sku: 'PP-PP-13',
+      slug: 'iphone-13-plug-and-play',
+      name: 'iPhone 13 Plug & Play Battery',
+      description: 'Reemplazo sin soldadura. Próximamente.',
+      basePrice: new Decimal('0.00'),
+      stockQuantity: 0,
+      categoryId: plugAndPlay.id,
+      attributes: PNP,
+    },
+  })
+  const pnp14 = await prisma.product.create({
+    data: {
+      sku: 'PP-PP-14',
+      slug: 'iphone-14-plug-and-play',
+      name: 'iPhone 14 Plug & Play Battery',
+      description: 'Reemplazo sin soldadura. Próximamente.',
+      basePrice: new Decimal('0.00'),
+      stockQuantity: 0,
+      categoryId: plugAndPlay.id,
+      attributes: PNP,
+    },
+  })
+  const pnp15 = await prisma.product.create({
+    data: {
+      sku: 'PP-PP-15',
+      slug: 'iphone-15-plug-and-play',
+      name: 'iPhone 15 Plug & Play Battery',
+      description: 'Reemplazo sin soldadura. Próximamente.',
+      basePrice: new Decimal('0.00'),
+      stockQuantity: 0,
+      categoryId: plugAndPlay.id,
+      attributes: PNP,
+    },
+  })
+
+  // Tag-on Flex — accesorio flex para TODOS los modelos. $3.50, in stock.
+  // (Las celdas 15 ya lo incluyen; este es el extra suelto.) Imagen: placeholder.
+  const tagOn = await prisma.product.create({
+    data: {
+      sku: 'PP-TO-1',
+      slug: 'tag-on-flex-cable',
+      name: 'Tag-on Flex (todos los modelos)',
+      description:
+        'Flex tag-on universal para celdas que no lo incluyen. Compatible con todos los modelos.',
+      basePrice: new Decimal('3.50'),
+      stockQuantity: 200,
+      categoryId: tagOnFlex.id,
+    },
+  })
+
+  const products = [
+    iphone1212pro,
+    iphone12ProMax,
+    iphone13,
+    iphone13Pro,
+    iphone13ProMax,
+    iphone14,
+    iphone14Pro,
+    iphone14ProMax,
+    iphone15,
+    iphone15Pro,
+    iphone15ProMax,
+    pnp13,
+    pnp14,
+    pnp15,
+    tagOn,
+  ]
+
+  // CustomerPrice override: RepairHub negocia mejor precio en iPhone 13 y 14
   await prisma.customerPrice.create({
     data: {
       organizationId: acme.id,
-      productId: products[0]?.id ?? '',
-      price: new Decimal('12.00'),
+      productId: iphone13.id,
+      price: new Decimal('8.50'),
       notes: 'Precio negociado contrato 2026',
     },
   })
-
-  // CustomerPrice override: papel toalla mejor para RepairHub
   await prisma.customerPrice.create({
     data: {
       organizationId: acme.id,
-      productId: products[5]?.id ?? '',
-      price: new Decimal('15.50'),
+      productId: iphone14.id,
+      price: new Decimal('8.60'),
     },
   })
 
-  // Fase 2: volume discount tiers
-  if (products[1]) {
-    await prisma.productPriceTier.createMany({
-      data: [
-        { productId: products[1].id, minQty: 12, unitPrice: new Decimal('20.00') },
-        { productId: products[1].id, minQty: 48, unitPrice: new Decimal('18.50') },
-      ],
-    })
-  }
-  if (products[4]) {
-    await prisma.productPriceTier.createMany({
-      data: [
-        { productId: products[4].id, minQty: 24, unitPrice: new Decimal('4.75') },
-        { productId: products[4].id, minQty: 120, unitPrice: new Decimal('4.25') },
-      ],
-    })
-  }
+  // Fase 2: volume discount tiers en iPhone 13
+  await prisma.productPriceTier.createMany({
+    data: [
+      { productId: iphone13.id, minQty: 12, unitPrice: new Decimal('8.50') },
+      { productId: iphone13.id, minQty: 48, unitPrice: new Decimal('8.00') },
+    ],
+  })
 
-  // Fase 2: private product (catalog access example)
-  if (products[2]) {
-    await prisma.product.update({
-      where: { id: products[2].id },
-      data: { isPrivate: true },
-    })
-    await prisma.organizationCatalogAccess.create({
-      data: {
-        organizationId: acme.id,
-        productId: products[2].id,
-        grantedById: admin.id,
-      },
-    })
-  }
+  // Fase 2: producto privado (catalog access) — iPhone 12 Pro Max solo para
+  // orgs con acceso explícito. Demo: RepairHub tiene acceso, anónimo no lo ve.
+  await prisma.product.update({
+    where: { id: iphone12ProMax.id },
+    data: { isPrivate: true },
+  })
+  await prisma.organizationCatalogAccess.create({
+    data: {
+      organizationId: acme.id,
+      productId: iphone12ProMax.id,
+      grantedById: admin.id,
+    },
+  })
 
   // Fase 2: demo Quote (QUOTED, ready to accept)
   const quote = await prisma.quote.create({
@@ -248,39 +393,37 @@ async function main() {
       adminNotes: 'Confirmado stock para envío inmediato.',
     },
   })
-  if (products[0] && products[3]) {
-    await prisma.quoteLine.createMany({
-      data: [
-        {
-          quoteId: quote.id,
-          productId: products[0].id,
-          sku: products[0].sku,
-          name: products[0].name,
-          qty: 24,
-          unitPriceBase: products[0].basePrice,
-          unitPriceQuoted: new Decimal('11.50'),
-          lineTotal: new Decimal('276.00'),
-          order: 0,
-        },
-        {
-          quoteId: quote.id,
-          productId: products[3].id,
-          sku: products[3].sku,
-          name: products[3].name,
-          qty: 12,
-          unitPriceBase: products[3].basePrice,
-          unitPriceQuoted: new Decimal('9.00'),
-          lineTotal: new Decimal('108.00'),
-          order: 1,
-        },
-      ],
-    })
-    const subtotal = new Decimal('384.00')
-    await prisma.quote.update({
-      where: { id: quote.id },
-      data: { subtotal, total: subtotal },
-    })
-  }
+  await prisma.quoteLine.createMany({
+    data: [
+      {
+        quoteId: quote.id,
+        productId: iphone13.id,
+        sku: iphone13.sku,
+        name: iphone13.name,
+        qty: 24,
+        unitPriceBase: iphone13.basePrice,
+        unitPriceQuoted: new Decimal('8.50'),
+        lineTotal: new Decimal('204.00'),
+        order: 0,
+      },
+      {
+        quoteId: quote.id,
+        productId: iphone14Pro.id,
+        sku: iphone14Pro.sku,
+        name: iphone14Pro.name,
+        qty: 12,
+        unitPriceBase: iphone14Pro.basePrice,
+        unitPriceQuoted: new Decimal('11.50'),
+        lineTotal: new Decimal('138.00'),
+        order: 1,
+      },
+    ],
+  })
+  const quoteSubtotal = new Decimal('342.00')
+  await prisma.quote.update({
+    where: { id: quote.id },
+    data: { subtotal: quoteSubtotal, total: quoteSubtotal },
+  })
 
   // Fase 2: demo open invoice (requires a synthetic Order)
   const acmeAddress = await prisma.organizationAddress.findFirst({

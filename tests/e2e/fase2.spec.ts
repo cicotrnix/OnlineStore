@@ -25,21 +25,24 @@ test.describe('Fase 2 — feature-gated routes (anonymous, post Onboarding B2B)'
 })
 
 test.describe('Fase 2 — catalog visibility', () => {
-  test('anonymous catalog does NOT expose private product (COS-003 serum)', async ({ page }) => {
+  test('anonymous catalog does NOT expose private product (iPhone 12 Pro Max)', async ({
+    page,
+  }) => {
     await page.goto('/catalog')
-    await expect(page.getByText(/Serum vitamina C/i)).toHaveCount(0)
+    // href exacto: robusto a substrings de otros modelos "Pro Max" visibles.
+    await expect(page.locator('a[href="/products/iphone-12-pro-max"]')).toHaveCount(0)
   })
 
   test('anonymous direct visit to private product returns 404', async ({ page }) => {
-    const res = await page.goto('/products/serum-vitamina-c')
+    const res = await page.goto('/products/iphone-12-pro-max')
     expect(res?.status()).toBe(404)
   })
 })
 
 test.describe('Fase 2 — volume discount tiers visible on product page', () => {
   test('product with tiers shows tier table to anonymous', async ({ page }) => {
-    await page.goto('/products/protector-solar-spf50')
-    await expect(page.getByRole('heading', { name: /Protector solar/i })).toBeVisible()
+    await page.goto('/products/iphone-13')
+    await expect(page.getByRole('heading', { name: /iPhone 13/i })).toBeVisible()
     await expect(page.getByText(/12\+/i).first()).toBeVisible()
   })
 })
