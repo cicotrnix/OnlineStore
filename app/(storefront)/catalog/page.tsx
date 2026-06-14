@@ -87,7 +87,7 @@ export default async function CatalogPage({ searchParams }: Props) {
         <Link
           href="/catalog"
           aria-current={!activeCat ? 'page' : undefined}
-          className={`rounded-full border px-3 py-1 text-xs ${
+          className={`rounded-full border px-3 py-1 text-xs transition-colors motion-reduce:transition-none ${
             !activeCat
               ? 'border-gray-900 bg-gray-900 text-white'
               : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
@@ -100,7 +100,7 @@ export default async function CatalogPage({ searchParams }: Props) {
             key={c.id}
             href={`/catalog?category=${c.slug}`}
             aria-current={activeCat?.id === c.id ? 'page' : undefined}
-            className={`rounded-full border px-3 py-1 text-xs ${
+            className={`rounded-full border px-3 py-1 text-xs transition-colors motion-reduce:transition-none ${
               activeCat?.id === c.id
                 ? 'border-gray-900 bg-gray-900 text-white'
                 : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'

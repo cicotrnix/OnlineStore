@@ -21,7 +21,7 @@ export function CatalogToggle({
   }
 
   const cls = (active: boolean) =>
-    `rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-60 ${
+    `rounded-md px-3 py-1.5 text-sm font-medium transition-[colors,transform] active:scale-95 disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100 ${
       active ? 'bg-lime-500 text-gray-900' : 'text-gray-600 hover:text-gray-900'
     }`
 

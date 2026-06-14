@@ -46,7 +46,11 @@ export function AddToCartButton({
           {t(locale, 'product.unavailable')}
         </button>
       ) : (
-        <SubmitButton size="sm" pendingLabel={t(locale, 'product.adding')}>
+        <SubmitButton
+          size="sm"
+          pendingLabel={t(locale, 'product.adding')}
+          className="transition-transform active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100"
+        >
           {t(locale, 'product.add')}
         </SubmitButton>
       )}

@@ -67,7 +67,7 @@ export function ProductCard({
   const needsNotify = stockState === 'incoming' || stockState === 'coming_soon'
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <Link
         href={`/products/${product.slug}`}
         className="relative flex aspect-square items-center justify-center overflow-hidden bg-gray-50"

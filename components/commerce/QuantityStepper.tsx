@@ -30,7 +30,7 @@ export function QuantityStepper({
         type="button"
         aria-label={decrementLabel}
         onClick={() => setQty((q) => Math.max(min, q - 1))}
-        className="px-2.5 py-1.5 text-gray-600 hover:text-gray-900 disabled:text-gray-300"
+        className="px-2.5 py-1.5 text-gray-600 transition-transform hover:text-gray-900 active:scale-90 disabled:text-gray-300 motion-reduce:transition-none motion-reduce:active:scale-100"
         disabled={qty <= min}
       >
         −
@@ -48,7 +48,7 @@ export function QuantityStepper({
         type="button"
         aria-label={incrementLabel}
         onClick={() => setQty((q) => q + 1)}
-        className="px-2.5 py-1.5 text-gray-600 hover:text-gray-900"
+        className="px-2.5 py-1.5 text-gray-600 transition-transform hover:text-gray-900 active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         +
       </button>
