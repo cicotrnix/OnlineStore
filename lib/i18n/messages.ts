@@ -23,6 +23,23 @@ export type MessageKey =
   | 'landing.nav.myAccount'
   | 'landing.nav.signIn'
   | 'landing.nav.register'
+  // Header unificado (chrome único storefront + account + home)
+  | 'header.catalog'
+  | 'header.searchPlaceholder'
+  | 'header.cart'
+  | 'header.cartItems'
+  | 'header.account'
+  | 'header.buyAgain'
+  | 'header.orders'
+  | 'header.quotes'
+  | 'header.invoices'
+  | 'header.approvals'
+  | 'header.notifications'
+  | 'header.signIn'
+  | 'header.signOut'
+  | 'header.register'
+  | 'header.menu'
+  | 'header.close'
   | 'landing.hero.eyebrow'
   | 'landing.hero.headlineMain'
   | 'landing.hero.headlineAccent'
@@ -441,6 +458,22 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.nav.myAccount': 'My account',
     'landing.nav.signIn': 'Sign in',
     'landing.nav.register': 'Register',
+    'header.catalog': 'Catalog',
+    'header.searchPlaceholder': 'Search products…',
+    'header.cart': 'Cart',
+    'header.cartItems': 'Cart, {count} items',
+    'header.account': 'My account',
+    'header.buyAgain': 'Buy again',
+    'header.orders': 'Orders',
+    'header.quotes': 'Quotes',
+    'header.invoices': 'Invoices',
+    'header.approvals': 'Approvals',
+    'header.notifications': 'Notifications',
+    'header.signIn': 'Sign in',
+    'header.signOut': 'Sign out',
+    'header.register': 'Register',
+    'header.menu': 'Menu',
+    'header.close': 'Close',
     'landing.hero.eyebrow': '0 cycles · 100% health',
     'landing.hero.headlineMain': 'Back to',
     'landing.hero.headlineAccent': '100%',
@@ -862,6 +895,22 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.nav.myAccount': 'Mi cuenta',
     'landing.nav.signIn': 'Iniciar sesión',
     'landing.nav.register': 'Registrarse',
+    'header.catalog': 'Catálogo',
+    'header.searchPlaceholder': 'Buscar productos…',
+    'header.cart': 'Carrito',
+    'header.cartItems': 'Carrito, {count} items',
+    'header.account': 'Mi cuenta',
+    'header.buyAgain': 'Volver a pedir',
+    'header.orders': 'Órdenes',
+    'header.quotes': 'Cotizaciones',
+    'header.invoices': 'Facturas',
+    'header.approvals': 'Aprobaciones',
+    'header.notifications': 'Notificaciones',
+    'header.signIn': 'Iniciar sesión',
+    'header.signOut': 'Salir',
+    'header.register': 'Registrarse',
+    'header.menu': 'Menú',
+    'header.close': 'Cerrar',
     'landing.hero.eyebrow': '0 ciclos · 100% de salud',
     'landing.hero.headlineMain': 'Volvé al',
     'landing.hero.headlineAccent': '100%',
