@@ -1,6 +1,7 @@
 import { AccountMenu } from '@/components/commerce/AccountMenu'
 import { HeaderThemeWatcher } from '@/components/commerce/HeaderThemeWatcher'
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
+import { MobileNav } from '@/components/commerce/MobileNav'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
 import { SearchBar } from '@/components/commerce/SearchBar'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
@@ -116,7 +117,7 @@ export function Header({
           </div>
         )}
 
-        <nav className="flex items-center gap-5 text-small">
+        <nav className="hidden md:flex items-center gap-5 text-small">
           <Link href="/catalog" className={linkCls}>
             {t(locale, 'header.catalog')}
           </Link>
@@ -163,7 +164,44 @@ export function Header({
 
           <LocaleSwitch current={locale} />
         </nav>
+
+        {/* Mobile: logo · carrito · hamburguesa. El nav vive en el drawer. */}
+        <div className="flex items-center gap-1 md:hidden">
+          {isSignedIn && (
+            <Link
+              href="/cart"
+              className={`relative ${linkCls} px-2`}
+              aria-label={t(locale, 'header.cartItems', { count: cartCount })}
+            >
+              {t(locale, 'header.cart')}
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-ink-950">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          )}
+          <MobileNav
+            locale={locale}
+            isSignedIn={isSignedIn}
+            flags={flags}
+            signOut={
+              <SignOutButton
+                label={t(locale, 'header.signOut')}
+                className="block w-full px-2 py-2 text-left text-base text-ink-700 hover:bg-ink-50"
+              />
+            }
+            notifications={<NotificationBadge />}
+          />
+        </div>
       </div>
+
+      {/* Páginas internas: búsqueda full-width bajo la barra en mobile. */}
+      {!isHome && (
+        <div className="border-t border-ink-100 px-5 py-2 md:hidden">
+          <SearchBar placeholder={t(locale, 'header.searchPlaceholder')} />
+        </div>
+      )}
     </header>
   )
 }

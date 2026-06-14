@@ -14,6 +14,9 @@ vi.mock('@/components/commerce/NotificationBadge', () => ({ NotificationBadge: (
 vi.mock('@/components/commerce/SignOutButton', () => ({
   SignOutButton: ({ label }: { label?: string }) => <button type="button">{label}</button>,
 }))
+vi.mock('@/components/commerce/MobileNav', () => ({
+  MobileNav: () => <span data-testid="mobile-nav" />,
+}))
 vi.mock('@/components/commerce/AccountMenu', () => ({
   AccountMenu: (p: { flags: { rfq: boolean; credit: boolean; approvals: boolean } }) => (
     <span
