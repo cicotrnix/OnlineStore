@@ -162,6 +162,17 @@ export type MessageKey =
   | 'catalog.disabled.pending'
   | 'catalog.disabled.rejected'
   | 'catalog.signInLinkShort'
+  | 'catalog.stock.inStock'
+  | 'catalog.stock.incoming'
+  | 'catalog.stock.comingSoon'
+  | 'catalog.stock.outOfStock'
+  | 'catalog.notify'
+  | 'catalog.qtyDecrease'
+  | 'catalog.qtyIncrease'
+  | 'catalog.chip.spotWeld'
+  | 'catalog.chip.plugAndPlay'
+  | 'catalog.chip.flexProgrammed'
+  | 'catalog.chip.tagOn'
   // PDP
   | 'pdp.signInForPriceLong'
   | 'pdp.viewLabel.sku'
@@ -595,6 +606,17 @@ export const MESSAGES: Record<Locale, Dict> = {
     'catalog.disabled.pending': 'Your account is under review',
     'catalog.disabled.rejected': 'Your account was rejected — see the reason',
     'catalog.signInLinkShort': 'Sign in',
+    'catalog.stock.inStock': 'In stock',
+    'catalog.stock.incoming': 'Incoming',
+    'catalog.stock.comingSoon': 'Coming soon',
+    'catalog.stock.outOfStock': 'Out of stock',
+    'catalog.notify': 'Notify me',
+    'catalog.qtyDecrease': 'Decrease quantity',
+    'catalog.qtyIncrease': 'Increase quantity',
+    'catalog.chip.spotWeld': 'Spot weld',
+    'catalog.chip.plugAndPlay': 'Plug & play',
+    'catalog.chip.flexProgrammed': 'Flex programmed',
+    'catalog.chip.tagOn': 'Tag-on',
     // PDP
     'pdp.signInForPriceLong': 'Sign in or register your business to see wholesale pricing →',
     'pdp.viewLabel.sku': 'SKU',
@@ -1022,6 +1044,17 @@ export const MESSAGES: Record<Locale, Dict> = {
     'catalog.disabled.pending': 'Tu cuenta está en revisión',
     'catalog.disabled.rejected': 'Tu cuenta fue rechazada — revisá el motivo',
     'catalog.signInLinkShort': 'Iniciá sesión',
+    'catalog.stock.inStock': 'En stock',
+    'catalog.stock.incoming': 'En camino',
+    'catalog.stock.comingSoon': 'Próximamente',
+    'catalog.stock.outOfStock': 'Agotado',
+    'catalog.notify': 'Avisarme',
+    'catalog.qtyDecrease': 'Disminuir cantidad',
+    'catalog.qtyIncrease': 'Aumentar cantidad',
+    'catalog.chip.spotWeld': 'Soldadura',
+    'catalog.chip.plugAndPlay': 'Plug & play',
+    'catalog.chip.flexProgrammed': 'Flex programado',
+    'catalog.chip.tagOn': 'Tag-on',
     // PDP
     'pdp.signInForPriceLong': 'Iniciá sesión o registrá tu negocio para ver precios mayoristas →',
     'pdp.viewLabel.sku': 'SKU',

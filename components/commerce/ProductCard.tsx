@@ -1,12 +1,12 @@
-import { Badge } from '@/components/ui/Badge'
-import { Card, CardBody } from '@/components/ui/Card'
 import type { Locale } from '@/lib/i18n'
+import { t } from '@/lib/i18n'
 import type { Decimal } from '@prisma/client/runtime/library'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AddToCartButton } from './AddToCartButton'
+import { NotifyButton } from './NotifyButton'
 import { PriceTag } from './PriceTag'
-import { StockBadge } from './StockBadge'
+import { type Chip, type StockState, deriveChips, deriveStockState } from './product-display'
 
 type Product = {
   id: string
@@ -17,11 +17,7 @@ type Product = {
   basePrice: Decimal
   stockQuantity: number
   attributes?: unknown
-}
-
-function isTagOnFlex(attributes: unknown): boolean {
-  if (!attributes || typeof attributes !== 'object') return false
-  return (attributes as Record<string, unknown>).flex_included === 'tag-on'
+  category?: { slug: string } | null
 }
 
 type Props = {
@@ -39,6 +35,58 @@ type Props = {
   returnTo?: string
 }
 
+/** Quita del nombre del proveedor el sufijo "(Spot Welding Required)" — el chip ya lo dice. */
+function cleanName(name: string): string {
+  return name.replace(/\s*\(spot welding required\)\s*/gi, ' ').trim()
+}
+
+const STOCK_DOT: Record<StockState, string> = {
+  in_stock: 'bg-lime-500',
+  incoming: 'bg-amber-500',
+  coming_soon: 'bg-gray-400',
+  out_of_stock: 'bg-gray-400',
+}
+
+function stockLabel(state: StockState, locale: Locale): string {
+  switch (state) {
+    case 'in_stock':
+      return t(locale, 'catalog.stock.inStock')
+    case 'incoming':
+      return t(locale, 'catalog.stock.incoming')
+    case 'coming_soon':
+      return t(locale, 'catalog.stock.comingSoon')
+    default:
+      return t(locale, 'catalog.stock.outOfStock')
+  }
+}
+
+function chipLabel(chip: Chip, locale: Locale): string {
+  switch (chip.key) {
+    case 'seal':
+      return '0-cycle · 100%'
+    case 'spotWeld':
+      return t(locale, 'catalog.chip.spotWeld')
+    case 'plugAndPlay':
+      return t(locale, 'catalog.chip.plugAndPlay')
+    case 'flexProgrammed':
+      return t(locale, 'catalog.chip.flexProgrammed')
+    case 'tagOn':
+      return t(locale, 'catalog.chip.tagOn')
+    default:
+      return `+${chip.value ?? ''}`
+  }
+}
+
+// Tonos: sello/capacidad/plug = lima-deep; flex/tag-on = lima suave; spot-weld = ámbar (accionable).
+const CHIP_TONE: Record<Chip['key'], string> = {
+  seal: 'border-lime-200 bg-lime-50 text-lime-700',
+  capacity: 'border-lime-200 bg-lime-50 text-lime-700',
+  plugAndPlay: 'border-lime-200 bg-lime-50 text-lime-700',
+  flexProgrammed: 'border-lime-100 bg-lime-50/60 text-lime-700',
+  tagOn: 'border-lime-100 bg-lime-50/60 text-lime-700',
+  spotWeld: 'border-amber-200 bg-amber-50 text-amber-800',
+}
+
 export function ProductCard({
   product,
   customerPrice,
@@ -51,11 +99,18 @@ export function ProductCard({
   noImageLabel = 'No image',
   returnTo,
 }: Props) {
+  const stockState = deriveStockState(product.stockQuantity, product.attributes)
+  const chips = deriveChips({
+    attributes: product.attributes,
+    categorySlug: product.category?.slug ?? null,
+  })
+  const needsNotify = stockState === 'incoming' || stockState === 'coming_soon'
+
   return (
-    <Card className="overflow-hidden flex flex-col">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white">
       <Link
         href={`/products/${product.slug}`}
-        className="relative aspect-square bg-gray-100 flex items-center justify-center overflow-hidden"
+        className="relative flex aspect-square items-center justify-center overflow-hidden bg-gray-50"
       >
         {product.imageUrl ? (
           <Image
@@ -63,27 +118,37 @@ export function ProductCard({
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
-            className="object-cover"
+            className="object-contain p-4"
           />
         ) : (
-          <span className="text-xs text-gray-600">{noImageLabel}</span>
+          <span className="text-xs text-gray-400">{noImageLabel}</span>
         )}
       </Link>
-      <CardBody className="flex-1 flex flex-col gap-3">
+
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex flex-wrap gap-1.5">
+          {chips.map((c) => (
+            <span
+              key={c.key + (c.value ?? '')}
+              className={`inline-flex items-center rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium ${CHIP_TONE[c.key]}`}
+            >
+              {chipLabel(c, locale)}
+            </span>
+          ))}
+        </div>
+
         <div>
-          <div className="text-[10px] uppercase tracking-wide text-gray-500">{product.sku}</div>
+          <div className="font-mono text-[10px] uppercase tracking-wide text-gray-400">
+            {product.sku}
+          </div>
           <Link
             href={`/products/${product.slug}`}
-            className="mt-1 block font-medium hover:underline line-clamp-2"
+            className="mt-1 block line-clamp-2 text-sm font-medium text-gray-900 hover:underline"
           >
-            {product.name}
+            {cleanName(product.name)}
           </Link>
-          {isTagOnFlex(product.attributes) && (
-            <div className="mt-1">
-              <Badge variant="info">Tag-On Flex</Badge>
-            </div>
-          )}
         </div>
+
         {showPrice ? (
           <PriceTag
             basePrice={product.basePrice}
@@ -91,23 +156,30 @@ export function ProductCard({
             currency={currency}
           />
         ) : (
-          <Link href="/sign-in" className="text-sm text-blue-700 hover:underline">
+          <Link href="/sign-in" className="text-sm font-medium text-lime-700 hover:underline">
             {signInLinkLabel}
           </Link>
         )}
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <StockBadge stockQuantity={product.stockQuantity} />
-          {showPrice && (
+
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+          <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
+            <span className={`h-2 w-2 rounded-full ${STOCK_DOT[stockState]}`} aria-hidden="true" />
+            {stockLabel(stockState, locale)}
+          </span>
+          {needsNotify ? (
+            <NotifyButton productName={product.name} label={t(locale, 'catalog.notify')} />
+          ) : showPrice ? (
             <AddToCartButton
               productId={product.id}
               locale={locale}
               returnTo={returnTo}
-              disabled={!canAddToCart || product.stockQuantity === 0}
+              showQuantity
+              disabled={!canAddToCart || stockState !== 'in_stock'}
               disabledReason={disabledReason}
             />
-          )}
+          ) : null}
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </article>
   )
 }

@@ -2,6 +2,7 @@ import { addToCartAction } from '@/app/(storefront)/_actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import type { Locale } from '@/lib/i18n'
 import { t } from '@/lib/i18n'
+import { QuantityStepper } from './QuantityStepper'
 
 type Props = {
   productId: string
@@ -27,12 +28,11 @@ export function AddToCartButton({
       <input type="hidden" name="productId" value={productId} />
       {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
       {showQuantity && (
-        <input
+        <QuantityStepper
           name="quantity"
-          type="number"
-          min={1}
           defaultValue={defaultQuantity}
-          className="w-16 rounded-lg border border-gray-200 px-2 py-1.5 text-sm text-center"
+          decrementLabel={t(locale, 'catalog.qtyDecrease')}
+          incrementLabel={t(locale, 'catalog.qtyIncrease')}
         />
       )}
       {!showQuantity && <input type="hidden" name="quantity" value={defaultQuantity} />}
