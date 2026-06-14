@@ -47,6 +47,6 @@ export async function getProductCardContext(): Promise<ProductCardContext> {
     showPrice,
     canAddToCart,
     disabledReason,
-    signInLinkLabel: `${t(locale, 'product.signInForPrice')} →`,
+    signInLinkLabel: `${t(locale, 'catalog.loginForPrice')} →`,
   }
 }

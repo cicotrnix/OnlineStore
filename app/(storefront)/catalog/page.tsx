@@ -77,16 +77,20 @@ export default async function CatalogPage({ searchParams }: Props) {
               : t(locale, 'catalog.countMany', { count: products.length })}
           </p>
         </div>
-        <CatalogToggle current={view} />
+        <CatalogToggle
+          current={view}
+          labels={{ cards: t(locale, 'catalog.viewCards'), list: t(locale, 'catalog.viewList') }}
+        />
       </div>
 
-      <nav className="mt-6 flex flex-wrap gap-2">
+      <nav aria-label={t(locale, 'catalog.title')} className="mt-6 flex flex-wrap gap-2">
         <Link
           href="/catalog"
+          aria-current={!activeCat ? 'page' : undefined}
           className={`rounded-full border px-3 py-1 text-xs ${
             !activeCat
-              ? 'bg-gray-900 text-white border-gray-900'
-              : 'bg-white text-gray-700 border-gray-200'
+              ? 'border-gray-900 bg-gray-900 text-white'
+              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
           }`}
         >
           {t(locale, 'catalog.allCategories')}
@@ -95,10 +99,11 @@ export default async function CatalogPage({ searchParams }: Props) {
           <Link
             key={c.id}
             href={`/catalog?category=${c.slug}`}
+            aria-current={activeCat?.id === c.id ? 'page' : undefined}
             className={`rounded-full border px-3 py-1 text-xs ${
               activeCat?.id === c.id
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white text-gray-700 border-gray-200'
+                ? 'border-gray-900 bg-gray-900 text-white'
+                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
             }`}
           >
             {c.name}
@@ -121,7 +126,7 @@ export default async function CatalogPage({ searchParams }: Props) {
               returnTo="/catalog"
               disabledReason={disabledReason}
               showPrice={customerState.kind === 'verified'}
-              signInLinkLabel={`${t(locale, 'product.signInForPrice')} →`}
+              signInLinkLabel={`${t(locale, 'catalog.loginForPrice')} →`}
             />
           ))}
         </div>

@@ -173,6 +173,9 @@ export type MessageKey =
   | 'catalog.chip.plugAndPlay'
   | 'catalog.chip.flexProgrammed'
   | 'catalog.chip.tagOn'
+  | 'catalog.loginForPrice'
+  | 'catalog.viewCards'
+  | 'catalog.viewList'
   // PDP
   | 'pdp.signInForPriceLong'
   | 'pdp.viewLabel.sku'
@@ -617,6 +620,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'catalog.chip.plugAndPlay': 'Plug & play',
     'catalog.chip.flexProgrammed': 'Flex programmed',
     'catalog.chip.tagOn': 'Tag-on',
+    'catalog.loginForPrice': 'Sign in to see prices',
+    'catalog.viewCards': 'Cards',
+    'catalog.viewList': 'List',
     // PDP
     'pdp.signInForPriceLong': 'Sign in or register your business to see wholesale pricing →',
     'pdp.viewLabel.sku': 'SKU',
@@ -1055,6 +1061,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'catalog.chip.plugAndPlay': 'Plug & play',
     'catalog.chip.flexProgrammed': 'Flex programado',
     'catalog.chip.tagOn': 'Tag-on',
+    'catalog.loginForPrice': 'Iniciá sesión para ver precios',
+    'catalog.viewCards': 'Tarjetas',
+    'catalog.viewList': 'Lista',
     // PDP
     'pdp.signInForPriceLong': 'Iniciá sesión o registrá tu negocio para ver precios mayoristas →',
     'pdp.viewLabel.sku': 'SKU',
