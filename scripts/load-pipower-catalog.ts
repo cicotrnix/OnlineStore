@@ -1,4 +1,5 @@
 import { LEGACY_SKUS, PIPOWER_CATEGORIES, PIPOWER_PRODUCTS } from '@/lib/catalog/pipower-catalog'
+import { enqueueIndex } from '@/modules/search'
 import { Prisma, PrismaClient } from '@prisma/client'
 import { Decimal } from '@prisma/client/runtime/library'
 
@@ -30,7 +31,7 @@ async function main() {
     if (!categoryId) throw new Error(`loader: categoría ${p.categorySlug} no creada`)
     const attributes =
       p.attributes === null ? Prisma.JsonNull : (p.attributes as Prisma.InputJsonObject)
-    await prisma.product.upsert({
+    const up = await prisma.product.upsert({
       where: { sku: p.sku },
       update: {
         name: p.name,
@@ -54,6 +55,8 @@ async function main() {
         attributes,
       },
     })
+    // Reindexar el producto nuevo/actualizado (idempotente, noop sin Meili/Voyage).
+    await enqueueIndex(up.id, 'UPSERT')
     upserted++
   }
 
@@ -63,8 +66,18 @@ async function main() {
     data: { isActive: false },
   })
 
+  // 4. Reindexar los legacy: el processor convierte UPSERT→DELETE para inactivos,
+  //    así Meilisearch/embeddings dejan de servir el catálogo viejo.
+  const legacy = await prisma.product.findMany({
+    where: { sku: { in: LEGACY_SKUS } },
+    select: { id: true },
+  })
+  for (const l of legacy) {
+    await enqueueIndex(l.id, 'UPSERT')
+  }
+
   console.log(
-    `catalog loaded: upserted=${upserted} categorías=${PIPOWER_CATEGORIES.length} legacy_deactivated=${deactivated.count}`
+    `catalog loaded: upserted=${upserted} categorías=${PIPOWER_CATEGORIES.length} legacy_deactivated=${deactivated.count} reindex_enqueued=${upserted + legacy.length}`
   )
 }
 
