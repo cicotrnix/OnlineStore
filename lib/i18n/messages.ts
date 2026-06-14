@@ -144,14 +144,6 @@ export type MessageKey =
   | 'onboarding.rejected.intro'
   | 'onboarding.rejected.resubmitNote'
   | 'onboarding.rejected.submit'
-  // Storefront nav
-  | 'storefront.nav.catalog'
-  | 'storefront.nav.quotes'
-  | 'storefront.nav.cart'
-  | 'storefront.nav.orders'
-  | 'storefront.nav.invoices'
-  | 'storefront.nav.approvals'
-  | 'storefront.nav.signIn'
   // Catalog
   | 'catalog.title'
   | 'catalog.countOne'
@@ -585,14 +577,6 @@ export const MESSAGES: Record<Locale, Dict> = {
     'onboarding.rejected.resubmitNote':
       'You can submit the updated certificate. The account will go back to PENDING for review.',
     'onboarding.rejected.submit': 'Resubmit for review',
-    // Storefront nav
-    'storefront.nav.catalog': 'Catalog',
-    'storefront.nav.quotes': 'Quotes',
-    'storefront.nav.cart': 'Cart',
-    'storefront.nav.orders': 'Orders',
-    'storefront.nav.invoices': 'Invoices',
-    'storefront.nav.approvals': 'Approvals',
-    'storefront.nav.signIn': 'Sign in',
     // Catalog
     'catalog.title': 'Catalog',
     'catalog.countOne': '1 product',
@@ -1020,14 +1004,6 @@ export const MESSAGES: Record<Locale, Dict> = {
     'onboarding.rejected.resubmitNote':
       'Podés volver a enviar el certificado actualizado. La cuenta volverá a estado PENDING hasta nueva revisión.',
     'onboarding.rejected.submit': 'Re-enviar para revisión',
-    // Storefront nav
-    'storefront.nav.catalog': 'Catálogo',
-    'storefront.nav.quotes': 'Cotizaciones',
-    'storefront.nav.cart': 'Carrito',
-    'storefront.nav.orders': 'Órdenes',
-    'storefront.nav.invoices': 'Facturas',
-    'storefront.nav.approvals': 'Aprobaciones',
-    'storefront.nav.signIn': 'Entrar',
     // Catalog
     'catalog.title': 'Catálogo',
     'catalog.countOne': '1 producto',

@@ -23,7 +23,7 @@ vi.mock('next/headers', () => ({
   cookies: vi.fn(async () => ({ get: () => undefined })),
 }))
 
-// StoreHeader hace queries (cart, etc.) — para esta suite del layout no nos
+// HeaderContainer hace queries (cart, etc.) — para esta suite del layout no nos
 // importa, así que lo mockeamos a un noop. El render solo importa cuando NO
 // se redirige (caso anónimo + verificado).
 vi.mock('@/components/commerce/HeaderContainer', () => ({

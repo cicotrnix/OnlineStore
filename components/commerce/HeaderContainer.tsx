@@ -9,9 +9,9 @@ import type { JSX } from 'react'
 
 /**
  * Wrapper server del header único: resuelve datos (sesión, cart, flags, locale,
- * impersonation) y delega el render en el `Header` presentacional. Reemplaza el
- * fetch que hoy hace `StoreHeader`. Lo consumen los tres shells (storefront,
- * account, home) con la `variant` correspondiente.
+ * impersonation) y delega el render en el `Header` presentacional. Único punto
+ * de fetch del chrome. Lo consumen los tres shells (storefront, account, home)
+ * con la `variant` correspondiente.
  */
 export async function HeaderContainer({
   variant,
