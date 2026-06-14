@@ -1,15 +1,14 @@
-import { Card, CardBody } from '@/components/ui/Card'
-import { formatMoney } from '@/lib/money'
-import { getStoreConfig } from '@/stores'
+import { ProductCard } from '@/components/commerce/ProductCard'
+import { getProductCardContext } from '@/lib/catalog/card-context'
+import { pricingService } from '@/modules/pricing'
 import type { Category, Product } from '@prisma/client'
 import Link from 'next/link'
 
 type Props = {
   hits: (Product & { category: Category })[]
-  signedIn: boolean
 }
 
-export function SearchResults({ hits, signedIn }: Props) {
+export async function SearchResults({ hits }: Props) {
   if (hits.length === 0) {
     return (
       <div className="text-center py-12">
@@ -24,28 +23,30 @@ export function SearchResults({ hits, signedIn }: Props) {
       </div>
     )
   }
+
+  const ctx = await getProductCardContext()
+  const customerPrices = ctx.orgId
+    ? await pricingService.batchResolveForOrg(
+        ctx.orgId,
+        hits.map((p) => p.id)
+      )
+    : new Map()
+
   return (
-    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {hits.map((p) => (
         <li key={p.id}>
-          <Link href={`/products/${p.slug}`}>
-            <Card className="hover:border-gray-400 h-full">
-              <CardBody>
-                <h3 className="font-medium text-sm">{p.name}</h3>
-                <p className="mt-1 text-xs text-gray-500">{p.category.name}</p>
-                <p className="mt-1 text-[10px] text-gray-400 font-mono">SKU {p.sku}</p>
-                {signedIn ? (
-                  <p className="mt-3 text-sm font-medium tabular-nums">
-                    {formatMoney(p.basePrice, getStoreConfig().currency.base)}
-                  </p>
-                ) : (
-                  <p className="mt-3 text-xs text-gray-500 italic">
-                    Iniciá sesión para ver precios
-                  </p>
-                )}
-              </CardBody>
-            </Card>
-          </Link>
+          <ProductCard
+            product={p}
+            customerPrice={customerPrices.get(p.id)}
+            currency={ctx.currency}
+            canAddToCart={ctx.canAddToCart}
+            locale={ctx.locale}
+            returnTo="/search"
+            disabledReason={ctx.disabledReason}
+            showPrice={ctx.showPrice}
+            signInLinkLabel={ctx.signInLinkLabel}
+          />
         </li>
       ))}
     </ul>

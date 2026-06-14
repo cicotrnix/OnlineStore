@@ -100,7 +100,7 @@ export default async function SearchPage({ searchParams }: Props) {
                 )}{' '}
                 <span className="text-gray-400">· modo {result.mode}</span>
               </p>
-              <SearchResults hits={result.hits} signedIn={signedIn} />
+              <SearchResults hits={result.hits} />
               <Pagination
                 total={result.total}
                 pageSize={limit}

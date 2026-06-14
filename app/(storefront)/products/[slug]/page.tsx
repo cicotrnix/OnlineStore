@@ -193,7 +193,7 @@ export default async function ProductPage({ params }: Props) {
           </div>
         )}
       </div>
-      <RelatedProducts title={relatedTitle} products={related} signedIn={!!session?.user} />
+      <RelatedProducts title={relatedTitle} products={related} />
     </div>
   )
 }
