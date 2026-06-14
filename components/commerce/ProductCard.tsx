@@ -81,7 +81,7 @@ export function ProductCard({
             className="object-contain p-4"
           />
         ) : (
-          <span className="text-xs text-gray-400">{noImageLabel}</span>
+          <span className="text-xs text-gray-500">{noImageLabel}</span>
         )}
       </Link>
 
@@ -98,7 +98,7 @@ export function ProductCard({
         </div>
 
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-wide text-gray-400">
+          <div className="font-mono text-[10px] uppercase tracking-wide text-gray-500">
             {product.sku}
           </div>
           <Link
