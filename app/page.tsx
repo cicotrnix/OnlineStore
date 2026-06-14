@@ -47,7 +47,16 @@ export default async function LandingPage() {
     <div className="min-h-screen flex flex-col bg-surface text-ink-700">
       <HomeMotion />
 
-      <Header isSignedIn={Boolean(session?.user)} locale={locale} initialTheme="dark" />
+      {/* Stopgap: la home migra a <HeaderContainer variant="home"> en la pieza 5
+          (con el retiro de landing.nav.*). Por ahora pasa los props nuevos. */}
+      <Header
+        variant="home"
+        isSignedIn={Boolean(session?.user)}
+        locale={locale}
+        initialTheme="dark"
+        cartCount={0}
+        flags={{ rfq: false, credit: false, approvals: false }}
+      />
 
       <main className="flex-1">
         {/* Hero — dark canvas. "Volvé al 100%. Cero ciclos." */}

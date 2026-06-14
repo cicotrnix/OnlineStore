@@ -1,4 +1,4 @@
-import { StoreHeader } from '@/components/commerce/StoreHeader'
+import { HeaderContainer } from '@/components/commerce/HeaderContainer'
 import { maintainCurrentSession } from '@/lib/auth/maintain'
 
 export const dynamic = 'force-dynamic'
@@ -7,7 +7,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
   await maintainCurrentSession()
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <StoreHeader />
+      <HeaderContainer variant="inner" />
       <main className="flex-1">{children}</main>
     </div>
   )

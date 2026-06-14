@@ -1,5 +1,7 @@
 import { HeaderThemeWatcher } from '@/components/commerce/HeaderThemeWatcher'
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
+import { NotificationBadge } from '@/components/commerce/NotificationBadge'
+import { SearchBar } from '@/components/commerce/SearchBar'
 import { SignOutButton } from '@/components/commerce/SignOutButton'
 import { t } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n/messages'
@@ -7,40 +9,55 @@ import { getStoreConfig } from '@/stores'
 import Image from 'next/image'
 import Link from 'next/link'
 
-interface Props {
-  isSignedIn: boolean
+export interface HeaderProps {
+  variant: 'home' | 'inner'
   locale: Locale
-  /**
-   * First-paint theme (SSR). HeaderThemeWatcher then flips this on scroll
-   * based on the `data-header-theme` attribute of whatever section is
-   * directly under the bar. Pages with no such sections keep this value.
-   */
+  isSignedIn: boolean
+  /** First-paint theme (SSR), solo se usa en variant='home'. */
   initialTheme?: 'dark' | 'light'
+  cartCount: number
+  /** Reservado (NotificationBadge se auto-fetchea hoy). */
+  notificationCount?: number
+  flags: { rfq: boolean; credit: boolean; approvals: boolean }
 }
 
 /**
- * Sticky header. Transparent over dark sections, semi-transparent surface
- * over light sections; logo + link colours crossfade between the two.
- * Theme is encoded as `data-header-theme="dark" | "light"` on the <header>
- * element and toggled by HeaderThemeWatcher in response to scroll. All the
- * styling switches live as Tailwind `data-[...]:` / `group-data-[...]:`
- * variants so the React tree never re-renders on scroll.
+ * Header único del chrome "Back to 100%" (storefront + account + home).
  *
- * WCAG: in BOTH states the logo, nav links, Register CTA, and locale
- * selector hit AA against their background. Register stays lime + slate
- * across themes (AAA on lime, AAA on dark, AAA on surface).
+ * - variant='home': barra transparente sobre el hero oscuro con crossfade
+ *   dark↔light en scroll (monta HeaderThemeWatcher). Sin búsqueda.
+ * - variant='inner': barra SÓLIDA clara fija (sin watcher, sin transparencia —
+ *   no hay hero debajo). Con búsqueda inline.
+ *
+ * Presentacional puro: sin DB ni auth(); todo por props (las resuelve
+ * HeaderContainer). El tree no re-renderiza en scroll (las variantes de tema
+ * son `data-[...]:` de Tailwind, no estado de React).
+ *
+ * WCAG: logo, links, Register CTA, locale y campana pasan AA en ambos temas.
  */
-export function Header({ isSignedIn, locale, initialTheme = 'light' }: Props) {
+export function Header({
+  variant,
+  locale,
+  isSignedIn,
+  initialTheme = 'light',
+  cartCount,
+  flags,
+}: HeaderProps) {
   const store = getStoreConfig()
   const logoLightSrc = store.identity.logoLight ?? store.identity.logo
+  const isHome = variant === 'home'
 
-  const barCls = [
-    'group/header sticky top-0 z-sticky border-b backdrop-blur',
-    'transition-[background-color,border-color] duration-300 ease-out motion-reduce:duration-0',
-    'data-[header-theme=dark]:bg-transparent data-[header-theme=dark]:border-transparent',
-    'data-[header-theme=light]:bg-surface/85 data-[header-theme=light]:supports-[backdrop-filter]:bg-surface/70 data-[header-theme=light]:border-ink-100',
-  ].join(' ')
+  const barCls = isHome
+    ? [
+        'group/header sticky top-0 z-sticky border-b backdrop-blur',
+        'transition-[background-color,border-color] duration-300 ease-out motion-reduce:duration-0',
+        'data-[header-theme=dark]:bg-transparent data-[header-theme=dark]:border-transparent',
+        'data-[header-theme=light]:bg-surface/85 data-[header-theme=light]:supports-[backdrop-filter]:bg-surface/70 data-[header-theme=light]:border-ink-100',
+      ].join(' ')
+    : 'group/header sticky top-0 z-sticky border-b bg-surface border-ink-100'
 
+  // Links: las variantes light de los data-attrs aplican en ambos casos (inner
+  // queda fijo en data-header-theme=light).
   const linkCls = [
     'rounded transition-colors duration-300 ease-out motion-reduce:duration-0',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
@@ -48,7 +65,6 @@ export function Header({ isSignedIn, locale, initialTheme = 'light' }: Props) {
     'group-data-[header-theme=light]/header:text-ink-700 group-data-[header-theme=light]/header:hover:text-ink-950 group-data-[header-theme=light]/header:focus-visible:ring-offset-surface',
   ].join(' ')
 
-  // Register CTA — lime fill + slate text in BOTH themes per brief.
   const ctaCls = [
     'inline-flex items-center rounded-button bg-accent text-ink-950 px-4 py-2 font-semibold',
     'transition-all duration-150 hover:-translate-y-px',
@@ -61,17 +77,14 @@ export function Header({ isSignedIn, locale, initialTheme = 'light' }: Props) {
     'h-14 md:h-16 w-auto transition-opacity duration-300 ease-out motion-reduce:duration-0'
 
   return (
-    <header className={barCls} data-header-theme={initialTheme}>
-      <HeaderThemeWatcher />
-      <div className="mx-auto max-w-[1240px] px-5 md:px-8 h-20 flex items-center justify-between">
+    <header className={barCls} data-header-theme={isHome ? initialTheme : 'light'}>
+      {isHome && <HeaderThemeWatcher />}
+      <div className="mx-auto max-w-[1240px] px-5 md:px-8 h-20 flex items-center justify-between gap-4">
         <Link
           href="/"
           aria-label={store.identity.name}
           className="-my-2 block shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
-          {/* Crossfade: both logos stacked via CSS grid, opacity driven by the
-              parent header's data-header-theme. Both images share intrinsic
-              dimensions so neither causes layout shift on swap. */}
           <span className="grid h-14 md:h-16 w-auto">
             <Image
               src={store.identity.logo}
@@ -94,27 +107,69 @@ export function Header({ isSignedIn, locale, initialTheme = 'light' }: Props) {
             />
           </span>
         </Link>
-        <nav className="flex items-center gap-6 text-small">
+
+        {/* Búsqueda inline — solo en páginas internas. */}
+        {!isHome && (
+          <div className="hidden md:block flex-1 max-w-md" data-testid="header-search">
+            <SearchBar placeholder={t(locale, 'header.searchPlaceholder')} />
+          </div>
+        )}
+
+        <nav className="flex items-center gap-5 text-small">
           <Link href="/catalog" className={linkCls}>
-            {t(locale, 'landing.nav.catalog')}
+            {t(locale, 'header.catalog')}
           </Link>
+
           {isSignedIn ? (
             <>
+              {/* Cuenta inline (piece 2); AccountMenu la colapsa en piece 3. */}
               <Link href="/orders" className={linkCls}>
-                {t(locale, 'landing.nav.myAccount')}
+                {t(locale, 'header.orders')}
               </Link>
-              <SignOutButton />
+              <Link href="/orders" className={linkCls}>
+                {t(locale, 'header.buyAgain')}
+              </Link>
+              {flags.rfq && (
+                <Link href="/quotes" className={linkCls}>
+                  {t(locale, 'header.quotes')}
+                </Link>
+              )}
+              {flags.credit && (
+                <Link href="/invoices" className={linkCls}>
+                  {t(locale, 'header.invoices')}
+                </Link>
+              )}
+              {flags.approvals && (
+                <Link href="/approvals" className={linkCls}>
+                  {t(locale, 'header.approvals')}
+                </Link>
+              )}
+              <Link
+                href="/cart"
+                className={`relative ${linkCls}`}
+                aria-label={t(locale, 'header.cartItems', { count: cartCount })}
+              >
+                {t(locale, 'header.cart')}
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-4 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-ink-950">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+              <NotificationBadge />
+              <SignOutButton label={t(locale, 'header.signOut')} className={linkCls} />
             </>
           ) : (
             <>
               <Link href="/sign-in" className={linkCls}>
-                {t(locale, 'landing.nav.signIn')}
+                {t(locale, 'header.signIn')}
               </Link>
               <Link href="/sign-up" className={ctaCls}>
-                {t(locale, 'landing.nav.register')}
+                {t(locale, 'header.register')}
               </Link>
             </>
           )}
+
           <LocaleSwitch current={locale} />
         </nav>
       </div>

@@ -1,5 +1,5 @@
 import { ChatWidget } from '@/components/commerce/ChatWidget'
-import { StoreHeader } from '@/components/commerce/StoreHeader'
+import { HeaderContainer } from '@/components/commerce/HeaderContainer'
 import { getCustomerState } from '@/lib/auth/customer'
 import { maintainCurrentSession } from '@/lib/auth/maintain'
 import { getStoreConfig } from '@/stores'
@@ -24,7 +24,7 @@ export default async function StorefrontLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <StoreHeader />
+      <HeaderContainer variant="inner" />
       <main className="flex-1">{children}</main>
       <footer className="border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-6 text-xs text-gray-500">
