@@ -1,3 +1,4 @@
+import { AccountMenu } from '@/components/commerce/AccountMenu'
 import { HeaderThemeWatcher } from '@/components/commerce/HeaderThemeWatcher'
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
@@ -122,28 +123,6 @@ export function Header({
 
           {isSignedIn ? (
             <>
-              {/* Cuenta inline (piece 2); AccountMenu la colapsa en piece 3. */}
-              <Link href="/orders" className={linkCls}>
-                {t(locale, 'header.orders')}
-              </Link>
-              <Link href="/orders" className={linkCls}>
-                {t(locale, 'header.buyAgain')}
-              </Link>
-              {flags.rfq && (
-                <Link href="/quotes" className={linkCls}>
-                  {t(locale, 'header.quotes')}
-                </Link>
-              )}
-              {flags.credit && (
-                <Link href="/invoices" className={linkCls}>
-                  {t(locale, 'header.invoices')}
-                </Link>
-              )}
-              {flags.approvals && (
-                <Link href="/approvals" className={linkCls}>
-                  {t(locale, 'header.approvals')}
-                </Link>
-              )}
               <Link
                 href="/cart"
                 className={`relative ${linkCls}`}
@@ -156,8 +135,20 @@ export function Header({
                   </span>
                 )}
               </Link>
+              {/* Ítems de cuenta (Orders/Buy again/Quotes/Invoices/Approvals/Sign
+                  out) colapsados en el dropdown para no recargar el chrome. */}
+              <AccountMenu
+                locale={locale}
+                flags={flags}
+                triggerClassName={linkCls}
+                signOut={
+                  <SignOutButton
+                    label={t(locale, 'header.signOut')}
+                    className="block w-full px-4 py-2 text-left text-sm text-ink-700 hover:bg-ink-50"
+                  />
+                }
+              />
               <NotificationBadge />
-              <SignOutButton label={t(locale, 'header.signOut')} className={linkCls} />
             </>
           ) : (
             <>

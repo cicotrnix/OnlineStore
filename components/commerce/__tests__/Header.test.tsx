@@ -14,6 +14,16 @@ vi.mock('@/components/commerce/NotificationBadge', () => ({ NotificationBadge: (
 vi.mock('@/components/commerce/SignOutButton', () => ({
   SignOutButton: ({ label }: { label?: string }) => <button type="button">{label}</button>,
 }))
+vi.mock('@/components/commerce/AccountMenu', () => ({
+  AccountMenu: (p: { flags: { rfq: boolean; credit: boolean; approvals: boolean } }) => (
+    <span
+      data-testid="account-menu"
+      data-rfq={String(p.flags.rfq)}
+      data-credit={String(p.flags.credit)}
+      data-approvals={String(p.flags.approvals)}
+    />
+  ),
+}))
 
 const base: HeaderProps = {
   variant: 'inner',
@@ -45,26 +55,21 @@ describe('Header', () => {
     expect(render({ variant: 'home', initialTheme: 'dark' })).toContain('data-header-theme="dark"')
   })
 
-  it('signed-in muestra cuenta + cart; anónimo muestra Sign in + Register', () => {
+  it('signed-in muestra AccountMenu + cart; anónimo muestra Sign in + Register', () => {
     const signed = render({ isSignedIn: true })
-    expect(signed).toContain('Orders')
-    expect(signed).toContain('Buy again')
+    expect(signed).toContain('data-testid="account-menu"')
     expect(signed).toContain('Cart')
     const anon = render({ isSignedIn: false })
     expect(anon).toContain('Sign in')
     expect(anon).toContain('Register')
-    expect(anon).not.toContain('Buy again')
+    expect(anon).not.toContain('data-testid="account-menu"')
   })
 
-  it('flags on/off muestran/ocultan quotes/invoices/approvals', () => {
-    const off = render({ flags: { rfq: false, credit: false, approvals: false } })
-    expect(off).not.toContain('Quotes')
-    expect(off).not.toContain('Invoices')
-    expect(off).not.toContain('Approvals')
-    const on = render({ flags: { rfq: true, credit: true, approvals: true } })
-    expect(on).toContain('Quotes')
-    expect(on).toContain('Invoices')
-    expect(on).toContain('Approvals')
+  it('pasa los flags al AccountMenu (los ítems gateados viven en el dropdown)', () => {
+    const on = render({ flags: { rfq: true, credit: false, approvals: true } })
+    expect(on).toContain('data-rfq="true"')
+    expect(on).toContain('data-credit="false"')
+    expect(on).toContain('data-approvals="true"')
   })
 
   it('badge del carrito solo con cartCount > 0', () => {
