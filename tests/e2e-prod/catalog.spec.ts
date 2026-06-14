@@ -79,7 +79,9 @@ test.describe('catálogo rediseñado (prod build)', () => {
 
     await page.getByRole('link', { name: /^Tag-on Flex$/ }).click()
     await expect(page).toHaveURL(/category=tag-on-flex/)
-    await expect(page.getByText(/Tag-on Flex \(todos/i).first()).toBeVisible()
+    // Tag-on = un producto por modelo: "Tag-on Flex — iPhone X" (el em-dash evita
+    // matchear la tab "Tag-on Flex").
+    await expect(page.getByText(/Tag-on Flex — iPhone/i).first()).toBeVisible()
   })
 
   test('toggle Cards/List persiste por usuario', async ({ browser }) => {
@@ -106,7 +108,9 @@ test.describe('catálogo rediseñado (prod build)', () => {
     const page = await ctx.newPage()
     try {
       await page.goto('/catalog', { waitUntil: 'networkidle' })
-      const card = page.locator('article').filter({ hasText: 'iPhone 13 Pro Max' })
+      // Filtra por SKU (único en el card): "iPhone 13 Pro Max" aparece en battery
+      // cell + tag-on + plug&play; el SKU desambigua la celda en stock.
+      const card = page.locator('article').filter({ hasText: 'PP-BC-13PM' })
       await card.getByRole('button', { name: /increase quantity/i }).click()
       await expect(card.getByRole('spinbutton')).toHaveValue('2')
       await card.getByRole('button', { name: /^add$/i }).click()
