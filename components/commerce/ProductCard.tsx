@@ -6,7 +6,14 @@ import Link from 'next/link'
 import { AddToCartButton } from './AddToCartButton'
 import { NotifyButton } from './NotifyButton'
 import { PriceTag } from './PriceTag'
-import { type Chip, type StockState, deriveChips, deriveStockState } from './product-display'
+import {
+  CHIP_TONE,
+  STOCK_DOT,
+  chipLabel,
+  deriveChips,
+  deriveStockState,
+  stockLabel,
+} from './product-display'
 
 type Product = {
   id: string
@@ -38,53 +45,6 @@ type Props = {
 /** Quita del nombre del proveedor el sufijo "(Spot Welding Required)" — el chip ya lo dice. */
 function cleanName(name: string): string {
   return name.replace(/\s*\(spot welding required\)\s*/gi, ' ').trim()
-}
-
-const STOCK_DOT: Record<StockState, string> = {
-  in_stock: 'bg-lime-500',
-  incoming: 'bg-amber-500',
-  coming_soon: 'bg-gray-400',
-  out_of_stock: 'bg-gray-400',
-}
-
-function stockLabel(state: StockState, locale: Locale): string {
-  switch (state) {
-    case 'in_stock':
-      return t(locale, 'catalog.stock.inStock')
-    case 'incoming':
-      return t(locale, 'catalog.stock.incoming')
-    case 'coming_soon':
-      return t(locale, 'catalog.stock.comingSoon')
-    default:
-      return t(locale, 'catalog.stock.outOfStock')
-  }
-}
-
-function chipLabel(chip: Chip, locale: Locale): string {
-  switch (chip.key) {
-    case 'seal':
-      return '0-cycle · 100%'
-    case 'spotWeld':
-      return t(locale, 'catalog.chip.spotWeld')
-    case 'plugAndPlay':
-      return t(locale, 'catalog.chip.plugAndPlay')
-    case 'flexProgrammed':
-      return t(locale, 'catalog.chip.flexProgrammed')
-    case 'tagOn':
-      return t(locale, 'catalog.chip.tagOn')
-    default:
-      return `+${chip.value ?? ''}`
-  }
-}
-
-// Tonos: sello/capacidad/plug = lima-deep; flex/tag-on = lima suave; spot-weld = ámbar (accionable).
-const CHIP_TONE: Record<Chip['key'], string> = {
-  seal: 'border-lime-200 bg-lime-50 text-lime-700',
-  capacity: 'border-lime-200 bg-lime-50 text-lime-700',
-  plugAndPlay: 'border-lime-200 bg-lime-50 text-lime-700',
-  flexProgrammed: 'border-lime-100 bg-lime-50/60 text-lime-700',
-  tagOn: 'border-lime-100 bg-lime-50/60 text-lime-700',
-  spotWeld: 'border-amber-200 bg-amber-50 text-amber-800',
 }
 
 export function ProductCard({

@@ -1,7 +1,10 @@
+import { type Locale, t } from '@/lib/i18n'
+
 /**
  * Lógica de presentación del catálogo, dirigida por DATOS (`attributes` JSON +
- * categoría), nunca por parsing del nombre. Pura y testeable; la comparten
- * `ProductCard` (Vista A) y `ProductListRow` (Vista B).
+ * categoría), nunca por parsing del nombre. La comparten `ProductCard` (Vista A)
+ * y `ProductListRow` (Vista B) para que ambas vistas usen el MISMO sistema
+ * visual (chips, tonos, estados de stock).
  */
 
 export type StockState = 'in_stock' | 'incoming' | 'coming_soon' | 'out_of_stock'
@@ -52,4 +55,54 @@ export function deriveChips(input: {
     chips.push({ key: 'capacity', value: a.capacity })
   }
   return chips
+}
+
+// ── Presentación compartida (card + fila densa) ──────────────────────────────
+
+/** Punto de color por estado (acompañado SIEMPRE de texto — nunca color-only). */
+export const STOCK_DOT: Record<StockState, string> = {
+  in_stock: 'bg-lime-500',
+  incoming: 'bg-amber-500',
+  coming_soon: 'bg-gray-400',
+  out_of_stock: 'bg-gray-400',
+}
+
+export function stockLabel(state: StockState, locale: Locale): string {
+  switch (state) {
+    case 'in_stock':
+      return t(locale, 'catalog.stock.inStock')
+    case 'incoming':
+      return t(locale, 'catalog.stock.incoming')
+    case 'coming_soon':
+      return t(locale, 'catalog.stock.comingSoon')
+    default:
+      return t(locale, 'catalog.stock.outOfStock')
+  }
+}
+
+// Tonos: sello/capacidad/plug = lima-deep; flex/tag-on = lima suave; spot-weld = ámbar (accionable).
+export const CHIP_TONE: Record<ChipKey, string> = {
+  seal: 'border-lime-200 bg-lime-50 text-lime-700',
+  capacity: 'border-lime-200 bg-lime-50 text-lime-700',
+  plugAndPlay: 'border-lime-200 bg-lime-50 text-lime-700',
+  flexProgrammed: 'border-lime-100 bg-lime-50/60 text-lime-700',
+  tagOn: 'border-lime-100 bg-lime-50/60 text-lime-700',
+  spotWeld: 'border-amber-200 bg-amber-50 text-amber-800',
+}
+
+export function chipLabel(chip: Chip, locale: Locale): string {
+  switch (chip.key) {
+    case 'seal':
+      return '0-cycle · 100%'
+    case 'spotWeld':
+      return t(locale, 'catalog.chip.spotWeld')
+    case 'plugAndPlay':
+      return t(locale, 'catalog.chip.plugAndPlay')
+    case 'flexProgrammed':
+      return t(locale, 'catalog.chip.flexProgrammed')
+    case 'tagOn':
+      return t(locale, 'catalog.chip.tagOn')
+    default:
+      return `+${chip.value ?? ''}`
+  }
 }
