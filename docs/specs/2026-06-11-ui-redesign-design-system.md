@@ -59,7 +59,11 @@ Métricas fijas en home: **0×** ciclos · **100%** salud · **+12%** capacidad 
 Fondo `neutral-900`. Números mono con unidad en `accent`. 4 columnas.
 
 ### SpecReadout (`components/commerce/SpecReadout.tsx`)
-Instrumento 3 columnas en product cards y PDP.  
+**Actualizado 2026-06-14 (redesign/catalog):** sello compacto en los cards del
+catálogo (chip `0-cycle · 100%`, no el instrumento de 3 columnas — sería
+"información cero" repetida por card); el **instrumento completo de 3 columnas se
+reserva para la PDP**. La intención original "en product cards" nunca llegó al
+código (el `ProductCard` jamás usó `SpecReadout`); el único uso real es la home.  
 Valores constantes por producto nuevo: `100%` salud / `0` ciclos.  
 Capacidad: **solo si existe `product.attributes.capacity`** — nunca inventar.  
 El valor `up` (capacidad) renderiza en `lime-deep` (AA sobre blanco).
@@ -77,7 +81,7 @@ El valor `up` (capacidad) renderiza en `lime-deep` (AA sobre blanco).
 | Footer          | `surface`       | `light`             |
 
 ### Featured grid
-- Fuente: `prisma.product` real (mismo filtro que `FeaturedGrid.tsx`).
+- Fuente: `prisma.product` real (filtro inline en `app/page.tsx`; el `FeaturedGrid.tsx` legacy fue borrado — el home renderiza sus featured cards inline desde el PR #30).
 - Sección se oculta si `featuredProducts.length === 0`.
 - Imagen: `product.imageUrl` si existe; fallback = battery glyph SVG inline.
 - Badge "Tag-On Flex": solo si `product.attributes.tagOnFlex === true`.

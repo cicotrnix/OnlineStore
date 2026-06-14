@@ -114,14 +114,14 @@ Antes de tocar código, leer en este orden:
 - **Home — HECHO** (PR #30 mergeada). Reconciliada con el design system.  
   Componentes compartidos: `components/commerce/StatStrip.tsx`, `components/commerce/SpecReadout.tsx`.
 - **Header — HECHO** (branch `redesign/header`, mergeada). Chrome único "Back to 100%" para storefront + account + home vía `Header.tsx` presentacional con `variant='home'|'inner'` + `HeaderContainer.tsx` (server, único punto de fetch). `StoreHeader` legacy borrado, namespaces i18n consolidados en `header.*`. `AccountMenu` (dropdown a11y) + `MobileNav` (drawer Vaul). Spec: `docs/superpowers/specs/2026-06-13-header-unification-design.md`.
+- **Catálogo + ProductCard — HECHO** (branch `redesign/catalog`, mergeada). `ProductCard` dir. B (chips por atributo dirigidos por `attributes`/categoría, sello `0-cycle · 100%`, stepper `− [n] +`, 3 estados de stock punto+texto, Notify) = **card único** aplicado también a PDP-related + `/search` (helpers en `components/commerce/product-display.ts`, gating B2B en `lib/catalog/card-context.ts`). `ProductListRow` (Vista B densa) mismo sistema. Chrome `/catalog`: tabs `aria-current`, toggle lima, `catalog.loginForPrice`. Seed swap a catálogo Pi-Power real (15 productos, imágenes locales → cierra FU-011). Spec: `docs/superpowers/specs/2026-06-14-catalog-productcard-design.md`. **Nota:** el **home quedó intacto** (sus featured cards ya eran "Back to 100%" del PR #30, no usan el card del catálogo); `FeaturedGrid.tsx` legacy borrado (código muerto). Pendiente ops: precios Plug & Play (Herney), capacidad +X% (FU-010).
 
 **Orden restante:**
-1. **Catálogo + ProductCard** ← siguiente superficie
-2. PDP
-3. Carrito + Checkout (Vaul drawer mobile)
-4. Auth (sign-in / sign-up)
-5. Cuenta / Admin
-6. Barrido i18n storefront (claves pendientes — transversal)
+1. **PDP** ← siguiente superficie (acá va el `SpecReadout` instrumento completo + galería)
+2. Carrito + Checkout (Vaul drawer mobile)
+3. Auth (sign-in / sign-up)
+4. Cuenta / Admin
+5. Barrido i18n storefront (claves pendientes — transversal)
 
 **Nota DX importante:** vitest necesita `DATABASE_URL` explícito en el entorno.  
 Sin él, ~239 tests fallan con `PrismaClientInitializationError` — **no son regresión**, es un problema de entorno.  
