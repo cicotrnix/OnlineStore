@@ -86,11 +86,29 @@ El valor `up` (capacidad) renderiza en `lime-deep` (AA sobre blanco).
 
 ---
 
-## Header adaptativo (`components/commerce/Header.tsx`)
+## Header unificado (`components/commerce/Header.tsx`)
 
-`HeaderThemeWatcher` (client component) observa `[data-header-theme]` con IntersectionObserver.  
-Dos estados: `dark` (transparente sobre hero/stat-strip) → `light` (semi-opaco `surface/90` sobre secciones claras).  
-Transición CSS `transition-colors duration-300`. Logo crossfade (dark variant / default).
+> **Actualizado 2026-06-13 (branch `redesign/header`):** el header dejó de ser "solo home".
+> Ahora es **un único chrome** para storefront + account + home. Spec de la unificación:
+> `docs/superpowers/specs/2026-06-13-header-unification-design.md`.
+
+`Header.tsx` es **presentacional** y recibe `variant: 'home' | 'inner'`. El fetch de datos
+(sesión, cart count, flags, locale, impersonation) vive en `HeaderContainer.tsx` (server
+component, único punto de fetch), consumido por los tres shells con la `variant` correspondiente.
+
+- **`variant='home'`** — adaptativo scroll-aware. `HeaderThemeWatcher` (client) observa
+  `[data-header-theme]` con IntersectionObserver. Dos estados: `dark` (transparente sobre
+  hero/stat-strip) → `light` (semi-opaco `surface/90` sobre secciones claras). Transición CSS
+  `transition-colors duration-300`. Logo crossfade (dark variant / default).
+- **`variant='inner'`** — barra sólida clara fija (sin `HeaderThemeWatcher`), con `SearchBar`
+  inline. Es el chrome de todas las páginas internas; mata la costura de "dos marcas"
+  home↔storefront.
+
+Affordances compartidas (ambas variantes): link de carrito con badge, `AccountMenu`
+(dropdown de cuenta con a11y completa — `aria-haspopup/expanded/controls`, foco al abrir,
+Esc cierra y devuelve foco, click-outside), `NotificationBadge`, y `MobileNav` (drawer Vaul,
+`direction="right"`). i18n consolidado bajo el namespace `header.*` (se retiraron
+`landing.nav.*` y `storefront.nav.*`). `StoreHeader` legacy eliminado.
 
 ---
 

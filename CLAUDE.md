@@ -111,17 +111,17 @@ Antes de tocar código, leer en este orden:
 **Método de ejecución:** superficie por superficie — branch `redesign/<superficie>` + PR, review de Herney en localhost antes de merge. No mergear sin confirmación.
 
 **Estado:**
-- **Home (PR #30):** reconciliada con el design system, lista para merge.  
-  Componentes compartidos ya creados: `components/commerce/StatStrip.tsx`, `components/commerce/SpecReadout.tsx`, `components/commerce/Header.tsx` (adaptativo dark/light scroll-aware).
+- **Home — HECHO** (PR #30 mergeada). Reconciliada con el design system.  
+  Componentes compartidos: `components/commerce/StatStrip.tsx`, `components/commerce/SpecReadout.tsx`.
+- **Header — HECHO** (branch `redesign/header`, mergeada). Chrome único "Back to 100%" para storefront + account + home vía `Header.tsx` presentacional con `variant='home'|'inner'` + `HeaderContainer.tsx` (server, único punto de fetch). `StoreHeader` legacy borrado, namespaces i18n consolidados en `header.*`. `AccountMenu` (dropdown a11y) + `MobileNav` (drawer Vaul). Spec: `docs/superpowers/specs/2026-06-13-header-unification-design.md`.
 
 **Orden restante:**
-1. Merge Home (PR #30)
-2. Barrido i18n storefront (claves pendientes)
-3. Catálogo + ProductCard
-4. PDP
-5. Carrito + Checkout (Vaul drawer mobile)
-6. Auth (sign-in / sign-up)
-7. Cuenta / Admin
+1. **Catálogo + ProductCard** ← siguiente superficie
+2. PDP
+3. Carrito + Checkout (Vaul drawer mobile)
+4. Auth (sign-in / sign-up)
+5. Cuenta / Admin
+6. Barrido i18n storefront (claves pendientes — transversal)
 
 **Nota DX importante:** vitest necesita `DATABASE_URL` explícito en el entorno.  
 Sin él, ~239 tests fallan con `PrismaClientInitializationError` — **no son regresión**, es un problema de entorno.  

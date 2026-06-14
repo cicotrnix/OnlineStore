@@ -79,3 +79,15 @@ Una cajita donde el cliente pone el **IMEI** (o el modelo) de su iPhone y la tie
 **Origen:** restore del tag de capacidad (2026-06-13). **Cuándo:** cuando llegue la doc del fabricante.
 
 Hero **+10% capacidad** — dato real de especificaciones de batería (restaurado en `app/_home-stats.ts` tras quitar el inventado +12% en 835c435). Pendiente: **citar fuente formal del fabricante** cuando llegue la doc. Al tenerla, **revisar 24–48h y demás claims contra esa doc** antes de restaurarlos en el hero/StatStrip (el `24–48h` sigue fuera por ahora). Regla del design system: nunca mostrar dato sin fuente.
+
+## FU-011 — Imágenes del seed demo apuntan a images.unsplash.com → `/catalog` da 500
+
+**Origen:** levantar entorno local para revisar `redesign/header` (2026-06-13). **Cuándo:** antes/junto al rediseño de Catálogo + ProductCard.
+
+`prisma/seed.ts` setea `imageUrl` de los 6 productos demo a `https://images.unsplash.com/...`. `next.config.mjs` **nunca tuvo `images.remotePatterns`** (verificado en historia git — gap pre-existente, no del header). `ProductCard` usa `next/image`, que valida el host remoto en render server-side → `/catalog` tira **500** en cuanto hay un producto con imagen unsplash. En la revisión se whitelisteó el host de forma local **sin commitear** (descartado luego). **Decidir la solución de raíz:** (a) apuntar el seed a imágenes locales propias (`public/`) — preferible, alinea con el plan de imágenes Pi-Power webp; o (b) whitelistear `images.unsplash.com` en `remotePatterns` (solo si seguimos con placeholders remotos). No bloquea el header, pero bloquea cualquier review local de catálogo con datos seed.
+
+## FU-012 — Ruido no-fatal del worker de pino (thread-stream) en el log de dev
+
+**Origen:** levantar entorno local (2026-06-13). **Cuándo:** higiene de DX, sin prisa.
+
+En `pnpm dev` el log tira `MODULE_NOT_FOUND` + `Error: the worker thread exited` desde `thread-stream@4.2.0` (transporte worker de pino) como `uncaughtException`. Las páginas sirven **200** — es ruido del transporte de logging en dev, no afecta runtime ni prod. Revisar config del transport de Pino (`lib/logger`/transport pretty) para que no levante el worker en dev, o silenciar el `uncaughtException`. Prioridad baja: solo ensucia el log.
