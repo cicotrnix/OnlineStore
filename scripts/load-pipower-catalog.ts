@@ -1,224 +1,71 @@
-import { PrismaClient } from '@prisma/client'
+import { LEGACY_SKUS, PIPOWER_CATEGORIES, PIPOWER_PRODUCTS } from '@/lib/catalog/pipower-catalog'
+import { Prisma, PrismaClient } from '@prisma/client'
 import { Decimal } from '@prisma/client/runtime/library'
 
+/**
+ * Loader prod-safe del catálogo Pi-Power. Consume la fuente ÚNICA
+ * (lib/catalog/pipower-catalog.ts), la MISMA que el seed. NO destructivo:
+ * upsert por SKU; no toca usuarios, órdenes ni precios de cliente. Idempotente.
+ * Desactiva (isActive=false) el catálogo viejo Fase 3 (PI-2004xx) para que prod
+ * no quede con duplicados old+new — sin borrar, preservando FKs de órdenes.
+ */
 const prisma = new PrismaClient()
 
-// Catálogo real Pi-Power (baterías iPhone). No destructivo: upsert por SKU.
-const CATEGORY = { slug: 'battery', name: 'Battery', sortOrder: 1 }
-
-type ProductAttrs = Record<string, string | number | boolean>
-
-interface Item {
-  sku: string
-  name: string
-  model: string
-  modelSlug: string
-  price: string
-  stock: number
-  attributes: ProductAttrs
-  compatibleModels: string[]
-}
-
-const COMMON: ProductAttrs = {
-  voltage_v: '3.85',
-  cycles_rated: 800,
-  requires_soldering: true,
-  professional_installation_recommended: true,
-  warranty_months: 12,
-  hazmat_class: '9',
-  requires_ground_shipping: true,
-}
-
-const items: Item[] = [
-  {
-    sku: 'PI-200450',
-    name: 'Battery Cell Pi-Power for iPhone 13 - Extended Capacity',
-    model: 'iPhone 13',
-    modelSlug: '13',
-    price: '9.90',
-    stock: 86,
-    compatibleModels: ['iPhone 13'],
-    attributes: { ...COMMON, capacity_mah: 3279, apple_model_code: 'A2482', flex_included: false },
-  },
-  {
-    sku: 'PI-200451',
-    name: 'Battery Cell Pi-Power for iPhone 13 Pro - Extended Capacity',
-    model: 'iPhone 13 Pro',
-    modelSlug: '13-pro',
-    price: '13.20',
-    stock: 220,
-    compatibleModels: ['iPhone 13 Pro'],
-    attributes: { ...COMMON, capacity_mah: 3095, apple_model_code: 'A2483', flex_included: false },
-  },
-  {
-    sku: 'PI-200452',
-    name: 'Battery Cell Pi-Power for iPhone 13 Pro Max - Extended Capacity',
-    model: 'iPhone 13 Pro Max',
-    modelSlug: '13-pro-max',
-    price: '14.85',
-    stock: 70,
-    compatibleModels: ['iPhone 13 Pro Max'],
-    attributes: { ...COMMON, capacity_mah: 4352, apple_model_code: 'A2484', flex_included: false },
-  },
-  {
-    sku: 'PI-200453',
-    name: 'Battery Cell Pi-Power for iPhone 14 - Extended Capacity',
-    model: 'iPhone 14',
-    modelSlug: '14',
-    price: '11.00',
-    stock: 57,
-    compatibleModels: ['iPhone 14'],
-    attributes: { ...COMMON, capacity_mah: 3279, apple_model_code: 'A2649', flex_included: false },
-  },
-  {
-    sku: 'PI-200454',
-    name: 'Battery Cell Pi-Power for iPhone 14 Pro - Extended Capacity',
-    model: 'iPhone 14 Pro',
-    modelSlug: '14-pro',
-    price: '13.20',
-    stock: 182,
-    compatibleModels: ['iPhone 14 Pro'],
-    attributes: { ...COMMON, capacity_mah: 3200, apple_model_code: 'A2650', flex_included: false },
-  },
-  {
-    sku: 'PI-200455',
-    name: 'Battery Cell Pi-Power for iPhone 14 Pro Max - Extended Capacity',
-    model: 'iPhone 14 Pro Max',
-    modelSlug: '14-pro-max',
-    price: '15.40',
-    stock: 66,
-    compatibleModels: ['iPhone 14 Pro Max'],
-    attributes: { ...COMMON, capacity_mah: 4323, apple_model_code: 'A2651', flex_included: false },
-  },
-  {
-    sku: 'PI-200456',
-    name: 'Battery Cell Pi-Power for iPhone 15 - Extended Capacity',
-    model: 'iPhone 15',
-    modelSlug: '15',
-    price: '12.10',
-    stock: 20,
-    compatibleModels: ['iPhone 15'],
-    attributes: { ...COMMON, capacity_mah: 3349, apple_model_code: 'A2846', flex_included: false },
-  },
-  {
-    sku: 'PI-200459',
-    name: 'Battery Cell Pi-Power for iPhone 15 - Extended Capacity + Tag-On Flex',
-    model: 'iPhone 15',
-    modelSlug: '15',
-    price: '13.20',
-    stock: 130,
-    compatibleModels: ['iPhone 15'],
-    attributes: {
-      ...COMMON,
-      capacity_mah: 3349,
-      apple_model_code: 'A2846',
-      flex_included: 'tag-on',
-      pre_programmed_flex_included: true,
-    },
-  },
-  {
-    sku: 'PI-200457',
-    name: 'Battery Cell Pi-Power for iPhone 15 Pro - Extended Capacity',
-    model: 'iPhone 15 Pro',
-    modelSlug: '15-pro',
-    price: '14.30',
-    stock: 23,
-    compatibleModels: ['iPhone 15 Pro'],
-    attributes: { ...COMMON, capacity_mah: 3274, apple_model_code: 'A2847', flex_included: false },
-  },
-  {
-    sku: 'PI-200460',
-    name: 'Battery Cell Pi-Power for iPhone 15 Pro - Extended Capacity + Tag-On Flex',
-    model: 'iPhone 15 Pro',
-    modelSlug: '15-pro',
-    price: '15.40',
-    stock: 110,
-    compatibleModels: ['iPhone 15 Pro'],
-    attributes: {
-      ...COMMON,
-      capacity_mah: 3274,
-      apple_model_code: 'A2847',
-      flex_included: 'tag-on',
-      pre_programmed_flex_included: true,
-    },
-  },
-  {
-    sku: 'PI-200458',
-    name: 'Battery Cell Pi-Power for iPhone 15 Pro Max - Extended Capacity',
-    model: 'iPhone 15 Pro Max',
-    modelSlug: '15-pro-max',
-    price: '16.50',
-    stock: 30,
-    compatibleModels: ['iPhone 15 Pro Max'],
-    attributes: { ...COMMON, capacity_mah: 4422, apple_model_code: 'A2848', flex_included: false },
-  },
-  {
-    sku: 'PI-200461',
-    name: 'Battery Cell Pi-Power for iPhone 15 Pro Max - Extended Capacity + Tag-On Flex',
-    model: 'iPhone 15 Pro Max',
-    modelSlug: '15-pro-max',
-    price: '16.50',
-    stock: 110,
-    compatibleModels: ['iPhone 15 Pro Max'],
-    attributes: {
-      ...COMMON,
-      capacity_mah: 4422,
-      apple_model_code: 'A2848',
-      flex_included: 'tag-on',
-      pre_programmed_flex_included: true,
-    },
-  },
-]
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
 async function main() {
-  const category = await prisma.category.upsert({
-    where: { slug: CATEGORY.slug },
-    update: { name: CATEGORY.name },
-    create: CATEGORY,
-  })
-
-  let count = 0
-  for (const it of items) {
-    const description = `Pi-Power extended-capacity replacement battery cell for ${it.model}. Wholesale.`
-    const isFlex = it.attributes.flex_included === 'tag-on'
-    const imageUrl = `/products/iphone-${it.modelSlug}${isFlex ? '-flex' : ''}.png`
-    await prisma.product.upsert({
-      where: { sku: it.sku },
-      update: {
-        name: it.name,
-        description,
-        basePrice: new Decimal(it.price),
-        stockQuantity: it.stock,
-        categoryId: category.id,
-        isActive: true,
-        imageUrl,
-        attributes: it.attributes,
-        compatibleModels: it.compatibleModels,
-      },
-      create: {
-        sku: it.sku,
-        slug: slugify(it.name),
-        name: it.name,
-        description,
-        basePrice: new Decimal(it.price),
-        stockQuantity: it.stock,
-        categoryId: category.id,
-        imageUrl,
-        attributes: it.attributes,
-        compatibleModels: it.compatibleModels,
-      },
+  // 1. Categorías (upsert por slug).
+  const categoryBySlug = new Map<string, string>()
+  for (const c of PIPOWER_CATEGORIES) {
+    const cat = await prisma.category.upsert({
+      where: { slug: c.slug },
+      update: { name: c.name, sortOrder: c.sortOrder },
+      create: { slug: c.slug, name: c.name, sortOrder: c.sortOrder },
     })
-    count++
+    categoryBySlug.set(c.slug, cat.id)
   }
 
-  console.log(`catalog loaded: category=${category.name}, products=${count}`)
+  // 2. Productos (upsert por SKU). El slug solo se setea al crear (no se pisa).
+  let upserted = 0
+  for (const p of PIPOWER_PRODUCTS) {
+    const categoryId = categoryBySlug.get(p.categorySlug)
+    if (!categoryId) throw new Error(`loader: categoría ${p.categorySlug} no creada`)
+    const attributes =
+      p.attributes === null ? Prisma.JsonNull : (p.attributes as Prisma.InputJsonObject)
+    await prisma.product.upsert({
+      where: { sku: p.sku },
+      update: {
+        name: p.name,
+        description: p.description,
+        basePrice: new Decimal(p.basePrice),
+        stockQuantity: p.stockQuantity,
+        imageUrl: p.imageUrl,
+        categoryId,
+        isActive: true,
+        attributes,
+      },
+      create: {
+        sku: p.sku,
+        slug: p.slug,
+        name: p.name,
+        description: p.description,
+        basePrice: new Decimal(p.basePrice),
+        stockQuantity: p.stockQuantity,
+        imageUrl: p.imageUrl,
+        categoryId,
+        attributes,
+      },
+    })
+    upserted++
+  }
+
+  // 3. Desactivar el catálogo viejo (Fase 3). Idempotente: solo afecta los activos.
+  const deactivated = await prisma.product.updateMany({
+    where: { sku: { in: LEGACY_SKUS }, isActive: true },
+    data: { isActive: false },
+  })
+
+  console.log(
+    `catalog loaded: upserted=${upserted} categorías=${PIPOWER_CATEGORIES.length} legacy_deactivated=${deactivated.count}`
+  )
 }
 
 main()
