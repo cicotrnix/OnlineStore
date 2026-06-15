@@ -8,6 +8,8 @@ type Props = {
   min?: number
   decrementLabel: string
   incrementLabel: string
+  /** Si se pasa, se llama con el nuevo valor en cada cambio (edición inline). */
+  onChange?: (value: number) => void
 }
 
 /**
@@ -21,15 +23,21 @@ export function QuantityStepper({
   min = 1,
   decrementLabel,
   incrementLabel,
+  onChange,
 }: Props) {
   const [qty, setQty] = useState(defaultValue)
+  const set = (v: number) => {
+    const n = Math.max(min, Number.isFinite(v) ? v : min)
+    setQty(n)
+    onChange?.(n)
+  }
 
   return (
     <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white">
       <button
         type="button"
         aria-label={decrementLabel}
-        onClick={() => setQty((q) => Math.max(min, q - 1))}
+        onClick={() => set(qty - 1)}
         className="px-2.5 py-1.5 text-gray-600 transition-transform hover:text-gray-900 active:scale-90 disabled:text-gray-300 motion-reduce:transition-none motion-reduce:active:scale-100"
         disabled={qty <= min}
       >
@@ -40,14 +48,14 @@ export function QuantityStepper({
         type="number"
         min={min}
         value={qty}
-        onChange={(e) => setQty(Math.max(min, Number(e.target.value) || min))}
+        onChange={(e) => set(Number(e.target.value) || min)}
         aria-label={name}
         className="w-10 border-x border-gray-200 bg-transparent py-1.5 text-center text-sm tabular-nums focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
       />
       <button
         type="button"
         aria-label={incrementLabel}
-        onClick={() => setQty((q) => q + 1)}
+        onClick={() => set(qty + 1)}
         className="px-2.5 py-1.5 text-gray-600 transition-transform hover:text-gray-900 active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         +

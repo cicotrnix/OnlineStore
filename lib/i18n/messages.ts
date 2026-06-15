@@ -204,6 +204,9 @@ export type MessageKey =
   | 'cart.taxNote'
   | 'cart.proceedCheckout'
   | 'cart.continueShopping'
+  | 'minicart.title'
+  | 'minicart.checkout'
+  | 'minicart.viewFull'
   | 'cart.noLongerAvailable'
   | 'cart.skuLabel'
   | 'cart.noImage'
@@ -655,6 +658,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'cart.taxNote': 'Taxes and shipping calculated at checkout.',
     'cart.proceedCheckout': 'Proceed to checkout · {amount}',
     'cart.continueShopping': 'Continue shopping',
+    'minicart.title': 'Cart',
+    'minicart.checkout': 'Checkout',
+    'minicart.viewFull': 'View full cart',
     'cart.noLongerAvailable': 'No longer available',
     'cart.skuLabel': 'SKU',
     'cart.noImage': 'No image',
@@ -1100,6 +1106,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'cart.taxNote': 'Impuestos y envío se calcularán en el checkout.',
     'cart.proceedCheckout': 'Proceder al checkout · {amount}',
     'cart.continueShopping': 'Continuar comprando',
+    'minicart.title': 'Carrito',
+    'minicart.checkout': 'Checkout',
+    'minicart.viewFull': 'Ver carrito completo',
     'cart.noLongerAvailable': 'Ya no disponible',
     'cart.skuLabel': 'SKU',
     'cart.noImage': 'Sin imagen',
