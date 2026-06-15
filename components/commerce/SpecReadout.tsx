@@ -2,7 +2,7 @@ import { t } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n/messages'
 
 export interface SpecRow {
-  /** Numeric value rendered in mono (e.g. "100%", "0", "+12%"). */
+  /** Numeric value rendered in mono (e.g. "100%", "0", "+10%"). */
   value: string
   /** True if this row represents a brand "up" reading (capacity over OEM):
    * the value renders in `lime-deep` (AA-safe lime on white). */
@@ -18,8 +18,12 @@ export interface SpecRow {
  * in lime-deep (#5fa000) so the lime-as-text passes AA against the white card.
  */
 export function SpecReadout({ rows, locale }: { rows: SpecRow[]; locale: Locale }) {
+  // Columnas según cantidad de datos: 2 (health/cycles) o 3 cuando hay capacity
+  // real (FU-010). Evita el hueco de una 3ª columna vacía. Clases estáticas para
+  // que Tailwind las compile.
+  const cols = rows.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
   return (
-    <dl className="my-[14px] grid grid-cols-3 gap-[6px] border-y border-line py-[12px]">
+    <dl className={`my-[14px] grid ${cols} gap-[6px] border-y border-line py-[12px]`}>
       {rows.map((r) => (
         <div key={r.labelKey} className="flex flex-col gap-[1px]">
           <dd
