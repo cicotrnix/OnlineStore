@@ -94,17 +94,19 @@ export function ProductCard({
           </Link>
         </div>
 
-        {showPrice ? (
-          <PriceTag
-            basePrice={product.basePrice}
-            customerPrice={customerPrice}
-            currency={currency}
-          />
-        ) : (
-          <Link href="/sign-in" className="text-sm font-medium text-lime-700 hover:underline">
-            {signInLinkLabel}
-          </Link>
-        )}
+        {/* incoming/coming_soon NO muestran precio (el 0.00 placeholder nunca se ve). */}
+        {!needsNotify &&
+          (showPrice ? (
+            <PriceTag
+              basePrice={product.basePrice}
+              customerPrice={customerPrice}
+              currency={currency}
+            />
+          ) : (
+            <Link href="/sign-in" className="text-sm font-medium text-lime-700 hover:underline">
+              {signInLinkLabel}
+            </Link>
+          ))}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-2">
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">

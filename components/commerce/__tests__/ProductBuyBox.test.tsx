@@ -86,6 +86,14 @@ describe('ProductBuyBox — 3 estados de stock', () => {
     renderBox({ stockQuantity: 0, attributes: { coming_soon: true } })
     expect(screen.getByRole('link', { name: /notify/i })).toBeInTheDocument()
   })
+  it('coming_soon NO muestra precio (el 0.00 placeholder nunca se ve)', () => {
+    renderBox({
+      stockQuantity: 0,
+      basePrice: new Decimal('0.00'),
+      attributes: { coming_soon: true },
+    })
+    expect(screen.queryByText(/\$/)).toBeNull()
+  })
   it('muestra el estado como texto (no color-only)', () => {
     renderBox()
     expect(screen.getByText(/in stock/i)).toBeInTheDocument()

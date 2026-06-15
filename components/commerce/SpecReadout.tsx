@@ -33,7 +33,7 @@ export function SpecReadout({ rows, locale }: { rows: SpecRow[]; locale: Locale 
           >
             {r.value}
           </dd>
-          <dt className="text-[10.5px] uppercase tracking-[0.03em] text-ink-300">
+          <dt className="text-[10.5px] uppercase tracking-[0.03em] text-ink-500">
             {t(locale, r.labelKey)}
           </dt>
         </div>

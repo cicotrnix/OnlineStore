@@ -76,30 +76,33 @@ export function ProductBuyBox({
       >
         {product.category.name}
       </Link>
-      <p className="mt-1 font-mono text-[11px] text-gray-400">{product.sku}</p>
+      <p className="mt-1 font-mono text-[11px] text-gray-500">{product.sku}</p>
       <h1 className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{product.name}</h1>
 
       {shortDescription && <p className="mt-3 text-sm text-gray-600">{shortDescription}</p>}
 
       <SpecReadout rows={specRows} locale={locale} />
 
-      <div className="mt-1">
-        {showPrice ? (
-          <PriceTag
-            basePrice={product.basePrice}
-            customerPrice={customerPrice}
-            currency={currency}
-            size="lg"
-          />
-        ) : (
-          <Link
-            href="/sign-in"
-            className="inline-flex items-center rounded-lg border border-lime-200 bg-lime-50 px-4 py-2 text-sm font-medium text-lime-700 hover:bg-lime-100"
-          >
-            {signInLabel}
-          </Link>
-        )}
-      </div>
+      {/* incoming/coming_soon NO muestran precio (el 0.00 placeholder nunca se ve). */}
+      {!needsNotify && (
+        <div className="mt-1">
+          {showPrice ? (
+            <PriceTag
+              basePrice={product.basePrice}
+              customerPrice={customerPrice}
+              currency={currency}
+              size="lg"
+            />
+          ) : (
+            <Link
+              href="/sign-in"
+              className="inline-flex items-center rounded-lg border border-lime-200 bg-lime-50 px-4 py-2 text-sm font-medium text-lime-700 hover:bg-lime-100"
+            >
+              {signInLabel}
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
         <span className={`h-2.5 w-2.5 rounded-full ${STOCK_DOT[stockState]}`} aria-hidden="true" />

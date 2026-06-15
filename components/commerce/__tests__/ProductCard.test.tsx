@@ -52,6 +52,14 @@ describe('ProductCard — estados de stock', () => {
     renderCard({ stockQuantity: 0, attributes: { coming_soon: true } })
     expect(screen.getByRole('link', { name: /notify/i })).toBeInTheDocument()
   })
+  it('coming_soon NO muestra precio (0.00 placeholder)', () => {
+    renderCard({
+      stockQuantity: 0,
+      basePrice: new Decimal('0.00'),
+      attributes: { coming_soon: true },
+    })
+    expect(screen.queryByText(/\$/)).toBeNull()
+  })
 })
 
 describe('ProductCard — chips por atributo', () => {
