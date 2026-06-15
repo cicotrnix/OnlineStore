@@ -10,6 +10,15 @@ import {
 
 export type CheckoutIssue = 'empty' | 'inactive' | 'insufficient-stock' | 'price-changed'
 
+/**
+ * ¿Hay un issue que BLOQUEA la colocación de la orden? `inactive` (producto dado
+ * de baja) e `insufficient-stock` bloquean; `price-changed`/`empty` no (se
+ * informan pero no impiden confirmar). Pura y unit-testeable.
+ */
+export function hasBlockingIssue(issues: CheckoutIssue[]): boolean {
+  return issues.some((i) => i === 'inactive' || i === 'insufficient-stock')
+}
+
 export type ReviewedItem = {
   productId: string
   name: string
