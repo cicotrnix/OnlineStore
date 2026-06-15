@@ -1,6 +1,7 @@
 import { AccountMenu } from '@/components/commerce/AccountMenu'
 import { HeaderThemeWatcher } from '@/components/commerce/HeaderThemeWatcher'
 import { LocaleSwitch } from '@/components/commerce/LocaleSwitch'
+import { MiniCart } from '@/components/commerce/MiniCart'
 import { MobileNav } from '@/components/commerce/MobileNav'
 import { NotificationBadge } from '@/components/commerce/NotificationBadge'
 import { SearchBar } from '@/components/commerce/SearchBar'
@@ -18,6 +19,9 @@ export interface HeaderProps {
   /** First-paint theme (SSR), solo se usa en variant='home'. */
   initialTheme?: 'dark' | 'light'
   cartCount: number
+  /** Verificado: el ícono de carrito abre el MiniCart drawer. No-verificado:
+   * degrada a link plano `/cart` (#5). */
+  cartEnabled: boolean
   /** Reservado (NotificationBadge se auto-fetchea hoy). */
   notificationCount?: number
   flags: { rfq: boolean; credit: boolean; approvals: boolean }
@@ -43,11 +47,29 @@ export function Header({
   isSignedIn,
   initialTheme = 'light',
   cartCount,
+  cartEnabled,
   flags,
 }: HeaderProps) {
   const store = getStoreConfig()
   const logoLightSrc = store.identity.logoLight ?? store.identity.logo
   const isHome = variant === 'home'
+
+  // Ancla del carrito (label + badge). Verificado → trigger del MiniCart drawer
+  // (Drawer.Trigger asChild sobre el <a> → role=link, fallback no-JS a /cart);
+  // no-verificado → link plano. Compartida por desktop y mobile.
+  const cartAnchor = (anchorCls: string, badgeCls: string) => {
+    const link = (
+      <Link
+        href="/cart"
+        className={anchorCls}
+        aria-label={t(locale, 'header.cartItems', { count: cartCount })}
+      >
+        {t(locale, 'header.cart')}
+        {cartCount > 0 && <span className={badgeCls}>{cartCount}</span>}
+      </Link>
+    )
+    return cartEnabled ? <MiniCart locale={locale}>{link}</MiniCart> : link
+  }
 
   const barCls = isHome
     ? [
@@ -124,18 +146,10 @@ export function Header({
 
           {isSignedIn ? (
             <>
-              <Link
-                href="/cart"
-                className={`relative ${linkCls}`}
-                aria-label={t(locale, 'header.cartItems', { count: cartCount })}
-              >
-                {t(locale, 'header.cart')}
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-4 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-ink-950">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
+              {cartAnchor(
+                `relative ${linkCls}`,
+                'absolute -top-2 -right-4 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-ink-950'
+              )}
               {/* Ítems de cuenta (Orders/Buy again/Quotes/Invoices/Approvals/Sign
                   out) colapsados en el dropdown para no recargar el chrome. */}
               <AccountMenu
@@ -167,20 +181,11 @@ export function Header({
 
         {/* Mobile: logo · carrito · hamburguesa. El nav vive en el drawer. */}
         <div className="flex items-center gap-1 md:hidden">
-          {isSignedIn && (
-            <Link
-              href="/cart"
-              className={`relative ${linkCls} px-2`}
-              aria-label={t(locale, 'header.cartItems', { count: cartCount })}
-            >
-              {t(locale, 'header.cart')}
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-ink-950">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-          )}
+          {isSignedIn &&
+            cartAnchor(
+              `relative ${linkCls} px-2`,
+              'absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-ink-950'
+            )}
           <MobileNav
             locale={locale}
             isSignedIn={isSignedIn}

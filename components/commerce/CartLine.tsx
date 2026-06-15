@@ -1,6 +1,6 @@
 'use client'
 
-import { type Locale, t } from '@/lib/i18n'
+import { type Locale, t } from '@/lib/i18n/messages'
 import Image from 'next/image'
 import Link from 'next/link'
 import { QuantityStepper } from './QuantityStepper'

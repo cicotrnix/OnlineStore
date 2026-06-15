@@ -17,6 +17,10 @@ vi.mock('@/components/commerce/SignOutButton', () => ({
 vi.mock('@/components/commerce/MobileNav', () => ({
   MobileNav: () => <span data-testid="mobile-nav" />,
 }))
+// MiniCart importa server actions (auth chain) → mock que renderiza el trigger.
+vi.mock('@/components/commerce/MiniCart', () => ({
+  MiniCart: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 vi.mock('@/components/commerce/AccountMenu', () => ({
   AccountMenu: (p: { flags: { rfq: boolean; credit: boolean; approvals: boolean } }) => (
     <span
@@ -33,6 +37,7 @@ const base: HeaderProps = {
   locale: 'en-US',
   isSignedIn: true,
   cartCount: 0,
+  cartEnabled: false,
   flags: { rfq: false, credit: false, approvals: false },
 }
 

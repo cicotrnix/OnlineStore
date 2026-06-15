@@ -1,6 +1,7 @@
 import { Header } from '@/components/commerce/Header'
 import { ImpersonationBanner } from '@/components/commerce/ImpersonationBanner'
 import { auth } from '@/lib/auth/config'
+import { getCustomerState } from '@/lib/auth/customer'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
 import { getLocale } from '@/lib/i18n'
@@ -26,6 +27,10 @@ export async function HeaderContainer({
 
   const cart = userId ? await cartService.get(userId) : null
   const cartCount = cart?.items.reduce((acc, i) => acc + i.quantity, 0) ?? 0
+
+  // #5: solo verificados abren el MiniCart drawer; el resto degrada a link /cart.
+  const customerState = await getCustomerState()
+  const cartEnabled = customerState.kind === 'verified'
 
   const locale = await getLocale({ userId })
 
@@ -53,6 +58,7 @@ export async function HeaderContainer({
         locale={locale}
         isSignedIn={isSignedIn}
         cartCount={cartCount}
+        cartEnabled={cartEnabled}
         flags={flags}
       />
     </>

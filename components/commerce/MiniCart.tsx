@@ -6,7 +6,7 @@ import {
   miniCartRemove,
   miniCartSetQuantity,
 } from '@/app/(storefront)/_mini-cart-actions'
-import { type Locale, t } from '@/lib/i18n'
+import { type Locale, t } from '@/lib/i18n/messages'
 import Link from 'next/link'
 import { type ReactNode, useState, useTransition } from 'react'
 import { Drawer } from 'vaul'
