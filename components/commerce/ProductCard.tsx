@@ -4,16 +4,10 @@ import type { Decimal } from '@prisma/client/runtime/library'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AddToCartButton } from './AddToCartButton'
+import { AttributeChips } from './AttributeChips'
 import { NotifyButton } from './NotifyButton'
 import { PriceTag } from './PriceTag'
-import {
-  CHIP_TONE,
-  STOCK_DOT,
-  chipLabel,
-  deriveChips,
-  deriveStockState,
-  stockLabel,
-} from './product-display'
+import { STOCK_DOT, deriveStockState, stockLabel } from './product-display'
 
 type Product = {
   id: string
@@ -60,10 +54,6 @@ export function ProductCard({
   returnTo,
 }: Props) {
   const stockState = deriveStockState(product.stockQuantity, product.attributes)
-  const chips = deriveChips({
-    attributes: product.attributes,
-    categorySlug: product.category?.slug ?? null,
-  })
   const needsNotify = stockState === 'incoming' || stockState === 'coming_soon'
 
   return (
@@ -86,16 +76,11 @@ export function ProductCard({
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="flex flex-wrap gap-1.5">
-          {chips.map((c) => (
-            <span
-              key={c.key + (c.value ?? '')}
-              className={`inline-flex items-center rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium ${CHIP_TONE[c.key]}`}
-            >
-              {chipLabel(c, locale)}
-            </span>
-          ))}
-        </div>
+        <AttributeChips
+          attributes={product.attributes}
+          categorySlug={product.category?.slug ?? null}
+          locale={locale}
+        />
 
         <div>
           <div className="font-mono text-[10px] uppercase tracking-wide text-gray-500">

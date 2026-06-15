@@ -1,9 +1,8 @@
-import { AddToCartButton } from '@/components/commerce/AddToCartButton'
 import { AddToQuoteButton } from '@/components/commerce/AddToQuoteButton'
-import { PriceTag } from '@/components/commerce/PriceTag'
+import { AttributeChips } from '@/components/commerce/AttributeChips'
 import { PriceTierTable } from '@/components/commerce/PriceTierTable'
+import { ProductBuyBox } from '@/components/commerce/ProductBuyBox'
 import { RelatedProducts } from '@/components/commerce/RelatedProducts'
-import { StockBadge } from '@/components/commerce/StockBadge'
 import { Badge } from '@/components/ui/Badge'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db/client'
@@ -15,7 +14,6 @@ import { listTiersForProduct, pricingService } from '@/modules/pricing'
 import { getStoreConfig } from '@/stores'
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 type Props = {
@@ -68,10 +66,6 @@ export default async function ProductPage({ params }: Props) {
   const showRfq = isFeatureEnabled('rfq') && !!session?.user && !isImpersonating
   const showPrivateBadge = isFeatureEnabled('privateCatalogs') && product.isPrivate
   const content = await loadPublishedContent(product.id, session?.user?.id ?? null)
-  const isTagOn =
-    product.attributes &&
-    typeof product.attributes === 'object' &&
-    (product.attributes as Record<string, unknown>).flex_included === 'tag-on'
 
   const personalized =
     getStoreConfig().ai.recommendations && session?.user?.id
@@ -92,90 +86,49 @@ export default async function ProductPage({ params }: Props) {
       : t(locale, 'pdp.relatedTitle.related')
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10 grid gap-10 md:grid-cols-2">
-      <div className="relative aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
-        {product.imageUrl ? (
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 480px"
-            className="object-cover"
+    <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="grid gap-8 md:gap-12 lg:grid-cols-2">
+        {/* Hero: una imagen instrument-grade + chips de atributo overlaid (igual que el card). */}
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
+          <AttributeChips
+            attributes={product.attributes}
+            categorySlug={product.category.slug}
+            locale={locale}
+            className="absolute left-3 top-3 z-10"
           />
-        ) : (
-          <span className="text-sm text-gray-400">{t(locale, 'pdp.noImage')}</span>
-        )}
-      </div>
-      <div>
-        <Link
-          href={`/catalog?category=${product.category.slug}`}
-          className="text-xs uppercase tracking-wide text-gray-500 hover:underline"
-        >
-          {product.category.name}
-        </Link>
-        <h1 className="mt-1 text-3xl font-medium tracking-tight">{product.name}</h1>
-        <p className="mt-1 text-xs text-gray-500 font-mono">
-          {t(locale, 'pdp.viewLabel.sku')} {product.sku}
-        </p>
-        {isTagOn && (
-          <div className="mt-2">
-            <Badge variant="info">Tag-On Flex</Badge>
-          </div>
-        )}
-        {content?.shortDescription && (
-          <p className="mt-3 text-sm text-gray-700">{content.shortDescription}</p>
-        )}
-
-        <div className="mt-5">
-          {showPrice ? (
-            <PriceTag
-              basePrice={product.basePrice}
-              customerPrice={showOverride ? customerPrice : null}
-              currency={getStoreConfig().currency.base}
-              size="lg"
+          {product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 480px"
+              className="object-contain p-6"
             />
           ) : (
-            <Link
-              href="/sign-in"
-              className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
-            >
-              {t(locale, 'pdp.signInForPriceLong')}
-            </Link>
+            <span className="text-sm text-gray-500">{t(locale, 'pdp.noImage')}</span>
           )}
         </div>
 
-        <div className="mt-3">
-          <StockBadge stockQuantity={product.stockQuantity} />
-        </div>
-
-        {content?.longDescriptionMd ? (
-          <div className="mt-6 prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-            {content.longDescriptionMd}
-          </div>
-        ) : product.description ? (
-          <div className="mt-6 prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-            {product.description}
-          </div>
-        ) : null}
-
-        <div className="mt-8">
-          {showPrice && (
-            <AddToCartButton
-              productId={product.id}
-              locale={locale}
-              returnTo={`/products/${product.slug}`}
-              showQuantity
-              disabled={isImpersonating || product.stockQuantity === 0}
-              disabledReason={
-                isImpersonating
-                  ? t(locale, 'pdp.disabled.impersonating')
-                  : product.stockQuantity === 0
-                    ? t(locale, 'pdp.disabled.outOfStock')
-                    : undefined
-              }
-            />
-          )}
+        {/* Buy box */}
+        <div>
+          <ProductBuyBox
+            product={product}
+            shortDescription={content?.shortDescription}
+            customerPrice={showOverride ? customerPrice : null}
+            currency={getStoreConfig().currency.base}
+            locale={locale}
+            showPrice={showPrice}
+            canAddToCart={!isImpersonating}
+            disabledReason={
+              isImpersonating
+                ? t(locale, 'pdp.disabled.impersonating')
+                : product.stockQuantity === 0
+                  ? t(locale, 'pdp.disabled.outOfStock')
+                  : undefined
+            }
+            signInLabel={t(locale, 'pdp.signInForPriceLong')}
+          />
           {showRfq && (
             <div className="mt-3">
               <AddToQuoteButton productId={product.id} />
@@ -187,12 +140,19 @@ export default async function ProductPage({ params }: Props) {
             </div>
           )}
         </div>
-        {tiers.length > 0 && (
-          <div className="md:col-span-2">
-            <PriceTierTable tiers={tiers} currency={getStoreConfig().currency.base} />
-          </div>
-        )}
       </div>
+
+      {/* Below-fold (commit 3 lo restila a full-width instrument-style). */}
+      {(content?.longDescriptionMd || product.description) && (
+        <div className="mt-10 max-w-3xl whitespace-pre-wrap text-sm text-gray-700">
+          {content?.longDescriptionMd || product.description}
+        </div>
+      )}
+      {tiers.length > 0 && (
+        <div className="mt-8">
+          <PriceTierTable tiers={tiers} currency={getStoreConfig().currency.base} />
+        </div>
+      )}
       <RelatedProducts title={relatedTitle} products={related} />
     </div>
   )
