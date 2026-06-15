@@ -234,3 +234,8 @@ export const LEGACY_SKUS: string[] = [
   'PI-200460',
   'PI-200461',
 ]
+
+/** Categorías del catálogo Fase 3 viejo, a desactivar (reemplazadas por las 3
+ * nuevas). El loader las pone isActive=false para que no aparezcan como tabs
+ * vacíos en /catalog (listCategories filtra por Category.isActive). */
+export const LEGACY_CATEGORY_SLUGS: string[] = ['battery', 'tag-on']

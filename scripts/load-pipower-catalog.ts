@@ -1,4 +1,9 @@
-import { LEGACY_SKUS, PIPOWER_CATEGORIES, PIPOWER_PRODUCTS } from '@/lib/catalog/pipower-catalog'
+import {
+  LEGACY_CATEGORY_SLUGS,
+  LEGACY_SKUS,
+  PIPOWER_CATEGORIES,
+  PIPOWER_PRODUCTS,
+} from '@/lib/catalog/pipower-catalog'
 import { enqueueIndex } from '@/modules/search'
 import { Prisma, PrismaClient } from '@prisma/client'
 import { Decimal } from '@prisma/client/runtime/library'
@@ -76,8 +81,15 @@ async function main() {
     await enqueueIndex(l.id, 'UPSERT')
   }
 
+  // 5. Desactivar las categorías viejas (Fase 3) → no aparecen como tabs vacíos
+  //    en /catalog (listCategories filtra por Category.isActive). Idempotente.
+  const deactivatedCats = await prisma.category.updateMany({
+    where: { slug: { in: LEGACY_CATEGORY_SLUGS }, isActive: true },
+    data: { isActive: false },
+  })
+
   console.log(
-    `catalog loaded: upserted=${upserted} categorías=${PIPOWER_CATEGORIES.length} legacy_deactivated=${deactivated.count} reindex_enqueued=${upserted + legacy.length}`
+    `catalog loaded: upserted=${upserted} categorías=${PIPOWER_CATEGORIES.length} legacy_deactivated=${deactivated.count} legacy_cats_deactivated=${deactivatedCats.count} reindex_enqueued=${upserted + legacy.length}`
   )
 }
 
