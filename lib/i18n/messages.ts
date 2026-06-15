@@ -185,6 +185,10 @@ export type MessageKey =
   | 'pdp.disabled.outOfStock'
   | 'pdp.noImage'
   | 'pdp.privateBadge'
+  | 'pdp.volumePricing'
+  | 'pdp.tierMinQty'
+  | 'pdp.tierUnitPrice'
+  | 'pdp.requestQuote'
   // Cart
   | 'cart.title'
   | 'cart.empty.title'
@@ -632,6 +636,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     'pdp.disabled.outOfStock': 'Out of stock',
     'pdp.noImage': 'No image',
     'pdp.privateBadge': 'Private product for your organization',
+    'pdp.volumePricing': 'Volume pricing',
+    'pdp.tierMinQty': 'Min. quantity',
+    'pdp.tierUnitPrice': 'Unit price',
+    'pdp.requestQuote': 'Request a quote',
     // Cart
     'cart.title': 'Cart',
     'cart.empty.title': 'Your cart is empty',
@@ -1073,6 +1081,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     'pdp.disabled.outOfStock': 'Sin stock',
     'pdp.noImage': 'Sin imagen',
     'pdp.privateBadge': 'Producto privado para tu organización',
+    'pdp.volumePricing': 'Descuentos por volumen',
+    'pdp.tierMinQty': 'Cantidad mínima',
+    'pdp.tierUnitPrice': 'Precio unitario',
+    'pdp.requestQuote': 'Solicitar cotización',
     // Cart
     'cart.title': 'Carrito',
     'cart.empty.title': 'Tu carrito está vacío',

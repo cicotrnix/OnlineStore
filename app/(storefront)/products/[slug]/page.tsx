@@ -1,5 +1,6 @@
 import { AddToQuoteButton } from '@/components/commerce/AddToQuoteButton'
 import { AttributeChips } from '@/components/commerce/AttributeChips'
+import { MarkdownContent } from '@/components/commerce/MarkdownContent'
 import { PriceTierTable } from '@/components/commerce/PriceTierTable'
 import { ProductBuyBox } from '@/components/commerce/ProductBuyBox'
 import { RelatedProducts } from '@/components/commerce/RelatedProducts'
@@ -131,7 +132,7 @@ export default async function ProductPage({ params }: Props) {
           />
           {showRfq && (
             <div className="mt-3">
-              <AddToQuoteButton productId={product.id} />
+              <AddToQuoteButton productId={product.id} locale={locale} />
             </div>
           )}
           {showPrivateBadge && (
@@ -142,17 +143,14 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Below-fold (commit 3 lo restila a full-width instrument-style). */}
+      {/* Below-fold full-width: descripción AI (markdown) → tier table → related. */}
       {(content?.longDescriptionMd || product.description) && (
-        <div className="mt-10 max-w-3xl whitespace-pre-wrap text-sm text-gray-700">
-          {content?.longDescriptionMd || product.description}
-        </div>
+        <MarkdownContent
+          markdown={content?.longDescriptionMd || product.description || ''}
+          className="mt-12 max-w-3xl"
+        />
       )}
-      {tiers.length > 0 && (
-        <div className="mt-8">
-          <PriceTierTable tiers={tiers} currency={getStoreConfig().currency.base} />
-        </div>
-      )}
+      <PriceTierTable tiers={tiers} currency={getStoreConfig().currency.base} locale={locale} />
       <RelatedProducts title={relatedTitle} products={related} />
     </div>
   )
