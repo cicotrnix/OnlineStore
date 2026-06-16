@@ -139,6 +139,29 @@ export type MessageKey =
   | 'account.nav.profile'
   | 'account.nav.addresses'
   | 'account.nav.security'
+  // Account overview
+  | 'account.overview.identity'
+  | 'account.overview.name'
+  | 'account.overview.email'
+  | 'account.overview.locale'
+  | 'account.overview.edit'
+  | 'account.overview.organization'
+  | 'account.overview.role'
+  | 'account.overview.verification'
+  | 'account.overview.taxExempt'
+  | 'account.overview.paymentTerms'
+  | 'account.overview.credit'
+  | 'account.overview.switch'
+  | 'account.overview.quickAccess'
+  | 'account.overview.orders'
+  | 'account.overview.invoices'
+  | 'account.overview.quotes'
+  | 'account.overview.notSet'
+  | 'account.verification.VERIFIED'
+  | 'account.verification.PENDING'
+  | 'account.verification.REJECTED'
+  | 'account.locale.en'
+  | 'account.locale.es'
   // Select org
   | 'selectOrg.title'
   | 'selectOrg.subtitle'
@@ -631,6 +654,29 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.nav.profile': 'Profile',
     'account.nav.addresses': 'Addresses',
     'account.nav.security': 'Security',
+    // Account overview
+    'account.overview.identity': 'Identity',
+    'account.overview.name': 'Name',
+    'account.overview.email': 'Email',
+    'account.overview.locale': 'Language',
+    'account.overview.edit': 'Edit',
+    'account.overview.organization': 'Organization',
+    'account.overview.role': 'Role',
+    'account.overview.verification': 'Verification',
+    'account.overview.taxExempt': 'Tax-exempt',
+    'account.overview.paymentTerms': 'Payment terms',
+    'account.overview.credit': 'Credit limit',
+    'account.overview.switch': 'Switch',
+    'account.overview.quickAccess': 'Quick access',
+    'account.overview.orders': 'Orders',
+    'account.overview.invoices': 'Invoices',
+    'account.overview.quotes': 'Quotes',
+    'account.overview.notSet': 'Not set',
+    'account.verification.VERIFIED': 'Verified',
+    'account.verification.PENDING': 'Pending',
+    'account.verification.REJECTED': 'Rejected',
+    'account.locale.en': 'English',
+    'account.locale.es': 'Spanish',
     // Select org
     'selectOrg.title': 'Choose your organization',
     'selectOrg.subtitle': 'Switching organizations later will empty your cart.',
@@ -1122,6 +1168,29 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.nav.profile': 'Perfil',
     'account.nav.addresses': 'Direcciones',
     'account.nav.security': 'Seguridad',
+    // Account overview
+    'account.overview.identity': 'Identidad',
+    'account.overview.name': 'Nombre',
+    'account.overview.email': 'Email',
+    'account.overview.locale': 'Idioma',
+    'account.overview.edit': 'Editar',
+    'account.overview.organization': 'Organización',
+    'account.overview.role': 'Rol',
+    'account.overview.verification': 'Verificación',
+    'account.overview.taxExempt': 'Exento de impuestos',
+    'account.overview.paymentTerms': 'Términos de pago',
+    'account.overview.credit': 'Límite de crédito',
+    'account.overview.switch': 'Cambiar',
+    'account.overview.quickAccess': 'Accesos rápidos',
+    'account.overview.orders': 'Órdenes',
+    'account.overview.invoices': 'Facturas',
+    'account.overview.quotes': 'Cotizaciones',
+    'account.overview.notSet': 'Sin definir',
+    'account.verification.VERIFIED': 'Verificada',
+    'account.verification.PENDING': 'Pendiente',
+    'account.verification.REJECTED': 'Rechazada',
+    'account.locale.en': 'Inglés',
+    'account.locale.es': 'Español',
     // Select org
     'selectOrg.title': 'Elegí tu organización',
     'selectOrg.subtitle': 'Cambiar de organización en el futuro vaciará tu carrito.',

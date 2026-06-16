@@ -106,6 +106,12 @@ export const customersService = {
     return customersRepository.findOrganizationsForUser(userId)
   },
 
+  /** Rol del usuario en la org activa (null si no es miembro). Gating de UI. */
+  async getMemberRole(orgId: string, userId: string): Promise<OrgRole | null> {
+    const membership = await customersRepository.findMembership(orgId, userId)
+    return membership?.role ?? null
+  },
+
   async createAddress(input: CreateAddressInput) {
     const parsed = createAddressSchema.parse(input)
     return customersRepository.createAddress(parsed)

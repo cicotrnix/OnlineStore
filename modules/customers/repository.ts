@@ -15,6 +15,13 @@ export const customersRepository = {
     })
   },
 
+  async findMembership(orgId: string, userId: string) {
+    return prisma.organizationMember.findUnique({
+      where: { organizationId_userId: { organizationId: orgId, userId } },
+      select: { role: true },
+    })
+  },
+
   async findOrganizationsForUser(userId: string) {
     return prisma.organization.findMany({
       where: { members: { some: { userId } } },
