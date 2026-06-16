@@ -139,7 +139,7 @@ function AddressCard({
             </ActionButton>
           )}
           {confirming ? (
-            <form action={delAction} className="flex items-center gap-2" role="group">
+            <form action={delAction} className="flex items-center gap-2">
               <input type="hidden" name="id" value={address.id} />
               <span className="text-xs text-ink-700">
                 {t(locale, 'account.addresses.confirmDelete')}
