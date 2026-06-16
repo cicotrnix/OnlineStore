@@ -15,6 +15,7 @@ import {
   InvoiceOverdueEmail,
   InvoicePaidEmail,
   OrderPlacedEmail,
+  PasswordResetEmail,
   PaymentCapturedEmail,
   PaymentReconciledEmail,
   QuoteAcceptedEmail,
@@ -60,4 +61,15 @@ export async function renderEmailFor(
 ): Promise<string> {
   const Template = TEMPLATES[type]
   return render(Template({ ...vars, locale }))
+}
+
+/**
+ * Render del email de reset de contraseña. Sale del flujo de auth (acción
+ * síncrona), no del outbox de notificaciones, por eso tiene su propio render.
+ */
+export async function renderPasswordResetEmail(
+  vars: RenderVars,
+  locale: Locale = 'en-US'
+): Promise<string> {
+  return render(PasswordResetEmail({ ...vars, locale }))
 }

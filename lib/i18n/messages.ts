@@ -445,6 +445,9 @@ export type MessageKey =
   // Email chrome
   | 'email.greeting'
   | 'email.cta.viewDetail'
+  | 'email.reset.subject'
+  | 'email.reset.heading'
+  | 'email.reset.body'
   // Cart toasts
   | 'cart.toast.added'
   | 'cart.toast.updated'
@@ -928,6 +931,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.inviting': 'Inviting…',
     'email.greeting': 'Hi {name},',
     'email.cta.viewDetail': 'View details',
+    'email.reset.subject': 'Reset your password',
+    'email.reset.heading': 'Reset your password',
+    'email.reset.body':
+      "We received a request to reset your password. Click the button below to choose a new one. This link expires in 1 hour. If you didn't request this, you can safely ignore this email.",
     // Cart
     'cart.toast.added': 'Added to cart ✓',
     'cart.toast.updated': 'Cart updated.',
@@ -1413,6 +1420,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.action.inviting': 'Invitando…',
     'email.greeting': 'Hola {name},',
     'email.cta.viewDetail': 'Ver detalle',
+    'email.reset.subject': 'Restablecé tu contraseña',
+    'email.reset.heading': 'Restablecé tu contraseña',
+    'email.reset.body':
+      'Recibimos una solicitud para restablecer tu contraseña. Tocá el botón de abajo para elegir una nueva. Este link vence en 1 hora. Si no lo pediste, podés ignorar este email.',
     // Cart
     'cart.toast.added': 'Agregado al carrito ✓',
     'cart.toast.updated': 'Carrito actualizado.',

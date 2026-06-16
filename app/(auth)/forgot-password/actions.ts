@@ -4,7 +4,9 @@ import { RESET_TOKEN_TTL_MS, generateResetToken, hashResetToken } from '@/lib/au
 import { prisma } from '@/lib/db/client'
 import { sendEmail } from '@/lib/email/resend'
 import type { ActionResult } from '@/lib/feedback/action-result'
+import { type Locale, t } from '@/lib/i18n/messages'
 import { PASSWORD_RESET_LIMITS, checkRateLimit } from '@/lib/rate-limit'
+import { renderPasswordResetEmail } from '@/modules/notifications'
 import { headers } from 'next/headers'
 
 /**
@@ -51,12 +53,22 @@ export async function requestPasswordResetAction(
     },
   })
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
-  const link = `${baseUrl}/reset-password/${raw}`
+  // Link RELATIVO: BaseTemplate le antepone appUrl. El token crudo viaja solo
+  // acá (en DB queda el hash).
+  const locale: Locale = user.preferredLocale === 'es-419' ? 'es-419' : 'en-US'
+  const html = await renderPasswordResetEmail(
+    {
+      title: t(locale, 'email.reset.heading'),
+      body: t(locale, 'email.reset.body'),
+      userName: user.name ?? user.email,
+      link: `/reset-password/${raw}`,
+    },
+    locale
+  )
   await sendEmail({
     to: user.email,
-    subject: 'Reset your password',
-    html: `<p>We received a request to reset your password.</p><p><a href="${link}">Reset your password</a></p><p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>`,
+    subject: t(locale, 'email.reset.subject'),
+    html,
   })
 
   return NEUTRAL

@@ -53,3 +53,6 @@ export const InvoiceIssuedEmail = make({ en: 'Pay via wire', es: 'Pagar via wire
 export const ShipmentDispatchedEmail = make({ en: 'Track shipment', es: 'Rastrear envío' })
 export const CustomerApprovedEmail = make({ en: 'Browse catalog', es: 'Ver catálogo' })
 export const CustomerRejectedEmail = make({ en: 'Resubmit certificate', es: 'Volver a enviar' })
+
+// Email de reset de contraseña (auth, no es un NotificationType del outbox).
+export const PasswordResetEmail = make({ en: 'Reset password', es: 'Restablecer contraseña' })
