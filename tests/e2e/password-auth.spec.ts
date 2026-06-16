@@ -278,11 +278,10 @@ test.describe('password auth (login + signup + change)', () => {
       ])
       const pageB = await ctxB.newPage()
       await pageB.goto('/account')
-      // requireVerifiedCustomer rebota a /onboarding (no-org). Para
-      // ejercer el form, navegamos directo o seguimos el redirect — el
-      // form de cambio de contraseña vive en /account, que sólo renderiza
-      // si el usuario es verified. Necesitamos darle una org verificada.
-      // Lo hacemos antes de continuar.
+      // requireVerifiedCustomer rebota a /onboarding (no-org). El form de
+      // cambio de contraseña vive en /account/security (rediseño 2026-06-16) y
+      // sólo renderiza si el usuario es verified. Le damos una org verificada
+      // antes de continuar.
       const org = await prisma.organization.create({
         data: {
           name: 'Acme CP',
@@ -301,7 +300,7 @@ test.describe('password auth (login + signup + change)', () => {
         data: { activeOrgId: org.id },
       })
 
-      await pageB.goto('/account')
+      await pageB.goto('/account/security')
       await expect(pageB.locator('input[name="currentPassword"]')).toBeVisible({ timeout: 10_000 })
 
       await pageB.locator('input[name="currentPassword"]').fill('Old1234A')

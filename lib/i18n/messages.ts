@@ -197,6 +197,13 @@ export type MessageKey =
   | 'account.addresses.field.postalCode'
   | 'account.addresses.field.country'
   | 'account.addresses.field.phone'
+  // Account security
+  | 'account.security.subtitle'
+  | 'account.security.passwordSection'
+  | 'account.security.sessionsSection'
+  | 'account.security.signOutEverywhere'
+  | 'account.security.signOutEverywhereHint'
+  | 'account.toast.signedOutEverywhere'
   // Select org
   | 'selectOrg.title'
   | 'selectOrg.subtitle'
@@ -747,6 +754,14 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.addresses.field.postalCode': 'Postal code',
     'account.addresses.field.country': 'Country (2-letter)',
     'account.addresses.field.phone': 'Phone',
+    // Account security
+    'account.security.subtitle': 'Manage your password and active sessions.',
+    'account.security.passwordSection': 'Password',
+    'account.security.sessionsSection': 'Sessions',
+    'account.security.signOutEverywhere': 'Sign out everywhere',
+    'account.security.signOutEverywhereHint':
+      'Signs out every other device. Your current session stays active.',
+    'account.toast.signedOutEverywhere': 'Signed out of all other sessions.',
     // Select org
     'selectOrg.title': 'Choose your organization',
     'selectOrg.subtitle': 'Switching organizations later will empty your cart.',
@@ -1297,6 +1312,14 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.addresses.field.postalCode': 'Código postal',
     'account.addresses.field.country': 'País (2 letras)',
     'account.addresses.field.phone': 'Teléfono',
+    // Account security
+    'account.security.subtitle': 'Gestioná tu contraseña y tus sesiones activas.',
+    'account.security.passwordSection': 'Contraseña',
+    'account.security.sessionsSection': 'Sesiones',
+    'account.security.signOutEverywhere': 'Cerrar sesión en todos lados',
+    'account.security.signOutEverywhereHint':
+      'Cierra todos los otros dispositivos. Tu sesión actual sigue activa.',
+    'account.toast.signedOutEverywhere': 'Cerraste sesión en todas las otras sesiones.',
     // Select org
     'selectOrg.title': 'Elegí tu organización',
     'selectOrg.subtitle': 'Cambiar de organización en el futuro vaciará tu carrito.',

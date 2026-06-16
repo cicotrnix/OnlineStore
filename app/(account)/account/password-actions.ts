@@ -127,6 +127,23 @@ export async function setPasswordAction(_prev: ActionResult, fd: FormData): Prom
 }
 
 /**
+ * "Sign out everywhere": revoca TODAS las otras sesiones del usuario, conserva
+ * la actual (la del cookie). Reusa invalidateOtherSessions. Útil ante sospecha
+ * de sesión robada sin cambiar la contraseña.
+ */
+export async function signOutEverywhereAction(
+  _prev: ActionResult,
+  _fd: FormData
+): Promise<ActionResult> {
+  const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) return { ok: false, messageKey: 'auth.toast.unauthenticated' }
+  const currentToken = await getCurrentSessionToken()
+  await invalidateOtherSessions(userId, currentToken)
+  return { ok: true, messageKey: 'account.toast.signedOutEverywhere' }
+}
+
+/**
  * Initiates the step-up flow for set-password. Issues a SensitiveActionToken
  * and emails the OTP to the user. The opaque `token` is returned via
  * ActionResult.vars so the UI can carry it to the submit (hidden input).

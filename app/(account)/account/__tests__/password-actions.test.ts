@@ -186,3 +186,22 @@ describe('setPasswordAction', () => {
     expect(await verifyPassword('Newpass1', fresh!.hashedPassword!)).toBe(true)
   })
 })
+
+describe('signOutEverywhereAction', () => {
+  it('revokes other sessions, keeps the current one', async () => {
+    const { user, tokenCurrent, tokenOther } = await seedUserWithSession({ password: 'Oldpass1' })
+    const { signOutEverywhereAction } = await import('../password-actions')
+    const r = await signOutEverywhereAction(INITIAL_ACTION_RESULT, new FormData())
+    expect(r.ok).toBe(true)
+    const remaining = await prisma.session.findMany({ where: { userId: user.id } })
+    expect(remaining.map((s) => s.sessionToken)).toEqual([tokenCurrent])
+    expect(remaining.find((s) => s.sessionToken === tokenOther)).toBeUndefined()
+  })
+
+  it('unauthenticated → error, no deletion', async () => {
+    authMock.mockResolvedValue({ user: undefined } as never)
+    const { signOutEverywhereAction } = await import('../password-actions')
+    const r = await signOutEverywhereAction(INITIAL_ACTION_RESULT, new FormData())
+    expect(r.ok).toBe(false)
+  })
+})
