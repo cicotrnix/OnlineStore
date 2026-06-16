@@ -1,6 +1,5 @@
 import { enqueueContentGenAction, publishContentAction } from '@/app/admin/products/_ai-actions'
-import { Badge } from '@/components/ui/Badge'
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { AdminPageHeader, StatusBadge, adminBtn } from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
@@ -14,17 +13,17 @@ type Props = {
   searchParams: Promise<{ flash?: string; locale?: string }>
 }
 
-const FLASH_MESSAGES: Record<string, (locale?: string) => string> = {
-  queued: () => 'Generación AI encolada (EN + ES). El worker procesa cada minuto.',
-  published: (locale) => `Contenido publicado para ${locale ?? 'el locale'}. Reindex en cola.`,
-}
-
 export default async function AdminProductDetailPage({ params, searchParams }: Props) {
   const { id } = await params
   const sp = await searchParams
-  const flashMessage = sp.flash ? FLASH_MESSAGES[sp.flash]?.(sp.locale) : null
   const user = await requireAuth()
   const uiLocale = await getLocale({ userId: user.id })
+  const flashMessage =
+    sp.flash === 'queued'
+      ? t(uiLocale, 'admin.productDetail.flashQueued')
+      : sp.flash === 'published'
+        ? t(uiLocale, 'admin.productDetail.flashPublished', { locale: sp.locale ?? '' })
+        : null
   const u = await prisma.user.findUnique({
     where: { id: user.id },
     select: { isPlatformAdmin: true },
@@ -41,53 +40,60 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
   if (!product) notFound()
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="max-w-4xl space-y-6">
       {flashMessage && (
         <output
           aria-live="polite"
-          className="block rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
+          className="block rounded-card border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-ink-950"
         >
           {flashMessage}
         </output>
       )}
-      <div>
-        <h1 className="text-2xl font-medium tracking-tight">{product.name}</h1>
-        <p className="mt-1 text-sm text-gray-500 font-mono">
-          SKU {product.sku} · {product.category.name}
-        </p>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <h2 className="font-medium">Contenido AI</h2>
-            <form action={enqueueContentGenAction}>
-              <input type="hidden" name="productId" value={product.id} />
-              <SubmitButton size="sm" pendingLabel={t(uiLocale, 'admin.action.enqueuing')}>
-                {t(uiLocale, 'admin.action.generateRegenerate')}
-              </SubmitButton>
-            </form>
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            Encola jobs para los locales soportados. El worker corre cada minuto en producción.
-          </p>
-        </CardHeader>
-        <CardBody className="space-y-4">
+      <AdminPageHeader
+        title={product.name}
+        subtitle={t(uiLocale, 'admin.productDetail.subtitle', {
+          sku: product.sku,
+          category: product.category.name,
+        })}
+      />
+
+      <section className="rounded-card border border-line p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-ink-950">
+            {t(uiLocale, 'admin.productDetail.aiContent')}
+          </h2>
+          <form action={enqueueContentGenAction}>
+            <input type="hidden" name="productId" value={product.id} />
+            <SubmitButton
+              pendingLabel={t(uiLocale, 'admin.action.enqueuing')}
+              className={adminBtn.primary}
+            >
+              {t(uiLocale, 'admin.action.generateRegenerate')}
+            </SubmitButton>
+          </form>
+        </div>
+        <p className="mt-1 text-xs text-ink-500">{t(uiLocale, 'admin.productDetail.aiHint')}</p>
+
+        <div className="mt-4 space-y-3">
           {LOCALES.map((locale: Locale) => {
             const c = product.content.find((x) => x.locale === locale)
+            const published = c?.status === 'PUBLISHED'
             return (
-              <div key={locale} className="rounded-lg border border-gray-100 p-3">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div key={locale} className="rounded-card border border-line p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs uppercase tracking-wide text-gray-500">
+                    <span className="font-mono text-xs uppercase tracking-wide text-ink-500">
                       {locale}
                     </span>
                     {c ? (
-                      <Badge variant={c.status === 'PUBLISHED' ? 'success' : 'default'}>
-                        {c.status}
-                      </Badge>
+                      <StatusBadge tone={published ? 'success' : 'neutral'}>
+                        {published
+                          ? t(uiLocale, 'admin.productDetail.published')
+                          : t(uiLocale, 'admin.productDetail.draft')}
+                      </StatusBadge>
                     ) : (
-                      <Badge variant="default">—</Badge>
+                      <StatusBadge tone="neutral">—</StatusBadge>
                     )}
                   </div>
                   {c?.status === 'DRAFT' && (
@@ -95,9 +101,8 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
                       <input type="hidden" name="productId" value={product.id} />
                       <input type="hidden" name="locale" value={locale} />
                       <SubmitButton
-                        variant="secondary"
-                        size="sm"
                         pendingLabel={t(uiLocale, 'admin.action.publishing')}
+                        className={adminBtn.secondary}
                       >
                         {t(uiLocale, 'admin.action.publish')}
                       </SubmitButton>
@@ -105,28 +110,28 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
                   )}
                 </div>
                 {c?.shortDescription && (
-                  <p className="mt-2 text-sm text-gray-700">{c.shortDescription}</p>
+                  <p className="mt-2 text-sm text-ink-700">{c.shortDescription}</p>
                 )}
                 {c?.longDescriptionMd && (
                   <details className="mt-2">
-                    <summary className="cursor-pointer text-xs text-gray-500">
-                      Long description (markdown)
+                    <summary className="cursor-pointer text-xs text-ink-500">
+                      {t(uiLocale, 'admin.productDetail.longDescription')}
                     </summary>
-                    <pre className="mt-2 whitespace-pre-wrap text-xs bg-gray-50 p-2 rounded">
+                    <pre className="mt-2 whitespace-pre-wrap rounded bg-muted p-2 text-xs text-ink-700">
                       {c.longDescriptionMd}
                     </pre>
                   </details>
                 )}
                 {c?.seoTitle && (
-                  <p className="mt-2 text-xs text-gray-500">
-                    SEO: <strong>{c.seoTitle}</strong> — {c.seoDescription}
+                  <p className="mt-2 text-xs text-ink-500">
+                    SEO: <strong className="text-ink-950">{c.seoTitle}</strong> — {c.seoDescription}
                   </p>
                 )}
               </div>
             )
           })}
-        </CardBody>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

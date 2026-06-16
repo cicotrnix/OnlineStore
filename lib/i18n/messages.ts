@@ -444,6 +444,56 @@ export type MessageKey =
   | 'admin.dashboard.orgsTitle'
   | 'admin.dashboard.noOrgs'
   | 'admin.dashboard.createInSettings'
+  // Admin catalog (Fase 1)
+  | 'admin.products.bulkQueued'
+  | 'admin.products.title'
+  | 'admin.products.count'
+  | 'admin.products.newProduct'
+  | 'admin.products.f.sku'
+  | 'admin.products.f.slug'
+  | 'admin.products.f.name'
+  | 'admin.products.f.basePrice'
+  | 'admin.products.f.stock'
+  | 'admin.products.f.imageUrl'
+  | 'admin.products.f.category'
+  | 'admin.products.f.description'
+  | 'admin.products.chooseCategory'
+  | 'admin.products.col.sku'
+  | 'admin.products.col.product'
+  | 'admin.products.col.category'
+  | 'admin.products.col.price'
+  | 'admin.products.col.stock'
+  | 'admin.products.col.status'
+  | 'admin.products.col.private'
+  | 'admin.products.col.action'
+  | 'admin.products.active'
+  | 'admin.products.inactive'
+  | 'admin.products.tiers.title'
+  | 'admin.products.tiers.hint'
+  | 'admin.products.tiers.base'
+  | 'admin.products.tiers.minQty'
+  | 'admin.products.tiers.unitPrice'
+  | 'admin.products.tiers.minQtyRow'
+  | 'admin.categories.title'
+  | 'admin.categories.count'
+  | 'admin.categories.newCategory'
+  | 'admin.categories.f.slug'
+  | 'admin.categories.f.name'
+  | 'admin.categories.f.sortOrder'
+  | 'admin.categories.col.order'
+  | 'admin.categories.col.slug'
+  | 'admin.categories.col.name'
+  | 'admin.categories.col.status'
+  | 'admin.categories.active'
+  | 'admin.categories.inactive'
+  | 'admin.productDetail.flashQueued'
+  | 'admin.productDetail.flashPublished'
+  | 'admin.productDetail.subtitle'
+  | 'admin.productDetail.aiContent'
+  | 'admin.productDetail.aiHint'
+  | 'admin.productDetail.longDescription'
+  | 'admin.productDetail.published'
+  | 'admin.productDetail.draft'
   | 'admin.nav.dashboard'
   | 'admin.nav.products'
   | 'admin.nav.categories'
@@ -1078,6 +1128,59 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.dashboard.orgsTitle': 'Your organizations',
     'admin.dashboard.noOrgs': 'No organizations yet.',
     'admin.dashboard.createInSettings': 'Create one in settings',
+    // Admin catalog (Fase 1)
+    'admin.products.bulkQueued': 'Queued {n} AI content jobs. The worker runs every minute.',
+    'admin.products.title': 'Products',
+    'admin.products.count': '{count} products registered.',
+    'admin.products.newProduct': 'New product',
+    'admin.products.f.sku': 'SKU',
+    'admin.products.f.slug': 'Slug',
+    'admin.products.f.name': 'Name',
+    'admin.products.f.basePrice': 'Base price',
+    'admin.products.f.stock': 'Initial stock',
+    'admin.products.f.imageUrl': 'Image URL (optional)',
+    'admin.products.f.category': 'Category',
+    'admin.products.f.description': 'Description (markdown, optional)',
+    'admin.products.chooseCategory': '— choose —',
+    'admin.products.col.sku': 'SKU',
+    'admin.products.col.product': 'Product',
+    'admin.products.col.category': 'Category',
+    'admin.products.col.price': 'Price',
+    'admin.products.col.stock': 'Stock',
+    'admin.products.col.status': 'Status',
+    'admin.products.col.private': 'Private',
+    'admin.products.col.action': 'Action',
+    'admin.products.active': 'Active',
+    'admin.products.inactive': 'Inactive',
+    'admin.products.tiers.title': 'Volume discounts',
+    'admin.products.tiers.hint':
+      'Define quantity tiers. The tier price applies when the ordered quantity is ≥ minQty.',
+    'admin.products.tiers.base': 'Base',
+    'admin.products.tiers.minQty': 'Min quantity',
+    'admin.products.tiers.unitPrice': 'Unit price',
+    'admin.products.tiers.minQtyRow': '≥ {n} units',
+    'admin.categories.title': 'Categories',
+    'admin.categories.count': '{count} categories.',
+    'admin.categories.newCategory': 'New category',
+    'admin.categories.f.slug': 'Slug',
+    'admin.categories.f.name': 'Name',
+    'admin.categories.f.sortOrder': 'Order',
+    'admin.categories.col.order': 'Order',
+    'admin.categories.col.slug': 'Slug',
+    'admin.categories.col.name': 'Name',
+    'admin.categories.col.status': 'Status',
+    'admin.categories.active': 'Active',
+    'admin.categories.inactive': 'Inactive',
+    'admin.productDetail.flashQueued':
+      'AI generation queued (EN + ES). The worker runs every minute.',
+    'admin.productDetail.flashPublished': 'Content published for {locale}. Reindex queued.',
+    'admin.productDetail.subtitle': 'SKU {sku} · {category}',
+    'admin.productDetail.aiContent': 'AI content',
+    'admin.productDetail.aiHint':
+      'Queues jobs for the supported locales. The worker runs every minute in production.',
+    'admin.productDetail.longDescription': 'Long description (markdown)',
+    'admin.productDetail.published': 'Published',
+    'admin.productDetail.draft': 'Draft',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Products',
     'admin.nav.categories': 'Categories',
@@ -1704,6 +1807,60 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.dashboard.orgsTitle': 'Tus organizaciones',
     'admin.dashboard.noOrgs': 'Todavía no hay organizaciones.',
     'admin.dashboard.createInSettings': 'Creá una en settings',
+    // Admin catalog (Fase 1)
+    'admin.products.bulkQueued':
+      'Encolados {n} jobs de generación AI. El worker procesa cada minuto.',
+    'admin.products.title': 'Productos',
+    'admin.products.count': '{count} productos registrados.',
+    'admin.products.newProduct': 'Nuevo producto',
+    'admin.products.f.sku': 'SKU',
+    'admin.products.f.slug': 'Slug',
+    'admin.products.f.name': 'Nombre',
+    'admin.products.f.basePrice': 'Precio base',
+    'admin.products.f.stock': 'Stock inicial',
+    'admin.products.f.imageUrl': 'URL imagen (opcional)',
+    'admin.products.f.category': 'Categoría',
+    'admin.products.f.description': 'Descripción (markdown, opcional)',
+    'admin.products.chooseCategory': '— elegir —',
+    'admin.products.col.sku': 'SKU',
+    'admin.products.col.product': 'Producto',
+    'admin.products.col.category': 'Categoría',
+    'admin.products.col.price': 'Precio',
+    'admin.products.col.stock': 'Stock',
+    'admin.products.col.status': 'Estado',
+    'admin.products.col.private': 'Privado',
+    'admin.products.col.action': 'Acción',
+    'admin.products.active': 'Activo',
+    'admin.products.inactive': 'Inactivo',
+    'admin.products.tiers.title': 'Descuentos por volumen',
+    'admin.products.tiers.hint':
+      'Definí tramos por cantidad. El precio del tramo aplica cuando la cantidad pedida es ≥ minQty.',
+    'admin.products.tiers.base': 'Base',
+    'admin.products.tiers.minQty': 'Cantidad mínima',
+    'admin.products.tiers.unitPrice': 'Precio unitario',
+    'admin.products.tiers.minQtyRow': '≥ {n} uds',
+    'admin.categories.title': 'Categorías',
+    'admin.categories.count': '{count} categorías.',
+    'admin.categories.newCategory': 'Nueva categoría',
+    'admin.categories.f.slug': 'Slug',
+    'admin.categories.f.name': 'Nombre',
+    'admin.categories.f.sortOrder': 'Orden',
+    'admin.categories.col.order': 'Orden',
+    'admin.categories.col.slug': 'Slug',
+    'admin.categories.col.name': 'Nombre',
+    'admin.categories.col.status': 'Estado',
+    'admin.categories.active': 'Activa',
+    'admin.categories.inactive': 'Inactiva',
+    'admin.productDetail.flashQueued':
+      'Generación AI encolada (EN + ES). El worker procesa cada minuto.',
+    'admin.productDetail.flashPublished': 'Contenido publicado para {locale}. Reindex en cola.',
+    'admin.productDetail.subtitle': 'SKU {sku} · {category}',
+    'admin.productDetail.aiContent': 'Contenido AI',
+    'admin.productDetail.aiHint':
+      'Encola jobs para los locales soportados. El worker corre cada minuto en producción.',
+    'admin.productDetail.longDescription': 'Descripción larga (markdown)',
+    'admin.productDetail.published': 'Publicado',
+    'admin.productDetail.draft': 'Borrador',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Productos',
     'admin.nav.categories': 'Categorías',

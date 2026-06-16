@@ -1,10 +1,9 @@
+import { AuthField } from '@/app/(auth)/AuthField'
 import { createProductAction, toggleProductActiveAction } from '@/app/admin/_actions'
 import { toggleProductPrivateAction, upsertProductTierAction } from '@/app/admin/_actions-fase2'
 import { enqueueBulkContentGenAction } from '@/app/admin/products/_ai-actions'
+import { AdminPageHeader, type Column, DataTable, StatusBadge, adminBtn } from '@/components/admin'
 import { StockBadge } from '@/components/commerce/StockBadge'
-import { Badge } from '@/components/ui/Badge'
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
@@ -16,19 +15,18 @@ import { getStoreConfig } from '@/stores'
 
 type Props = { searchParams: Promise<{ flash?: string; n?: string }> }
 
+const ROW_BTN =
+  'rounded-button border border-line px-2.5 py-1 text-xs font-medium text-ink-700 hover:border-accent hover:text-ink-950'
+
 export default async function AdminProductsPage({ searchParams }: Props) {
   const sp = await searchParams
   const user = await requireAuth()
   const locale = await getLocale({ userId: user.id })
   const bulkMessage =
-    sp.flash === 'bulk-queued'
-      ? `Encolados ${sp.n ?? '?'} jobs de generación AI. El worker procesa cada minuto.`
-      : null
-  const products = await catalogService.listProducts({
-    activeOnly: false,
-    take: 100,
-  })
+    sp.flash === 'bulk-queued' ? t(locale, 'admin.products.bulkQueued', { n: sp.n ?? '?' }) : null
+  const products = await catalogService.listProducts({ activeOnly: false, take: 100 })
   const categories = await catalogService.listCategories(false)
+  const currency = getStoreConfig().currency.base
   const showPrivate = isFeatureEnabled('privateCatalogs')
   const showTiers = isFeatureEnabled('volumeDiscounts')
   const allTiers = showTiers
@@ -46,242 +44,221 @@ export default async function AdminProductsPage({ searchParams }: Props) {
     for (const r of rows) productPrivateMap.set(r.id, r.isPrivate)
   }
 
+  type Row = (typeof products)[number]
+  const columns: Column<Row>[] = [
+    {
+      key: 'sku',
+      header: t(locale, 'admin.products.col.sku'),
+      className: 'font-mono text-xs',
+      cell: (p) => p.sku,
+    },
+    { key: 'name', header: t(locale, 'admin.products.col.product'), cell: (p) => p.name },
+    {
+      key: 'category',
+      header: t(locale, 'admin.products.col.category'),
+      className: 'text-ink-500',
+      cell: (p) => p.category.name,
+    },
+    {
+      key: 'price',
+      header: t(locale, 'admin.products.col.price'),
+      align: 'right',
+      className: 'font-mono tabular-nums',
+      cell: (p) => formatMoney(p.basePrice, currency),
+    },
+    {
+      key: 'stock',
+      header: t(locale, 'admin.products.col.stock'),
+      cell: (p) => <StockBadge stockQuantity={p.stockQuantity} />,
+    },
+    {
+      key: 'status',
+      header: t(locale, 'admin.products.col.status'),
+      cell: (p) => (
+        <StatusBadge tone={p.isActive ? 'success' : 'neutral'}>
+          {p.isActive ? t(locale, 'admin.products.active') : t(locale, 'admin.products.inactive')}
+        </StatusBadge>
+      ),
+    },
+    ...(showPrivate
+      ? [
+          {
+            key: 'private',
+            header: t(locale, 'admin.products.col.private'),
+            cell: (p: Row) => (
+              <form action={toggleProductPrivateAction}>
+                <input type="hidden" name="id" value={p.id} />
+                <input
+                  type="hidden"
+                  name="isPrivate"
+                  value={productPrivateMap.get(p.id) ? 'true' : 'false'}
+                />
+                <SubmitButton pendingLabel={t(locale, 'common.pending')} className={ROW_BTN}>
+                  {productPrivateMap.get(p.id) ? t(locale, 'common.yes') : t(locale, 'common.no')}
+                </SubmitButton>
+              </form>
+            ),
+          },
+        ]
+      : []),
+    {
+      key: 'action',
+      header: t(locale, 'admin.products.col.action'),
+      align: 'right',
+      cell: (p) => (
+        <form action={toggleProductActiveAction}>
+          <input type="hidden" name="id" value={p.id} />
+          <input type="hidden" name="isActive" value={p.isActive ? 'true' : 'false'} />
+          <SubmitButton pendingLabel={t(locale, 'common.pending')} className={ROW_BTN}>
+            {p.isActive ? t(locale, 'admin.action.deactivate') : t(locale, 'admin.action.activate')}
+          </SubmitButton>
+        </form>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-8">
       {bulkMessage && (
         <output
           aria-live="polite"
-          className="block rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
+          className="block rounded-card border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-ink-950"
         >
           {bulkMessage}
         </output>
       )}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight">Productos</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {products.length} producto{products.length === 1 ? '' : 's'} registrados.
-          </p>
-        </div>
-        <form action={enqueueBulkContentGenAction}>
-          <SubmitButton
-            variant="secondary"
-            size="sm"
-            pendingLabel={t(locale, 'admin.action.enqueuing')}
-          >
-            {t(locale, 'admin.action.generateAllContent')}
-          </SubmitButton>
-        </form>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">Nuevo producto</h2>
-        </CardHeader>
-        <CardBody>
-          <form action={createProductAction} className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label htmlFor="sku" className="text-xs uppercase tracking-wide text-gray-500">
-                SKU
-              </label>
-              <Input id="sku" name="sku" required placeholder="SKU-001" className="mt-1" />
-            </div>
-            <div>
-              <label htmlFor="slug" className="text-xs uppercase tracking-wide text-gray-500">
-                Slug
-              </label>
-              <Input id="slug" name="slug" required placeholder="producto-1" className="mt-1" />
-            </div>
-            <div className="sm:col-span-2">
-              <label htmlFor="name" className="text-xs uppercase tracking-wide text-gray-500">
-                Nombre
-              </label>
-              <Input id="name" name="name" required className="mt-1" />
-            </div>
-            <div>
-              <label htmlFor="basePrice" className="text-xs uppercase tracking-wide text-gray-500">
-                Precio base (USD)
-              </label>
-              <Input
-                id="basePrice"
-                name="basePrice"
-                type="number"
-                step="0.01"
-                min="0.01"
-                required
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="stockQuantity"
-                className="text-xs uppercase tracking-wide text-gray-500"
-              >
-                Stock inicial
-              </label>
-              <Input
-                id="stockQuantity"
-                name="stockQuantity"
-                type="number"
-                min="0"
-                defaultValue={0}
-                className="mt-1"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label htmlFor="imageUrl" className="text-xs uppercase tracking-wide text-gray-500">
-                URL imagen (opcional)
-              </label>
-              <Input id="imageUrl" name="imageUrl" type="url" className="mt-1" />
-            </div>
-            <div className="sm:col-span-2">
-              <label htmlFor="categoryId" className="text-xs uppercase tracking-wide text-gray-500">
-                Categoría
-              </label>
-              <select
-                id="categoryId"
-                name="categoryId"
-                required
-                className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-              >
-                <option value="">— elegir —</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="description"
-                className="text-xs uppercase tracking-wide text-gray-500"
-              >
-                Descripción (markdown, opcional)
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
-              />
-            </div>
-            <div className="sm:col-span-2 flex justify-end">
-              <SubmitButton pendingLabel={t(locale, 'admin.action.creating')}>
-                {t(locale, 'admin.action.createProduct')}
-              </SubmitButton>
-            </div>
+      <AdminPageHeader
+        title={t(locale, 'admin.products.title')}
+        subtitle={t(locale, 'admin.products.count', { count: products.length })}
+        action={
+          <form action={enqueueBulkContentGenAction}>
+            <SubmitButton
+              pendingLabel={t(locale, 'admin.action.enqueuing')}
+              className={adminBtn.secondary}
+            >
+              {t(locale, 'admin.action.generateAllContent')}
+            </SubmitButton>
           </form>
-        </CardBody>
-      </Card>
+        }
+      />
 
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wide text-gray-500 bg-gray-50">
-              <tr>
-                <th className="text-left px-5 py-3 font-medium">SKU</th>
-                <th className="text-left px-5 py-3 font-medium">Producto</th>
-                <th className="text-left px-5 py-3 font-medium">Categoría</th>
-                <th className="text-left px-5 py-3 font-medium">Precio</th>
-                <th className="text-left px-5 py-3 font-medium">Stock</th>
-                <th className="text-left px-5 py-3 font-medium">Estado</th>
-                {showPrivate && <th className="text-left px-5 py-3 font-medium">Privado</th>}
-                <th className="text-right px-5 py-3 font-medium">Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id} className="border-t border-gray-100">
-                  <td className="px-5 py-3 font-mono text-xs">{p.sku}</td>
-                  <td className="px-5 py-3">{p.name}</td>
-                  <td className="px-5 py-3 text-xs text-gray-500">{p.category.name}</td>
-                  <td className="px-5 py-3 tabular-nums">
-                    {formatMoney(p.basePrice, getStoreConfig().currency.base)}
-                  </td>
-                  <td className="px-5 py-3">
-                    <StockBadge stockQuantity={p.stockQuantity} />
-                  </td>
-                  <td className="px-5 py-3">
-                    {p.isActive ? (
-                      <Badge variant="success">Activo</Badge>
-                    ) : (
-                      <Badge variant="default">Inactivo</Badge>
-                    )}
-                  </td>
-                  {showPrivate && (
-                    <td className="px-5 py-3">
-                      <form action={toggleProductPrivateAction}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <input
-                          type="hidden"
-                          name="isPrivate"
-                          value={productPrivateMap.get(p.id) ? 'true' : 'false'}
-                        />
-                        <SubmitButton
-                          variant="ghost"
-                          size="sm"
-                          pendingLabel={t(locale, 'common.pending')}
-                        >
-                          {productPrivateMap.get(p.id)
-                            ? t(locale, 'common.yes')
-                            : t(locale, 'common.no')}
-                        </SubmitButton>
-                      </form>
-                    </td>
-                  )}
-                  <td className="px-5 py-3 text-right">
-                    <form action={toggleProductActiveAction}>
-                      <input type="hidden" name="id" value={p.id} />
-                      <input type="hidden" name="isActive" value={p.isActive ? 'true' : 'false'} />
-                      <SubmitButton
-                        variant="secondary"
-                        size="sm"
-                        pendingLabel={t(locale, 'common.pending')}
-                      >
-                        {p.isActive
-                          ? t(locale, 'admin.action.deactivate')
-                          : t(locale, 'admin.action.activate')}
-                      </SubmitButton>
-                    </form>
-                  </td>
-                </tr>
+      {/* Nuevo producto */}
+      <section className="rounded-card border border-line p-5">
+        <h2 className="text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.products.newProduct')}
+        </h2>
+        <form action={createProductAction} className="mt-3 grid gap-3 sm:grid-cols-2">
+          <AuthField
+            name="sku"
+            label={t(locale, 'admin.products.f.sku')}
+            required
+            placeholder="SKU-001"
+          />
+          <AuthField
+            name="slug"
+            label={t(locale, 'admin.products.f.slug')}
+            required
+            placeholder="producto-1"
+          />
+          <div className="sm:col-span-2">
+            <AuthField name="name" label={t(locale, 'admin.products.f.name')} required />
+          </div>
+          <AuthField
+            name="basePrice"
+            label={t(locale, 'admin.products.f.basePrice')}
+            type="number"
+            step="0.01"
+            min="0.01"
+            required
+          />
+          <AuthField
+            name="stockQuantity"
+            label={t(locale, 'admin.products.f.stock')}
+            type="number"
+            min={0}
+            defaultValue={0}
+          />
+          <div className="sm:col-span-2">
+            <AuthField name="imageUrl" label={t(locale, 'admin.products.f.imageUrl')} type="url" />
+          </div>
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="categoryId"
+              className="block text-xs font-medium uppercase tracking-wide text-ink-500"
+            >
+              {t(locale, 'admin.products.f.category')}
+            </label>
+            <select
+              id="categoryId"
+              name="categoryId"
+              required
+              className="mt-1 w-full rounded-button border border-ink-100 bg-surface px-3 py-2.5 text-sm text-ink-950 focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="">{t(locale, 'admin.products.chooseCategory')}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label
+              htmlFor="description"
+              className="block text-xs font-medium uppercase tracking-wide text-ink-500"
+            >
+              {t(locale, 'admin.products.f.description')}
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              className="mt-1 w-full rounded-button border border-ink-100 bg-surface px-3 py-2.5 text-sm text-ink-950 focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div className="flex justify-end sm:col-span-2">
+            <SubmitButton
+              pendingLabel={t(locale, 'admin.action.creating')}
+              className={adminBtn.primary}
+            >
+              {t(locale, 'admin.action.createProduct')}
+            </SubmitButton>
+          </div>
+        </form>
+      </section>
+
+      <DataTable columns={columns} rows={products} getRowKey={(p) => p.id} empty="—" />
 
       {showTiers && (
-        <Card>
-          <CardHeader>
-            <h2 className="font-medium">Descuentos por volumen</h2>
-            <p className="mt-1 text-xs text-gray-500">
-              Define tramos por cantidad. El precio del tramo aplica cuando la cantidad pedida es ≥
-              minQty.
-            </p>
-          </CardHeader>
-          <CardBody className="space-y-4">
+        <section className="rounded-card border border-line p-5">
+          <h2 className="text-sm font-semibold text-ink-950">
+            {t(locale, 'admin.products.tiers.title')}
+          </h2>
+          <p className="mt-1 text-xs text-ink-500">{t(locale, 'admin.products.tiers.hint')}</p>
+          <div className="mt-4 space-y-4">
             {products.map((p) => {
               const tiers = tiersByProduct.get(p.id) ?? []
               return (
-                <div key={p.id} className="rounded-lg border border-gray-100 p-3">
+                <div key={p.id} className="rounded-card border border-line p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium">{p.name}</div>
-                      <div className="text-xs text-gray-500 font-mono">{p.sku}</div>
+                      <div className="text-sm font-medium text-ink-950">{p.name}</div>
+                      <div className="font-mono text-xs text-ink-500">{p.sku}</div>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      Base {formatMoney(p.basePrice, getStoreConfig().currency.base)}
+                    <div className="text-xs text-ink-500">
+                      {t(locale, 'admin.products.tiers.base')} {formatMoney(p.basePrice, currency)}
                     </div>
                   </div>
                   {tiers.length > 0 && (
-                    <ul className="mt-2 text-xs text-gray-600 space-y-1">
+                    <ul className="mt-2 space-y-1 text-xs text-ink-700">
                       {tiers.map((tier) => (
                         <li key={tier.id} className="flex justify-between">
-                          <span>≥ {tier.minQty} uds</span>
-                          <span className="tabular-nums">
-                            {formatMoney(tier.unitPrice, getStoreConfig().currency.base)}
+                          <span>
+                            {t(locale, 'admin.products.tiers.minQtyRow', { n: tier.minQty })}
+                          </span>
+                          <span className="font-mono tabular-nums">
+                            {formatMoney(tier.unitPrice, currency)}
                           </span>
                         </li>
                       ))}
@@ -292,43 +269,28 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                     className="mt-2 flex flex-wrap items-end gap-2"
                   >
                     <input type="hidden" name="productId" value={p.id} />
-                    <div>
-                      <label
-                        htmlFor={`minQty-${p.id}`}
-                        className="text-[10px] uppercase tracking-wide text-gray-500"
-                      >
-                        Cantidad mínima
-                      </label>
-                      <Input
-                        id={`minQty-${p.id}`}
+                    <div className="w-32">
+                      <AuthField
                         name="minQty"
+                        label={t(locale, 'admin.products.tiers.minQty')}
                         type="number"
-                        min="2"
+                        min={2}
                         required
-                        className="mt-1 w-32"
                       />
                     </div>
-                    <div>
-                      <label
-                        htmlFor={`unitPrice-${p.id}`}
-                        className="text-[10px] uppercase tracking-wide text-gray-500"
-                      >
-                        Precio unitario
-                      </label>
-                      <Input
-                        id={`unitPrice-${p.id}`}
+                    <div className="w-32">
+                      <AuthField
                         name="unitPrice"
+                        label={t(locale, 'admin.products.tiers.unitPrice')}
                         type="number"
                         step="0.01"
                         min="0.01"
                         required
-                        className="mt-1 w-32"
                       />
                     </div>
                     <SubmitButton
-                      size="sm"
-                      variant="secondary"
                       pendingLabel={t(locale, 'admin.action.saving')}
+                      className={adminBtn.secondary}
                     >
                       {t(locale, 'admin.action.saveTier')}
                     </SubmitButton>
@@ -336,8 +298,8 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                 </div>
               )
             })}
-          </CardBody>
-        </Card>
+          </div>
+        </section>
       )}
     </div>
   )

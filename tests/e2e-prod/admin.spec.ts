@@ -111,3 +111,44 @@ test.describe('admin shell (prod build) — Fase 0', () => {
     }
   })
 })
+
+test.describe('admin catalog (prod build) — Fase 1', () => {
+  async function axeBlocking(page: import('@playwright/test').Page) {
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze()
+    return results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+  }
+
+  test('products + categories + detail renderizan (DataTable) y pasan axe', async ({ browser }) => {
+    const { user, token } = await seedUser(true)
+    const product = await prisma.product.findFirst({ select: { id: true, sku: true } })
+    expect(product, 'la DB del e2e prod debe estar seedeada').not.toBeNull()
+    try {
+      const ctx = await browser.newContext()
+      await withSession(ctx, token)
+      const page = await ctx.newPage()
+
+      // /admin/products — DataTable con datos reales
+      await page.goto('/admin/products', { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible()
+      await expect(page.getByText(product!.sku).first()).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/products').toEqual([])
+
+      // /admin/categories
+      await page.goto('/admin/categories', { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'Categories' })).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/categories').toEqual([])
+
+      // /admin/products/[id]
+      await page.goto(`/admin/products/${product!.id}`, { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'AI content' })).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/products/[id]').toEqual([])
+
+      await ctx.close()
+    } finally {
+      await prisma.session.deleteMany({ where: { userId: user.id } })
+      await prisma.user.delete({ where: { id: user.id } }).catch(() => {})
+    }
+  })
+})
