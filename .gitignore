@@ -62,3 +62,7 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+
+# Stray catálogo assets sueltos en el root (no versionar)
+/tag-on flex all.png
+/tag-on-bases/
