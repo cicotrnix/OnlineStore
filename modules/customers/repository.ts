@@ -75,6 +75,50 @@ export const customersRepository = {
     return prisma.organizationAddress.findUnique({ where: { id } })
   },
 
+  async updateAddress(id: string, data: Prisma.OrganizationAddressUpdateInput) {
+    return prisma.organizationAddress.update({ where: { id }, data })
+  },
+
+  async deleteAddress(id: string) {
+    return prisma.organizationAddress.delete({ where: { id } })
+  },
+
+  async countOrdersUsingAddress(id: string) {
+    return prisma.order.count({
+      where: { OR: [{ billingAddressId: id }, { shippingAddressId: id }] },
+    })
+  },
+
+  /** Marca una dirección como default-billing y desmarca cualquier otra (tx). */
+  async setDefaultBilling(orgId: string, addressId: string) {
+    return prisma.$transaction(async (tx) => {
+      await tx.organizationAddress.updateMany({
+        where: { organizationId: orgId, isDefaultBilling: true },
+        data: { isDefaultBilling: false },
+      })
+      const res = await tx.organizationAddress.updateMany({
+        where: { id: addressId, organizationId: orgId },
+        data: { isDefaultBilling: true },
+      })
+      if (res.count === 0) throw new Error('Address not in organization')
+    })
+  },
+
+  /** Marca una dirección como default-shipping y desmarca cualquier otra (tx). */
+  async setDefaultShipping(orgId: string, addressId: string) {
+    return prisma.$transaction(async (tx) => {
+      await tx.organizationAddress.updateMany({
+        where: { organizationId: orgId, isDefaultShipping: true },
+        data: { isDefaultShipping: false },
+      })
+      const res = await tx.organizationAddress.updateMany({
+        where: { id: addressId, organizationId: orgId },
+        data: { isDefaultShipping: true },
+      })
+      if (res.count === 0) throw new Error('Address not in organization')
+    })
+  },
+
   async findDefaultBilling(orgId: string) {
     return prisma.organizationAddress.findFirst({
       where: { organizationId: orgId, isDefaultBilling: true },

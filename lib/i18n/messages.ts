@@ -168,6 +168,35 @@ export type MessageKey =
   | 'account.profile.submit'
   | 'account.toast.profileSaved'
   | 'account.toast.profileInvalid'
+  | 'account.toast.addressForbidden'
+  | 'account.toast.addressInUse'
+  | 'account.toast.addressInvalid'
+  | 'account.toast.addressSaved'
+  | 'account.toast.addressDeleted'
+  | 'account.toast.addressDefaultSet'
+  // Account addresses
+  | 'account.addresses.subtitle'
+  | 'account.addresses.add'
+  | 'account.addresses.edit'
+  | 'account.addresses.delete'
+  | 'account.addresses.cancel'
+  | 'account.addresses.save'
+  | 'account.addresses.confirmDelete'
+  | 'account.addresses.setDefaultBilling'
+  | 'account.addresses.setDefaultShipping'
+  | 'account.addresses.badgeBilling'
+  | 'account.addresses.badgeShipping'
+  | 'account.addresses.empty'
+  | 'account.addresses.readOnly'
+  | 'account.addresses.field.label'
+  | 'account.addresses.field.recipient'
+  | 'account.addresses.field.line1'
+  | 'account.addresses.field.line2'
+  | 'account.addresses.field.city'
+  | 'account.addresses.field.state'
+  | 'account.addresses.field.postalCode'
+  | 'account.addresses.field.country'
+  | 'account.addresses.field.phone'
   // Select org
   | 'selectOrg.title'
   | 'selectOrg.subtitle'
@@ -689,6 +718,35 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.profile.submit': 'Save changes',
     'account.toast.profileSaved': 'Profile updated.',
     'account.toast.profileInvalid': 'Check your name and language and try again.',
+    'account.toast.addressForbidden': "You don't have permission to manage addresses.",
+    'account.toast.addressInUse': "This address is used by existing orders and can't be deleted.",
+    'account.toast.addressInvalid': 'Check the address fields and try again.',
+    'account.toast.addressSaved': 'Address saved.',
+    'account.toast.addressDeleted': 'Address deleted.',
+    'account.toast.addressDefaultSet': 'Default address updated.',
+    // Account addresses
+    'account.addresses.subtitle': 'Shipping and billing addresses for your organization.',
+    'account.addresses.add': 'Add address',
+    'account.addresses.edit': 'Edit',
+    'account.addresses.delete': 'Delete',
+    'account.addresses.cancel': 'Cancel',
+    'account.addresses.save': 'Save address',
+    'account.addresses.confirmDelete': 'Delete this address?',
+    'account.addresses.setDefaultBilling': 'Set as billing',
+    'account.addresses.setDefaultShipping': 'Set as shipping',
+    'account.addresses.badgeBilling': 'Default billing',
+    'account.addresses.badgeShipping': 'Default shipping',
+    'account.addresses.empty': 'No addresses yet.',
+    'account.addresses.readOnly': 'Addresses are managed by organization owners and admins.',
+    'account.addresses.field.label': 'Label',
+    'account.addresses.field.recipient': 'Recipient',
+    'account.addresses.field.line1': 'Address line 1',
+    'account.addresses.field.line2': 'Address line 2',
+    'account.addresses.field.city': 'City',
+    'account.addresses.field.state': 'State / Province',
+    'account.addresses.field.postalCode': 'Postal code',
+    'account.addresses.field.country': 'Country (2-letter)',
+    'account.addresses.field.phone': 'Phone',
     // Select org
     'selectOrg.title': 'Choose your organization',
     'selectOrg.subtitle': 'Switching organizations later will empty your cart.',
@@ -1209,6 +1267,36 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.profile.submit': 'Guardar cambios',
     'account.toast.profileSaved': 'Perfil actualizado.',
     'account.toast.profileInvalid': 'Revisá tu nombre e idioma y volvé a intentar.',
+    'account.toast.addressForbidden': 'No tenés permiso para gestionar direcciones.',
+    'account.toast.addressInUse': 'Esta dirección la usan órdenes existentes y no se puede borrar.',
+    'account.toast.addressInvalid': 'Revisá los campos de la dirección y volvé a intentar.',
+    'account.toast.addressSaved': 'Dirección guardada.',
+    'account.toast.addressDeleted': 'Dirección borrada.',
+    'account.toast.addressDefaultSet': 'Dirección por defecto actualizada.',
+    // Account addresses
+    'account.addresses.subtitle': 'Direcciones de envío y facturación de tu organización.',
+    'account.addresses.add': 'Agregar dirección',
+    'account.addresses.edit': 'Editar',
+    'account.addresses.delete': 'Borrar',
+    'account.addresses.cancel': 'Cancelar',
+    'account.addresses.save': 'Guardar dirección',
+    'account.addresses.confirmDelete': '¿Borrar esta dirección?',
+    'account.addresses.setDefaultBilling': 'Marcar facturación',
+    'account.addresses.setDefaultShipping': 'Marcar envío',
+    'account.addresses.badgeBilling': 'Facturación por defecto',
+    'account.addresses.badgeShipping': 'Envío por defecto',
+    'account.addresses.empty': 'Todavía no hay direcciones.',
+    'account.addresses.readOnly':
+      'Las direcciones las gestionan los owners y admins de la organización.',
+    'account.addresses.field.label': 'Etiqueta',
+    'account.addresses.field.recipient': 'Destinatario',
+    'account.addresses.field.line1': 'Dirección línea 1',
+    'account.addresses.field.line2': 'Dirección línea 2',
+    'account.addresses.field.city': 'Ciudad',
+    'account.addresses.field.state': 'Estado / Provincia',
+    'account.addresses.field.postalCode': 'Código postal',
+    'account.addresses.field.country': 'País (2 letras)',
+    'account.addresses.field.phone': 'Teléfono',
     // Select org
     'selectOrg.title': 'Elegí tu organización',
     'selectOrg.subtitle': 'Cambiar de organización en el futuro vaciará tu carrito.',

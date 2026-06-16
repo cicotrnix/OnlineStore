@@ -1,12 +1,15 @@
 import { randomBytes } from 'node:crypto'
 import { prisma } from '@/lib/db/client'
+import { AddressInUseError, AddressNotFoundError } from './errors'
 import { customersRepository } from './repository'
 import {
   type CreateAddressInput,
   type OrgRole,
+  type UpdateAddressInput,
   createAddressSchema,
   createOrganizationSchema,
   inviteMemberSchema,
+  updateAddressSchema,
 } from './schemas'
 
 const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000
@@ -115,6 +118,35 @@ export const customersService = {
   async createAddress(input: CreateAddressInput) {
     const parsed = createAddressSchema.parse(input)
     return customersRepository.createAddress(parsed)
+  },
+
+  async updateAddress(input: UpdateAddressInput) {
+    const { id, ...data } = updateAddressSchema.parse(input)
+    return customersRepository.updateAddress(id, data)
+  },
+
+  async setDefaultBilling(orgId: string, addressId: string) {
+    return customersRepository.setDefaultBilling(orgId, addressId)
+  },
+
+  async setDefaultShipping(orgId: string, addressId: string) {
+    return customersRepository.setDefaultShipping(orgId, addressId)
+  },
+
+  async isAddressInUse(addressId: string): Promise<boolean> {
+    return (await customersRepository.countOrdersUsingAddress(addressId)) > 0
+  },
+
+  /**
+   * Borra una dirección de la org. Soft-guard: si alguna orden la referencia
+   * (FK OrderBilling/OrderShipping sin onDelete) lanza AddressInUseError en vez
+   * de romper la integridad. Verifica también pertenencia a la org.
+   */
+  async deleteAddress(orgId: string, addressId: string) {
+    const addr = await customersRepository.findAddressById(addressId)
+    if (!addr || addr.organizationId !== orgId) throw new AddressNotFoundError()
+    if (await this.isAddressInUse(addressId)) throw new AddressInUseError()
+    return customersRepository.deleteAddress(addressId)
   },
 
   async listAddresses(orgId: string) {
