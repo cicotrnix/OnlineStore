@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/Button'
-import { Card, CardBody } from '@/components/ui/Card'
 import { switchActiveOrg } from '@/lib/auth/actions'
 import { requireAuth } from '@/lib/auth/helpers'
 import { getLocale, t } from '@/lib/i18n'
@@ -31,25 +29,31 @@ export default async function SelectOrgPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 px-6">
-      <h1 className="text-xl font-medium">{t(locale, 'selectOrg.title')}</h1>
-      <p className="mt-1 text-sm text-gray-500">{t(locale, 'selectOrg.subtitle')}</p>
+    <div className="mx-auto mt-20 max-w-md px-6">
+      <h1 className="text-xl font-semibold tracking-tight text-ink-950">
+        {t(locale, 'selectOrg.title')}
+      </h1>
+      <p className="mt-1 text-sm text-ink-500">{t(locale, 'selectOrg.subtitle')}</p>
       <div className="mt-6 space-y-3">
         {orgs.map((org) => (
-          <Card key={org.id}>
-            <CardBody className="flex items-center justify-between gap-3">
-              <div>
-                <div className="font-medium">{org.name}</div>
-                <div className="text-xs text-gray-500">{org.slug}</div>
-              </div>
-              <form action={chooseOrg}>
-                <input type="hidden" name="orgId" value={org.id} />
-                <Button type="submit" size="sm">
-                  {t(locale, 'selectOrg.select')}
-                </Button>
-              </form>
-            </CardBody>
-          </Card>
+          <div
+            key={org.id}
+            className="flex items-center justify-between gap-3 rounded-card border border-line p-4"
+          >
+            <div>
+              <div className="font-medium text-ink-950">{org.name}</div>
+              <div className="font-mono text-xs text-ink-500">{org.slug}</div>
+            </div>
+            <form action={chooseOrg}>
+              <input type="hidden" name="orgId" value={org.id} />
+              <button
+                type="submit"
+                className="rounded-button bg-accent px-3 py-1.5 text-sm font-semibold text-ink-950 hover:bg-accent/90"
+              >
+                {t(locale, 'selectOrg.select')}
+              </button>
+            </form>
+          </div>
         ))}
       </div>
     </div>
