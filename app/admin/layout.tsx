@@ -3,12 +3,14 @@ import { requireAuth } from '@/lib/auth/helpers'
 import { maintainCurrentSession } from '@/lib/auth/maintain'
 import { prisma } from '@/lib/db/client'
 import { type Locale, getLocale, t } from '@/lib/i18n'
-import Link from 'next/link'
+import { getStoreConfig } from '@/stores'
 import { redirect } from 'next/navigation'
+import { AdminMobileBar } from './AdminMobileBar'
+import { AdminNav, type AdminNavItem } from './AdminNav'
 
 export const dynamic = 'force-dynamic'
 
-function buildNav(locale: Locale) {
+function buildNav(locale: Locale): AdminNavItem[] {
   return [
     { href: '/admin', label: t(locale, 'admin.nav.dashboard') },
     { href: '/admin/products', label: t(locale, 'admin.nav.products') },
@@ -34,37 +36,40 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!u?.isPlatformAdmin) redirect('/')
 
   const navItems = buildNav(locale)
+  const brand = getStoreConfig().identity.name
+
+  const foot = (
+    <div className="text-xs text-white/50">
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate">{user.email}</span>
+        <LocaleSwitch current={locale} />
+      </div>
+      <span className="mt-2 inline-block rounded-button bg-accent/15 px-1.5 py-0.5 text-[10px] font-medium text-accent">
+        {t(locale, 'admin.platformAdmin')}
+      </span>
+    </div>
+  )
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      <aside className="w-60 bg-white border-r border-gray-200 p-4 flex flex-col">
-        <div className="flex items-center justify-between px-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+    <div className="min-h-screen bg-surface lg:flex">
+      {/* Sidebar slate (desktop) */}
+      <aside className="hidden w-60 shrink-0 flex-col bg-neutral-900 p-4 lg:flex">
+        <div className="px-3 py-2">
+          <span className="text-lg font-bold tracking-tight text-white">{brand}</span>
+          <span className="ml-2 font-mono text-[11px] uppercase tracking-wide text-white/40">
             {t(locale, 'admin.label')}
-          </h2>
-          <LocaleSwitch current={locale} />
+          </span>
         </div>
-        <nav className="mt-4 space-y-0.5">
-          {navItems.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
-            >
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="mt-8 px-3 text-xs text-gray-500">
-          <div>{user.email}</div>
-          {u?.isPlatformAdmin && (
-            <div className="mt-1 inline-block rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-medium text-purple-700">
-              {t(locale, 'admin.platformAdmin')}
-            </div>
-          )}
+        <div className="mt-4 flex-1">
+          <AdminNav items={navItems} />
         </div>
+        <div className="mt-6 border-t border-white/10 pt-4">{foot}</div>
       </aside>
-      <main className="flex-1 p-8 overflow-x-auto">{children}</main>
+
+      {/* Barra + drawer (mobile) */}
+      <AdminMobileBar items={navItems} locale={locale} brand={brand} foot={foot} />
+
+      <main className="min-w-0 flex-1 overflow-x-auto p-6 lg:p-8">{children}</main>
     </div>
   )
 }
