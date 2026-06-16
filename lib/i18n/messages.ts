@@ -94,6 +94,7 @@ export type MessageKey =
   | 'auth.signUp.strength.weak'
   | 'auth.signUp.strength.medium'
   | 'auth.signUp.strength.strong'
+  | 'auth.brand.cycles'
   // Account password
   | 'account.password.title'
   | 'account.password.currentLabel'
@@ -542,6 +543,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.signUp.strength.weak': 'Weak',
     'auth.signUp.strength.medium': 'Medium',
     'auth.signUp.strength.strong': 'Strong',
+    'auth.brand.cycles': '0 cycles',
     // Account password
     'account.password.title': 'Password',
     'account.password.currentLabel': 'Current password',
@@ -989,6 +991,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.signUp.strength.weak': 'Débil',
     'auth.signUp.strength.medium': 'Media',
     'auth.signUp.strength.strong': 'Fuerte',
+    'auth.brand.cycles': '0 ciclos',
     // Account password
     'account.password.title': 'Contraseña',
     'account.password.currentLabel': 'Contraseña actual',
