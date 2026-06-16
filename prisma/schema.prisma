@@ -867,6 +867,19 @@ model SensitiveActionToken {
   @@index([userId, action])
 }
 
+// Reset de contraseña. Espeja SensitiveActionToken: el token CRUDO viaja solo en
+// el email; en DB se guarda el hash SHA-256. Single-use (usedAt), TTL 1h.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
 // ===== Fase 5 review: AuditLog append-only para evidencia forense =====
 
 model AuditLog {
