@@ -162,6 +162,12 @@ export type MessageKey =
   | 'account.verification.REJECTED'
   | 'account.locale.en'
   | 'account.locale.es'
+  // Account profile
+  | 'account.profile.subtitle'
+  | 'account.profile.emailHint'
+  | 'account.profile.submit'
+  | 'account.toast.profileSaved'
+  | 'account.toast.profileInvalid'
   // Select org
   | 'selectOrg.title'
   | 'selectOrg.subtitle'
@@ -677,6 +683,12 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.verification.REJECTED': 'Rejected',
     'account.locale.en': 'English',
     'account.locale.es': 'Spanish',
+    // Account profile
+    'account.profile.subtitle': 'Update your name and language.',
+    'account.profile.emailHint': "Email can't be changed here.",
+    'account.profile.submit': 'Save changes',
+    'account.toast.profileSaved': 'Profile updated.',
+    'account.toast.profileInvalid': 'Check your name and language and try again.',
     // Select org
     'selectOrg.title': 'Choose your organization',
     'selectOrg.subtitle': 'Switching organizations later will empty your cart.',
@@ -1191,6 +1203,12 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.verification.REJECTED': 'Rechazada',
     'account.locale.en': 'Inglés',
     'account.locale.es': 'Español',
+    // Account profile
+    'account.profile.subtitle': 'Actualizá tu nombre e idioma.',
+    'account.profile.emailHint': 'El email no se cambia desde acá.',
+    'account.profile.submit': 'Guardar cambios',
+    'account.toast.profileSaved': 'Perfil actualizado.',
+    'account.toast.profileInvalid': 'Revisá tu nombre e idioma y volvé a intentar.',
     // Select org
     'selectOrg.title': 'Elegí tu organización',
     'selectOrg.subtitle': 'Cambiar de organización en el futuro vaciará tu carrito.',
