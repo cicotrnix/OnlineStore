@@ -133,6 +133,12 @@ export type MessageKey =
   | 'account.password.requestStepUp'
   | 'account.password.otpLabel'
   | 'account.password.noPasswordYet'
+  // Account hub
+  | 'account.title'
+  | 'account.nav.overview'
+  | 'account.nav.profile'
+  | 'account.nav.addresses'
+  | 'account.nav.security'
   // Select org
   | 'selectOrg.title'
   | 'selectOrg.subtitle'
@@ -619,6 +625,12 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.password.otpLabel': 'Verification code',
     'account.password.noPasswordYet':
       'You sign in with a magic link. Set a password to sign in faster.',
+    // Account hub
+    'account.title': 'Account',
+    'account.nav.overview': 'Overview',
+    'account.nav.profile': 'Profile',
+    'account.nav.addresses': 'Addresses',
+    'account.nav.security': 'Security',
     // Select org
     'selectOrg.title': 'Choose your organization',
     'selectOrg.subtitle': 'Switching organizations later will empty your cart.',
@@ -1104,6 +1116,12 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.password.otpLabel': 'Código de verificación',
     'account.password.noPasswordYet':
       'Hoy entrás con un link mágico. Creá una contraseña para entrar más rápido.',
+    // Account hub
+    'account.title': 'Cuenta',
+    'account.nav.overview': 'Resumen',
+    'account.nav.profile': 'Perfil',
+    'account.nav.addresses': 'Direcciones',
+    'account.nav.security': 'Seguridad',
     // Select org
     'selectOrg.title': 'Elegí tu organización',
     'selectOrg.subtitle': 'Cambiar de organización en el futuro vaciará tu carrito.',
