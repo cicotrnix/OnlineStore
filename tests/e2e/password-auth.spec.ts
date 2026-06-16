@@ -132,19 +132,32 @@ test.describe('password auth (login + signup + change)', () => {
       })
       expect(sessionsAfterFail).toBe(0)
 
-      // ── (b) Forgot-password toggle muestra el form de magic link ─────────
-      // Texto i18n es-419: "¿Olvidaste tu contraseña?"
-      const forgotBtn = pageA.getByRole('button', {
-        name: /olvidaste tu contraseña|forgot your password/i,
+      // ── (b) UX desambiguada (rediseño auth 2026-06-15) ──────────────────
+      // Antes "¿Olvidaste tu contraseña?" toggleaba el magic link. Ahora son
+      // dos affordances separadas: un toggle para el magic link y un LINK al
+      // flujo de reset real.
+      const magicToggle = pageA.getByRole('button', {
+        name: /prefiero recibir un link por email|prefer to receive a link by email/i,
       })
-      await expect(forgotBtn).toBeVisible()
-      await forgotBtn.click()
+      await expect(magicToggle).toBeVisible()
+      await magicToggle.click()
       // El bloque del magic-link aparece: nuevo input email + botón "Enviar link mágico".
       const emailInputs = pageA.locator('input[name="email"]')
       await expect(emailInputs).toHaveCount(2)
       await expect(
         pageA.getByRole('button', { name: /enviar link mágico|send magic link/i })
       ).toBeVisible()
+
+      // "¿Olvidaste tu contraseña?" ahora navega al flujo de reset (no toggle).
+      const forgotLink = pageA.getByRole('link', {
+        name: /olvidaste tu contraseña|forgot your password/i,
+      })
+      await expect(forgotLink).toBeVisible()
+      await Promise.all([
+        pageA.waitForURL(/\/forgot-password/, { timeout: 15_000 }),
+        forgotLink.click(),
+      ])
+      await expect(pageA.locator('input[name="email"]').first()).toBeVisible()
       await ctxA.close()
     } finally {
       await prisma.session.deleteMany({ where: { userId: userLogin.id } })

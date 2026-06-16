@@ -8,7 +8,16 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
-const ROUTES = ['/', '/catalog', '/sign-in', '/products/iphone-13']
+const ROUTES = [
+  '/',
+  '/catalog',
+  '/sign-in',
+  '/sign-up',
+  '/forgot-password',
+  // Token inexistente → estado "link inválido" (pantalla real con CTA pedir-otro).
+  '/reset-password/nonexistent-token',
+  '/products/iphone-13',
+]
 
 for (const path of ROUTES) {
   test(`a11y axe: ${path} sin violaciones serious/critical`, async ({ page }) => {
