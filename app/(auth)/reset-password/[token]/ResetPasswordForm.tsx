@@ -5,7 +5,6 @@ import { SubmitButton } from '@/components/ui/SubmitButton'
 import { toast } from '@/components/ui/Toaster'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
 import { type Locale, type MessageKey, t } from '@/lib/i18n/messages'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useFormState } from 'react-dom'
 import { PasswordStrengthMeter } from '../../sign-up/PasswordStrengthMeter'
@@ -36,21 +35,16 @@ export function ResetPasswordForm({
   strengthMedium,
   strengthStrong,
 }: Props) {
-  const router = useRouter()
   const [state, formAction] = useFormState(resetPasswordAction, INITIAL_ACTION_RESULT)
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
 
+  // En éxito la action redirige server-side (la página navega sola); acá solo
+  // mostramos errores (token inválido / contraseña débil).
   useEffect(() => {
-    if (!state.messageKey) return
-    const msg = t(locale, state.messageKey as MessageKey, state.vars)
-    if (state.ok) {
-      toast.success(msg)
-      router.push('/select-org')
-    } else {
-      toast.error(msg)
-    }
-  }, [state, locale, router])
+    if (!state.messageKey || state.ok) return
+    toast.error(t(locale, state.messageKey as MessageKey, state.vars))
+  }, [state, locale])
 
   const mismatch = confirm.length > 0 && password !== confirm
 

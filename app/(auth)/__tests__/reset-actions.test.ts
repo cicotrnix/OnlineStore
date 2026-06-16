@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db/client'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
 import { resetRateLimits } from '@/lib/rate-limit'
 import { cleanDb } from '@/tests/helpers/cleanDb'
+import { isRedirectError } from 'next/dist/client/components/redirect'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // createDbSession sets the session cookie; capture it in an in-memory store.
@@ -112,8 +113,14 @@ describe('resetPasswordAction', () => {
     const fd = new FormData()
     fd.set('token', raw)
     fd.set('newPassword', 'Brandnew1')
-    const r = await resetPasswordAction(INITIAL_ACTION_RESULT, fd)
-    expect(r).toEqual({ ok: true, messageKey: 'auth.toast.passwordReset' })
+    // En éxito la action redirige server-side (NEXT_REDIRECT), no devuelve ok.
+    let thrown: unknown
+    try {
+      await resetPasswordAction(INITIAL_ACTION_RESULT, fd)
+    } catch (e) {
+      thrown = e
+    }
+    expect(isRedirectError(thrown)).toBe(true)
 
     const fresh = await prisma.user.findUnique({ where: { id: user.id } })
     expect(await verifyPassword('Brandnew1', fresh!.hashedPassword!)).toBe(true)

@@ -5,6 +5,7 @@ import { hashResetToken } from '@/lib/auth/password-reset'
 import { createDbSession } from '@/lib/auth/session'
 import { prisma } from '@/lib/db/client'
 import type { ActionResult } from '@/lib/feedback/action-result'
+import { redirect } from 'next/navigation'
 
 /**
  * Consume un token de reset y fija la nueva contraseña.
@@ -16,7 +17,11 @@ import type { ActionResult } from '@/lib/feedback/action-result'
  *   no vencido) dentro de una transacción → evita doble uso / carreras.
  * - Revoca TODAS las sesiones del usuario (session.deleteMany por userId).
  * - Backfill de emailVerified: probar control del inbox verifica el email.
- * - Auto sign-in: emite una sesión fresca; el form navega a /select-org.
+ * - Auto sign-in: emite una sesión fresca y redirige server-side a /select-org.
+ *   El redirect server-side (no router.push del cliente) es obligatorio acá: la
+ *   action consume el token, así que la revalidación automática post-action de
+ *   Next re-renderiza /reset-password/[token] (ahora en estado "inválido") y
+ *   ganaría la carrera contra un push del cliente. Por eso navegamos en el server.
  */
 const INVALID: ActionResult = { ok: false, messageKey: 'auth.toast.resetTokenInvalid' }
 
@@ -66,5 +71,6 @@ export async function resetPasswordAction(
   if (!userId) return INVALID
 
   await createDbSession(userId)
-  return { ok: true, messageKey: 'auth.toast.passwordReset' }
+  // redirect() lanza NEXT_REDIRECT (fuera del try/catch de la tx a propósito).
+  redirect('/select-org')
 }
