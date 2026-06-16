@@ -28,7 +28,7 @@
 
   /* "Back to 100%" supplements. */
   --line: #e8ece2; /* divider on light surfaces, replaces ink-100 on cards */
-  --lime-deep: #5fa000; /* lime as text/icon on light surface (lime #88D810 fails AA as text) */
+  --lime-deep: #4d8000; /* lime as text/icon on light surface. #4d8000=4.77:1 on white (AA normal text). El #5fa000 previo daba 3.22:1 y reprobaba axe en links 14px del rediseño auth. */
   --on-dark-2: #aab2c0; /* secondary text on dark canvases */
 
   /* Type scale — clamp() with hero ceiling at 74px per spec. */
