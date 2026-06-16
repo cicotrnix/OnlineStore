@@ -46,7 +46,7 @@ export function AdminMobileBar({
           <Drawer.Content className="fixed bottom-0 left-0 top-0 z-modal flex w-[78%] max-w-xs flex-col bg-neutral-900 p-5 text-white shadow-xl">
             <Drawer.Title className="text-sm font-semibold text-white">
               {brand}{' '}
-              <span className="font-mono text-xs text-white/40">{t(locale, 'admin.label')}</span>
+              <span className="font-mono text-xs text-white/60">{t(locale, 'admin.label')}</span>
             </Drawer.Title>
             <Drawer.Close asChild>
               <button
@@ -73,7 +73,7 @@ export function AdminMobileBar({
       </Drawer.Root>
       <span className="text-sm font-semibold text-white">
         {brand}{' '}
-        <span className="font-mono text-[11px] uppercase tracking-wide text-white/40">
+        <span className="font-mono text-[11px] uppercase tracking-wide text-white/60">
           {t(locale, 'admin.label')}
         </span>
       </span>

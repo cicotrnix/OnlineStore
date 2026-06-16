@@ -56,7 +56,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="hidden w-60 shrink-0 flex-col bg-neutral-900 p-4 lg:flex">
         <div className="px-3 py-2">
           <span className="text-lg font-bold tracking-tight text-white">{brand}</span>
-          <span className="ml-2 font-mono text-[11px] uppercase tracking-wide text-white/40">
+          <span className="ml-2 font-mono text-[11px] uppercase tracking-wide text-white/60">
             {t(locale, 'admin.label')}
           </span>
         </div>
