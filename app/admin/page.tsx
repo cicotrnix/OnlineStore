@@ -1,7 +1,8 @@
-import { Card, CardBody } from '@/components/ui/Card'
+import { AdminPageHeader, MetricCard } from '@/components/admin'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { isFeatureEnabled } from '@/lib/features'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { customersService } from '@/modules/customers'
 import { getStoreConfig } from '@/stores'
@@ -12,6 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboardPage() {
   const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const orgs = await customersService.listForUser(user.id)
   const rfqOn = isFeatureEnabled('rfq')
   const approvalsOn = isFeatureEnabled('approvals')
@@ -33,25 +35,25 @@ export default async function AdminDashboardPage() {
 
   const widgets: Array<{ label: string; value: string; href: string; show: boolean }> = [
     {
-      label: 'Cotizaciones pendientes',
+      label: t(locale, 'admin.dashboard.pendingQuotes'),
       value: String(pendingQuotes),
       href: '/admin/quotes',
       show: rfqOn,
     },
     {
-      label: 'Aprobaciones pendientes',
+      label: t(locale, 'admin.dashboard.pendingApprovals'),
       value: String(pendingApprovals),
       href: '/admin/approvals',
       show: approvalsOn,
     },
     {
-      label: 'Facturas vencidas',
+      label: t(locale, 'admin.dashboard.overdueInvoices'),
       value: String(overdueInvoices),
       href: '/admin/invoices',
       show: creditOn,
     },
     {
-      label: 'Saldo abierto (pendiente + overdue)',
+      label: t(locale, 'admin.dashboard.openBalance'),
       value: formatMoney(
         openInvoiceAgg._sum?.amount ?? new Decimal(0),
         getStoreConfig().currency.base
@@ -63,39 +65,36 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-medium">Dashboard</h1>
-      <p className="mt-2 text-sm text-gray-600">Welcome back, {user.email}.</p>
+      <AdminPageHeader
+        title={t(locale, 'admin.dashboard.title')}
+        subtitle={t(locale, 'admin.dashboard.welcome', { email: user.email ?? '' })}
+      />
 
-      <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {widgets
           .filter((w) => w.show)
           .map((w) => (
-            <Link key={w.label} href={w.href}>
-              <Card className="hover:border-gray-400 transition-colors">
-                <CardBody>
-                  <div className="text-xs uppercase tracking-wide text-gray-500">{w.label}</div>
-                  <div className="mt-2 text-2xl font-medium tabular-nums">{w.value}</div>
-                </CardBody>
-              </Card>
-            </Link>
+            <MetricCard key={w.label} label={w.label} value={w.value} href={w.href} />
           ))}
       </section>
 
       <section className="mt-8">
-        <h2 className="text-sm font-medium text-gray-500">Your organizations</h2>
+        <h2 className="text-xs font-medium uppercase tracking-wide text-ink-500">
+          {t(locale, 'admin.dashboard.orgsTitle')}
+        </h2>
         {orgs.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">
-            No organizations yet. Create one in{' '}
-            <a href="/admin/settings" className="underline">
-              settings
-            </a>
-            .
+          <p className="mt-2 text-sm text-ink-500">
+            {t(locale, 'admin.dashboard.noOrgs')}{' '}
+            <Link href="/admin/settings" className="font-medium text-lime-deep hover:underline">
+              {t(locale, 'admin.dashboard.createInSettings')}
+            </Link>
           </p>
         ) : (
-          <ul className="mt-2 space-y-1">
+          <ul className="mt-3 divide-y divide-line overflow-hidden rounded-card border border-line">
             {orgs.map((org) => (
-              <li key={org.id} className="text-sm">
-                <strong>{org.name}</strong> — {org.slug}
+              <li key={org.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                <strong className="font-medium text-ink-950">{org.name}</strong>
+                <span className="font-mono text-xs text-ink-500">{org.slug}</span>
               </li>
             ))}
           </ul>

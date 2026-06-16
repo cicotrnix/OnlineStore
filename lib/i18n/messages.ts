@@ -435,6 +435,15 @@ export type MessageKey =
   // Admin nav
   | 'admin.label'
   | 'admin.platformAdmin'
+  | 'admin.dashboard.title'
+  | 'admin.dashboard.welcome'
+  | 'admin.dashboard.pendingQuotes'
+  | 'admin.dashboard.pendingApprovals'
+  | 'admin.dashboard.overdueInvoices'
+  | 'admin.dashboard.openBalance'
+  | 'admin.dashboard.orgsTitle'
+  | 'admin.dashboard.noOrgs'
+  | 'admin.dashboard.createInSettings'
   | 'admin.nav.dashboard'
   | 'admin.nav.products'
   | 'admin.nav.categories'
@@ -1060,6 +1069,15 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Admin nav
     'admin.label': 'Admin',
     'admin.platformAdmin': 'Platform admin',
+    'admin.dashboard.title': 'Dashboard',
+    'admin.dashboard.welcome': 'Welcome back, {email}.',
+    'admin.dashboard.pendingQuotes': 'Pending quotes',
+    'admin.dashboard.pendingApprovals': 'Pending approvals',
+    'admin.dashboard.overdueInvoices': 'Overdue invoices',
+    'admin.dashboard.openBalance': 'Open balance (pending + overdue)',
+    'admin.dashboard.orgsTitle': 'Your organizations',
+    'admin.dashboard.noOrgs': 'No organizations yet.',
+    'admin.dashboard.createInSettings': 'Create one in settings',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Products',
     'admin.nav.categories': 'Categories',
@@ -1677,6 +1695,15 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Admin nav
     'admin.label': 'Admin',
     'admin.platformAdmin': 'Platform admin',
+    'admin.dashboard.title': 'Dashboard',
+    'admin.dashboard.welcome': 'Hola de nuevo, {email}.',
+    'admin.dashboard.pendingQuotes': 'Cotizaciones pendientes',
+    'admin.dashboard.pendingApprovals': 'Aprobaciones pendientes',
+    'admin.dashboard.overdueInvoices': 'Facturas vencidas',
+    'admin.dashboard.openBalance': 'Saldo abierto (pendiente + vencido)',
+    'admin.dashboard.orgsTitle': 'Tus organizaciones',
+    'admin.dashboard.noOrgs': 'Todavía no hay organizaciones.',
+    'admin.dashboard.createInSettings': 'Creá una en settings',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Productos',
     'admin.nav.categories': 'Categorías',
