@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthField } from '@/app/(auth)/AuthField'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { toast } from '@/components/ui/Toaster'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
@@ -60,68 +61,70 @@ export function SignInForm({
   }, [linkState, locale])
 
   return (
-    <div className="mt-6 space-y-6">
-      <form action={pwFormAction} className="space-y-3">
-        <input
+    <div className="mt-6 space-y-5">
+      <form action={pwFormAction} className="space-y-4">
+        <AuthField
           name="email"
+          label={t(locale, 'auth.field.email')}
           type="email"
           required
           autoComplete="email"
           placeholder={emailPlaceholder}
-          className="w-full border rounded-lg px-3 py-2 text-sm"
         />
-        <input
+        <AuthField
           name="password"
+          label={t(locale, 'auth.field.password')}
           type="password"
           required
           autoComplete="current-password"
           placeholder={passwordPlaceholder}
-          className="w-full border rounded-lg px-3 py-2 text-sm"
         />
         <SubmitButton
           pendingLabel={passwordPendingLabel}
-          className="w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
-          style={{ background: 'var(--color-primary)' }}
+          className="w-full rounded-button bg-accent px-3 py-2.5 text-sm font-semibold text-ink-950 hover:bg-accent/90"
         >
           {passwordSubmitLabel}
         </SubmitButton>
       </form>
 
-      <div className="text-center">
+      <div className="flex items-center justify-between text-sm">
+        {/* Reset real (≠ magic link). */}
+        <Link href="/forgot-password" className="font-medium text-lime-deep hover:underline">
+          {forgotPasswordLabel}
+        </Link>
+        {/* Magic link passwordless. */}
         <button
           type="button"
           onClick={() => setShowLinkForm((v) => !v)}
-          className="text-sm text-gray-700 hover:text-gray-900 underline"
+          className="text-ink-500 hover:text-ink-950"
         >
-          {forgotPasswordLabel}
+          {preferEmailLinkLabel}
         </button>
       </div>
 
       {showLinkForm && (
-        <div className="border-t pt-4">
-          <p className="text-sm text-gray-600">{preferEmailLinkLabel}</p>
-          <form action={linkFormAction} className="mt-3 space-y-3">
-            <input
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder={emailPlaceholder}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            />
-            <SubmitButton
-              pendingLabel={pendingLabel}
-              variant="secondary"
-              className="w-full rounded-lg px-3 py-2 text-sm font-medium"
-            >
-              {submitLabel}
-            </SubmitButton>
-          </form>
-        </div>
+        <form action={linkFormAction} className="space-y-3 border-t border-ink-100 pt-4">
+          <AuthField
+            name="email"
+            label={t(locale, 'auth.field.email')}
+            labelHidden
+            type="email"
+            required
+            autoComplete="email"
+            placeholder={emailPlaceholder}
+          />
+          <SubmitButton
+            pendingLabel={pendingLabel}
+            variant="secondary"
+            className="w-full rounded-button"
+          >
+            {submitLabel}
+          </SubmitButton>
+        </form>
       )}
 
-      <p className="text-center text-sm">
-        <Link href="/sign-up" className="text-gray-700 hover:text-gray-900 underline">
+      <p className="text-center text-sm text-ink-500">
+        <Link href="/sign-up" className="font-medium text-lime-deep hover:underline">
           {noAccountLabel}
         </Link>
       </p>

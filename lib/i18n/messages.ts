@@ -95,6 +95,10 @@ export type MessageKey =
   | 'auth.signUp.strength.medium'
   | 'auth.signUp.strength.strong'
   | 'auth.brand.cycles'
+  | 'auth.field.email'
+  | 'auth.field.password'
+  | 'auth.field.newPassword'
+  | 'auth.field.confirmPassword'
   // Account password
   | 'account.password.title'
   | 'account.password.currentLabel'
@@ -544,6 +548,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.signUp.strength.medium': 'Medium',
     'auth.signUp.strength.strong': 'Strong',
     'auth.brand.cycles': '0 cycles',
+    'auth.field.email': 'Email',
+    'auth.field.password': 'Password',
+    'auth.field.newPassword': 'New password',
+    'auth.field.confirmPassword': 'Confirm password',
     // Account password
     'account.password.title': 'Password',
     'account.password.currentLabel': 'Current password',
@@ -992,6 +1000,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.signUp.strength.medium': 'Media',
     'auth.signUp.strength.strong': 'Fuerte',
     'auth.brand.cycles': '0 ciclos',
+    'auth.field.email': 'Email',
+    'auth.field.password': 'Contraseña',
+    'auth.field.newPassword': 'Nueva contraseña',
+    'auth.field.confirmPassword': 'Confirmar contraseña',
     // Account password
     'account.password.title': 'Contraseña',
     'account.password.currentLabel': 'Contraseña actual',

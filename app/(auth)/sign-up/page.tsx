@@ -10,8 +10,10 @@ export default async function SignUpPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-medium">{t(locale, 'auth.signUp.title')}</h1>
-      <p className="mt-2 text-sm text-gray-600">{t(locale, 'auth.signUp.subtitle')}</p>
+      <h1 className="text-2xl font-semibold tracking-tight text-ink-950">
+        {t(locale, 'auth.signUp.title')}
+      </h1>
+      <p className="mt-2 text-sm text-ink-500">{t(locale, 'auth.signUp.subtitle')}</p>
       <SignUpForm
         locale={locale}
         emailPlaceholder={t(locale, 'auth.signUp.emailPlaceholder')}

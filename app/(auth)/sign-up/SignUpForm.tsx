@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthField } from '@/app/(auth)/AuthField'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { toast } from '@/components/ui/Toaster'
 import { INITIAL_ACTION_RESULT } from '@/lib/feedback/action-result'
@@ -67,18 +68,19 @@ export function SignUpForm({
   if (state.ok) {
     return (
       <div className="mt-6 space-y-4">
-        <p className="text-sm text-gray-700">{confirmHint}</p>
+        <p className="text-sm text-ink-700">{confirmHint}</p>
         <form action={resendAction}>
           <input type="hidden" name="email" value={email} />
           <SubmitButton
             pendingLabel={t(locale, 'auth.signIn.sending')}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+            variant="secondary"
+            className="w-full rounded-button"
           >
             {resendLabel}
           </SubmitButton>
         </form>
-        <p className="text-center text-sm">
-          <Link href="/sign-in" className="text-gray-700 hover:text-gray-900 underline">
+        <p className="text-center text-sm text-ink-500">
+          <Link href="/sign-in" className="font-medium text-lime-deep hover:underline">
             {hasAccountLabel}
           </Link>
         </p>
@@ -90,24 +92,25 @@ export function SignUpForm({
     <>
       <form
         action={formAction}
-        className="mt-6 space-y-3"
+        className="mt-6 space-y-4"
         onSubmit={(e) => {
           if (mismatch) e.preventDefault()
         }}
       >
-        <input
+        <AuthField
           name="email"
+          label={t(locale, 'auth.field.email')}
           type="email"
           required
           autoComplete="email"
           placeholder={emailPlaceholder}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 text-sm"
         />
         <div>
-          <input
+          <AuthField
             name="password"
+            label={t(locale, 'auth.field.password')}
             type="password"
             required
             autoComplete="new-password"
@@ -115,7 +118,6 @@ export function SignUpForm({
             placeholder={passwordPlaceholder}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
           />
           <PasswordStrengthMeter
             password={password}
@@ -124,29 +126,26 @@ export function SignUpForm({
             strongLabel={strengthStrong}
           />
         </div>
-        <div>
-          <input
-            type="password"
-            required
-            autoComplete="new-password"
-            placeholder={confirmPlaceholder}
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            aria-invalid={mismatch}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
-          {mismatch && <p className="mt-1 text-xs text-red-600">{mismatchLabel}</p>}
-        </div>
+        <AuthField
+          name="confirmPassword"
+          label={t(locale, 'auth.field.confirmPassword')}
+          type="password"
+          required
+          autoComplete="new-password"
+          placeholder={confirmPlaceholder}
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          error={mismatch ? mismatchLabel : undefined}
+        />
         <SubmitButton
           pendingLabel={pendingLabel}
-          className="w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
-          style={{ background: 'var(--color-primary)' }}
+          className="w-full rounded-button bg-accent px-3 py-2.5 text-sm font-semibold text-ink-950 hover:bg-accent/90"
         >
           {submitLabel}
         </SubmitButton>
       </form>
-      <p className="mt-4 text-center text-sm">
-        <Link href="/sign-in" className="text-gray-700 hover:text-gray-900 underline">
+      <p className="mt-4 text-center text-sm text-ink-500">
+        <Link href="/sign-in" className="font-medium text-lime-deep hover:underline">
           {hasAccountLabel}
         </Link>
       </p>
