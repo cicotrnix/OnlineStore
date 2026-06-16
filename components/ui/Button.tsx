@@ -11,6 +11,11 @@ const buttonVariants = cva(
         secondary: 'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50',
         ghost: 'text-gray-700 hover:bg-gray-100',
         danger: 'bg-red-600 text-white hover:bg-red-700',
+        // Variantes admin Back-to-100% (sin inline --color-primary; bg explícito
+        // para no dejar pasar el slate del primaryStyle bajo important:true).
+        lime: 'bg-accent text-ink-950 hover:bg-accent/90',
+        outline:
+          'bg-surface border border-line text-ink-700 hover:border-accent hover:text-ink-950',
       },
       size: {
         sm: 'px-3 py-1.5 text-xs',

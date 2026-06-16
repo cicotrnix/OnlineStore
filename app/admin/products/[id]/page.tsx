@@ -1,5 +1,5 @@
 import { enqueueContentGenAction, publishContentAction } from '@/app/admin/products/_ai-actions'
-import { AdminPageHeader, StatusBadge, adminBtn } from '@/components/admin'
+import { AdminPageHeader, StatusBadge } from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
@@ -65,10 +65,7 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
           </h2>
           <form action={enqueueContentGenAction}>
             <input type="hidden" name="productId" value={product.id} />
-            <SubmitButton
-              pendingLabel={t(uiLocale, 'admin.action.enqueuing')}
-              className={adminBtn.primary}
-            >
+            <SubmitButton variant="lime" pendingLabel={t(uiLocale, 'admin.action.enqueuing')}>
               {t(uiLocale, 'admin.action.generateRegenerate')}
             </SubmitButton>
           </form>
@@ -101,8 +98,8 @@ export default async function AdminProductDetailPage({ params, searchParams }: P
                       <input type="hidden" name="productId" value={product.id} />
                       <input type="hidden" name="locale" value={locale} />
                       <SubmitButton
+                        variant="outline"
                         pendingLabel={t(uiLocale, 'admin.action.publishing')}
-                        className={adminBtn.secondary}
                       >
                         {t(uiLocale, 'admin.action.publish')}
                       </SubmitButton>

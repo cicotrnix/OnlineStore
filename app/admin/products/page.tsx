@@ -2,7 +2,7 @@ import { AuthField } from '@/app/(auth)/AuthField'
 import { createProductAction, toggleProductActiveAction } from '@/app/admin/_actions'
 import { toggleProductPrivateAction, upsertProductTierAction } from '@/app/admin/_actions-fase2'
 import { enqueueBulkContentGenAction } from '@/app/admin/products/_ai-actions'
-import { AdminPageHeader, type Column, DataTable, StatusBadge, adminBtn } from '@/components/admin'
+import { AdminPageHeader, type Column, DataTable, StatusBadge } from '@/components/admin'
 import { StockBadge } from '@/components/commerce/StockBadge'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
@@ -14,9 +14,6 @@ import { catalogService } from '@/modules/catalog'
 import { getStoreConfig } from '@/stores'
 
 type Props = { searchParams: Promise<{ flash?: string; n?: string }> }
-
-const ROW_BTN =
-  'rounded-button border border-line px-2.5 py-1 text-xs font-medium text-ink-700 hover:border-accent hover:text-ink-950'
 
 export default async function AdminProductsPage({ searchParams }: Props) {
   const sp = await searchParams
@@ -93,7 +90,11 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                   name="isPrivate"
                   value={productPrivateMap.get(p.id) ? 'true' : 'false'}
                 />
-                <SubmitButton pendingLabel={t(locale, 'common.pending')} className={ROW_BTN}>
+                <SubmitButton
+                  variant="outline"
+                  size="sm"
+                  pendingLabel={t(locale, 'common.pending')}
+                >
                   {productPrivateMap.get(p.id) ? t(locale, 'common.yes') : t(locale, 'common.no')}
                 </SubmitButton>
               </form>
@@ -109,7 +110,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
         <form action={toggleProductActiveAction}>
           <input type="hidden" name="id" value={p.id} />
           <input type="hidden" name="isActive" value={p.isActive ? 'true' : 'false'} />
-          <SubmitButton pendingLabel={t(locale, 'common.pending')} className={ROW_BTN}>
+          <SubmitButton variant="outline" size="sm" pendingLabel={t(locale, 'common.pending')}>
             {p.isActive ? t(locale, 'admin.action.deactivate') : t(locale, 'admin.action.activate')}
           </SubmitButton>
         </form>
@@ -133,10 +134,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
         subtitle={t(locale, 'admin.products.count', { count: products.length })}
         action={
           <form action={enqueueBulkContentGenAction}>
-            <SubmitButton
-              pendingLabel={t(locale, 'admin.action.enqueuing')}
-              className={adminBtn.secondary}
-            >
+            <SubmitButton variant="outline" pendingLabel={t(locale, 'admin.action.enqueuing')}>
               {t(locale, 'admin.action.generateAllContent')}
             </SubmitButton>
           </form>
@@ -218,10 +216,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
             />
           </div>
           <div className="flex justify-end sm:col-span-2">
-            <SubmitButton
-              pendingLabel={t(locale, 'admin.action.creating')}
-              className={adminBtn.primary}
-            >
+            <SubmitButton variant="lime" pendingLabel={t(locale, 'admin.action.creating')}>
               {t(locale, 'admin.action.createProduct')}
             </SubmitButton>
           </div>
@@ -288,10 +283,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
                         required
                       />
                     </div>
-                    <SubmitButton
-                      pendingLabel={t(locale, 'admin.action.saving')}
-                      className={adminBtn.secondary}
-                    >
+                    <SubmitButton variant="outline" pendingLabel={t(locale, 'admin.action.saving')}>
                       {t(locale, 'admin.action.saveTier')}
                     </SubmitButton>
                   </form>

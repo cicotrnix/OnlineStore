@@ -1,6 +1,6 @@
 import { AuthField } from '@/app/(auth)/AuthField'
 import { createCategoryAction } from '@/app/admin/_actions'
-import { AdminPageHeader, DataTable, StatusBadge, adminBtn } from '@/components/admin'
+import { AdminPageHeader, DataTable, StatusBadge } from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { getLocale, t } from '@/lib/i18n'
@@ -38,10 +38,7 @@ export default async function AdminCategoriesPage() {
             defaultValue={0}
           />
           <div className="flex justify-end sm:col-span-3">
-            <SubmitButton
-              pendingLabel={t(locale, 'admin.action.creating')}
-              className={adminBtn.primary}
-            >
+            <SubmitButton variant="lime" pendingLabel={t(locale, 'admin.action.creating')}>
               {t(locale, 'admin.action.create')}
             </SubmitButton>
           </div>
