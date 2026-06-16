@@ -73,7 +73,9 @@ describe('requestPasswordResetAction', () => {
     const tokens = await prisma.passwordResetToken.findMany({ where: { userId: user.id } })
     expect(tokens).toHaveLength(1)
     expect(tokens[0]?.usedAt).toBeNull()
-    expect(sendEmailMock).toHaveBeenCalledOnce()
+    // El envío es fire-and-forget (M-1): se dispara DESPUÉS de devolver, así que
+    // esperamos a que la promesa detached complete.
+    await vi.waitFor(() => expect(sendEmailMock).toHaveBeenCalledOnce())
   })
 
   it('invalidates prior unused tokens before creating a new one', async () => {

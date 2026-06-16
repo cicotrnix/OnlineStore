@@ -58,3 +58,5 @@ Bloqueantes reales: A1, B1, B2, B3, B4, B6, C1. Todo lo demás se enciende/endur
 ## Post-launch (hardening, sin bloquear)
 
 Stripe/tarjetas (con staging + suite PSDD §16) · FedEx API real · analytics PostHog/GA4 · webhooks salientes · contenido/chat IA (`ANTHROPIC_API_KEY`) · revisión de seguridad externa / pentest · redundancia (réplica DB / HA) · rate-limit en más endpoints · Uptime Kuma externo.
+
+**Rate-limit del password reset → store compartido (multi-instancia).** El rate-limit de `requestPasswordResetAction` (keys por IP **y** por email, ya implementado — security review M-2) usa un store **in-memory por instancia** (`lib/rate-limit.ts`). En single-instance (estado actual) el límite es efectivo. Antes de escalar a multi-instancia, mover el store a Redis para que el límite sea global; si no, el techo efectivo se multiplica por la cantidad de instancias. No bloquea launch.

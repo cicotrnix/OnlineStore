@@ -29,11 +29,18 @@ export async function requestPasswordResetAction(
     .toLowerCase()
   if (!email) return NEUTRAL
 
-  // Rate-limit por IP. Si excede, igual respondemos neutro (no filtramos nada).
+  // Rate-limit por IP **y** por email. El key por-email evita que un atacante
+  // rotando IPs inunde el inbox de una víctima conocida (M-2 del security
+  // review). Keyea sobre el email enviado (no sobre su existencia) → no filtra
+  // enumeración. Si cualquiera excede, respondemos neutro (no filtramos nada).
+  // Hardening de launch (NO ahora): el store es in-memory por instancia; en
+  // deploy multi-instancia mover a un store compartido (Redis) para que el
+  // límite sea global. Ver docs/runbooks/launch-readiness-pipower.md.
   const h = await headers()
   const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-  const rl = checkRateLimit(`pwreset:${ip}`, PASSWORD_RESET_LIMITS)
-  if (!rl.allowed) return NEUTRAL
+  const rlIp = checkRateLimit(`pwreset:ip:${ip}`, PASSWORD_RESET_LIMITS)
+  const rlEmail = checkRateLimit(`pwreset:email:${email}`, PASSWORD_RESET_LIMITS)
+  if (!rlIp.allowed || !rlEmail.allowed) return NEUTRAL
 
   // Lookup case-insensitive: el email puede haberse guardado con otra caja.
   const user = await prisma.user.findFirst({
@@ -53,23 +60,33 @@ export async function requestPasswordResetAction(
     },
   })
 
+  // Envío fire-and-forget (M-1 anti-enumeración por timing): NO esperamos el
+  // round-trip a Resend, así la rama existing-user no tarda más que la no-user.
+  // .catch traga el error para no dejar una promesa rejected colgada — el
+  // usuario ve la misma respuesta neutra pase lo que pase con el email.
+  // (Corre en un proceso Node persistente — VPS Hetzner/Coolify, no serverless —
+  // así que la promesa completa después de responder.)
   // Link RELATIVO: BaseTemplate le antepone appUrl. El token crudo viaja solo
-  // acá (en DB queda el hash).
+  // en el email (en DB queda el hash).
   const locale: Locale = user.preferredLocale === 'es-419' ? 'es-419' : 'en-US'
-  const html = await renderPasswordResetEmail(
-    {
-      title: t(locale, 'email.reset.heading'),
-      body: t(locale, 'email.reset.body'),
-      userName: user.name ?? user.email,
-      link: `/reset-password/${raw}`,
-    },
-    locale
-  )
-  await sendEmail({
-    to: user.email,
-    subject: t(locale, 'email.reset.subject'),
-    html,
-  })
+  const recipient = user.email
+  const displayName = user.name ?? user.email
+  void (async () => {
+    const html = await renderPasswordResetEmail(
+      {
+        title: t(locale, 'email.reset.heading'),
+        body: t(locale, 'email.reset.body'),
+        userName: displayName,
+        link: `/reset-password/${raw}`,
+      },
+      locale
+    )
+    await sendEmail({
+      to: recipient,
+      subject: t(locale, 'email.reset.subject'),
+      html,
+    })
+  })().catch(() => {})
 
   return NEUTRAL
 }
