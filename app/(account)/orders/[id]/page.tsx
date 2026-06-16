@@ -1,9 +1,8 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
 import { PaymentBadge } from '@/components/commerce/PaymentBadge'
-import { Button } from '@/components/ui/Button'
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { requireVerifiedCustomer } from '@/lib/auth/customer'
 import { prisma } from '@/lib/db/client'
-import { getLocale } from '@/lib/i18n'
+import { type Locale, getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { getStoreConfig } from '@/stores'
@@ -17,8 +16,47 @@ type Props = {
   params: Promise<{ id: string }>
 }
 
+type OrderAddress = {
+  label: string
+  recipient: string
+  line1: string
+  line2: string | null
+  city: string
+  state: string | null
+  postalCode: string
+  country: string
+}
+
+function AddressBlock({
+  locale,
+  titleKey,
+  address,
+}: {
+  locale: Locale
+  titleKey: 'account.orders.billing' | 'account.orders.shipping'
+  address: OrderAddress
+}) {
+  return (
+    <div>
+      <div className="text-xs font-medium uppercase tracking-wide text-ink-500">
+        {t(locale, titleKey)}
+      </div>
+      <div className="mt-1 text-sm text-ink-500">
+        <strong className="text-ink-950">{address.label}</strong>
+        <div>{address.recipient}</div>
+        <div>{address.line1}</div>
+        {address.line2 && <div>{address.line2}</div>}
+        <div>
+          {address.city}
+          {address.state ? `, ${address.state}` : ''} {address.postalCode}
+        </div>
+        <div className="font-mono text-xs uppercase">{address.country}</div>
+      </div>
+    </div>
+  )
+}
+
 export default async function OrderDetailPage({ params }: Props) {
-  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
   const customer = await requireVerifiedCustomer()
   const locale = await getLocale({ userId: customer.userId })
   const { id } = await params
@@ -29,20 +67,23 @@ export default async function OrderDetailPage({ params }: Props) {
     where: { orderId: order.id },
     select: { status: true },
   })
-
   const canPayWithCard =
     getStoreConfig().payments.stripe.enabled && order.status === 'PENDING_PAYMENT'
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="mx-auto max-w-3xl px-6 py-10">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">
-            Orden <span className="font-mono">{order.orderNumber}</span>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-950">
+            {t(locale, 'account.orders.orderLabel')}{' '}
+            <span className="font-mono">{order.orderNumber}</span>
           </h1>
-          <p className="mt-1 text-xs text-gray-500">
-            {order.organization.name} · Colocada por {order.placedBy.email} ·{' '}
-            {order.placedAt.toLocaleString()}
+          <p className="mt-1 text-xs text-ink-500">
+            {order.organization.name} ·{' '}
+            {t(locale, 'account.orders.placedBy', {
+              email: order.placedBy.email,
+            })}{' '}
+            · {order.placedAt.toLocaleString()}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -58,123 +99,115 @@ export default async function OrderDetailPage({ params }: Props) {
         <ReorderButton orderId={order.id} locale={locale} variant="primary" />
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <h2 className="font-medium">Líneas</h2>
-        </CardHeader>
-        <CardBody className="px-0 py-0">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wide text-gray-500 bg-gray-50">
-              <tr>
-                <th className="text-left px-5 py-2 font-medium">SKU</th>
-                <th className="text-left px-5 py-2 font-medium">Producto</th>
-                <th className="text-right px-5 py-2 font-medium">Precio</th>
-                <th className="text-right px-5 py-2 font-medium">Cant.</th>
-                <th className="text-right px-5 py-2 font-medium">Total</th>
+      {/* Líneas — readout instrument */}
+      <div className="mt-8 overflow-hidden rounded-card border border-line">
+        <table className="w-full text-sm">
+          <thead className="bg-muted text-xs uppercase tracking-wide text-ink-500">
+            <tr>
+              <th className="px-5 py-2 text-left font-medium">
+                {t(locale, 'account.orders.col.sku')}
+              </th>
+              <th className="px-5 py-2 text-left font-medium">
+                {t(locale, 'account.orders.col.product')}
+              </th>
+              <th className="px-5 py-2 text-right font-medium">
+                {t(locale, 'account.orders.col.price')}
+              </th>
+              <th className="px-5 py-2 text-right font-medium">
+                {t(locale, 'account.orders.col.qty')}
+              </th>
+              <th className="px-5 py-2 text-right font-medium">
+                {t(locale, 'account.orders.col.total')}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.lines.map((line) => (
+              <tr key={line.id} className="border-t border-line">
+                <td className="px-5 py-2 font-mono text-xs text-ink-500">{line.sku}</td>
+                <td className="px-5 py-2 text-ink-950">{line.name}</td>
+                <td className="px-5 py-2 text-right font-mono tabular-nums text-ink-500">
+                  {formatMoney(line.unitPrice, order.currency)}
+                </td>
+                <td className="px-5 py-2 text-right font-mono tabular-nums text-ink-950">
+                  {line.quantity}
+                </td>
+                <td className="px-5 py-2 text-right font-mono font-medium tabular-nums text-ink-950">
+                  {formatMoney(line.lineTotal, order.currency)}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {order.lines.map((line) => (
-                <tr key={line.id} className="border-t border-gray-100">
-                  <td className="px-5 py-2 font-mono text-xs">{line.sku}</td>
-                  <td className="px-5 py-2">{line.name}</td>
-                  <td className="px-5 py-2 text-right tabular-nums">
-                    {formatMoney(line.unitPrice, order.currency)}
-                  </td>
-                  <td className="px-5 py-2 text-right tabular-nums">{line.quantity}</td>
-                  <td className="px-5 py-2 text-right tabular-nums font-medium">
-                    {formatMoney(line.lineTotal, order.currency)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardBody>
-      </Card>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      <Card className="mt-6">
-        <CardHeader>
-          <h2 className="font-medium">Direcciones</h2>
-        </CardHeader>
-        <CardBody className="grid sm:grid-cols-2 gap-6 text-sm">
-          <div>
-            <div className="text-xs uppercase tracking-wide text-gray-500">Facturación</div>
-            <div className="mt-1">
-              <strong>{order.billingAddress.label}</strong>
-              <div className="text-gray-600">{order.billingAddress.recipient}</div>
-              <div className="text-gray-600">{order.billingAddress.line1}</div>
-              {order.billingAddress.line2 && (
-                <div className="text-gray-600">{order.billingAddress.line2}</div>
-              )}
-              <div className="text-gray-600">
-                {order.billingAddress.city}, {order.billingAddress.state ?? ''}{' '}
-                {order.billingAddress.postalCode}
-              </div>
-              <div className="text-gray-600">{order.billingAddress.country}</div>
-            </div>
-          </div>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-gray-500">Envío</div>
-            <div className="mt-1">
-              <strong>{order.shippingAddress.label}</strong>
-              <div className="text-gray-600">{order.shippingAddress.recipient}</div>
-              <div className="text-gray-600">{order.shippingAddress.line1}</div>
-              {order.shippingAddress.line2 && (
-                <div className="text-gray-600">{order.shippingAddress.line2}</div>
-              )}
-              <div className="text-gray-600">
-                {order.shippingAddress.city}, {order.shippingAddress.state ?? ''}{' '}
-                {order.shippingAddress.postalCode}
-              </div>
-              <div className="text-gray-600">{order.shippingAddress.country}</div>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
+      {/* Direcciones */}
+      <div className="mt-6 rounded-card border border-line p-5">
+        <h2 className="text-sm font-semibold text-ink-950">
+          {t(locale, 'account.orders.addresses')}
+        </h2>
+        <div className="mt-3 grid gap-6 sm:grid-cols-2">
+          <AddressBlock
+            locale={locale}
+            titleKey="account.orders.billing"
+            address={order.billingAddress}
+          />
+          <AddressBlock
+            locale={locale}
+            titleKey="account.orders.shipping"
+            address={order.shippingAddress}
+          />
+        </div>
+      </div>
 
-      <Card className="mt-6">
-        <CardBody>
-          <dl className="space-y-2 text-sm">
-            {order.poNumber && (
-              <div className="flex justify-between">
-                <dt className="text-gray-500">PO</dt>
-                <dd className="font-mono">{order.poNumber}</dd>
-              </div>
-            )}
-            {order.notes && (
-              <div>
-                <dt className="text-gray-500">Notas</dt>
-                <dd className="mt-1 whitespace-pre-wrap">{order.notes}</dd>
-              </div>
-            )}
-            <div className="flex justify-between pt-3 border-t border-gray-100">
-              <dt className="text-gray-500">Subtotal</dt>
-              <dd className="tabular-nums">{formatMoney(order.subtotal, order.currency)}</dd>
+      {/* Totales */}
+      <div className="mt-6 rounded-card border border-line p-5">
+        <dl className="space-y-2 text-sm">
+          {order.poNumber && (
+            <div className="flex justify-between">
+              <dt className="text-ink-500">PO</dt>
+              <dd className="font-mono text-ink-950">{order.poNumber}</dd>
             </div>
-            <div className="flex justify-between font-medium">
-              <dt>Total</dt>
-              <dd className="tabular-nums">{formatMoney(order.total, order.currency)}</dd>
+          )}
+          {order.notes && (
+            <div>
+              <dt className="text-ink-500">{t(locale, 'account.orders.notes')}</dt>
+              <dd className="mt-1 whitespace-pre-wrap text-ink-950">{order.notes}</dd>
             </div>
-          </dl>
-        </CardBody>
-      </Card>
+          )}
+          <div className="flex justify-between border-t border-line pt-3">
+            <dt className="text-ink-500">{t(locale, 'account.orders.subtotal')}</dt>
+            <dd className="font-mono tabular-nums text-ink-950">
+              {formatMoney(order.subtotal, order.currency)}
+            </dd>
+          </div>
+          <div className="flex justify-between font-medium">
+            <dt className="text-ink-950">{t(locale, 'account.orders.total')}</dt>
+            <dd className="font-mono tabular-nums text-ink-950">
+              {formatMoney(order.total, order.currency)}
+            </dd>
+          </div>
+        </dl>
+      </div>
 
       {canPayWithCard && (
-        <Card className="mt-6">
-          <CardHeader>
-            <h2 className="font-medium">Pagar con tarjeta</h2>
-            <p className="mt-1 text-xs text-gray-500">
-              Te redirigimos a Stripe Checkout (hosted). El pago se confirma vía webhook firmado —
-              nunca desde la URL de retorno.
-            </p>
-          </CardHeader>
-          <CardBody>
-            <form action={startCardCheckoutAction}>
-              <input type="hidden" name="orderId" value={order.id} />
-              <Button type="submit">Pagar {formatMoney(order.total, order.currency)}</Button>
-            </form>
-          </CardBody>
-        </Card>
+        <div className="mt-6 rounded-card border border-line p-5">
+          <h2 className="text-sm font-semibold text-ink-950">
+            {t(locale, 'account.orders.payCard')}
+          </h2>
+          <p className="mt-1 text-xs text-ink-500">{t(locale, 'account.orders.payCardHint')}</p>
+          <form action={startCardCheckoutAction} className="mt-3">
+            <input type="hidden" name="orderId" value={order.id} />
+            <button
+              type="submit"
+              className="rounded-button bg-accent px-4 py-2.5 text-sm font-semibold text-ink-950 hover:bg-accent/90"
+            >
+              {t(locale, 'account.orders.payCta', {
+                amount: formatMoney(order.total, order.currency),
+              })}
+            </button>
+          </form>
+        </div>
       )}
     </div>
   )

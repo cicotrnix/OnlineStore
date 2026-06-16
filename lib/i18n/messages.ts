@@ -204,6 +204,33 @@ export type MessageKey =
   | 'account.security.signOutEverywhere'
   | 'account.security.signOutEverywhereHint'
   | 'account.toast.signedOutEverywhere'
+  // Account orders
+  | 'account.orders.title'
+  | 'account.orders.empty'
+  | 'account.orders.linesLabel'
+  | 'account.orders.orderLabel'
+  | 'account.orders.placedBy'
+  | 'account.orders.linesSection'
+  | 'account.orders.col.sku'
+  | 'account.orders.col.product'
+  | 'account.orders.col.price'
+  | 'account.orders.col.qty'
+  | 'account.orders.col.total'
+  | 'account.orders.addresses'
+  | 'account.orders.billing'
+  | 'account.orders.shipping'
+  | 'account.orders.notes'
+  | 'account.orders.subtotal'
+  | 'account.orders.total'
+  | 'account.orders.payCard'
+  | 'account.orders.payCardHint'
+  | 'account.orders.payCta'
+  | 'account.orders.pp.processingTitle'
+  | 'account.orders.pp.confirmedTitle'
+  | 'account.orders.pp.confirmedBody'
+  | 'account.orders.pp.processingBody1'
+  | 'account.orders.pp.processingBody2'
+  | 'account.orders.pp.backToOrder'
   // Select org
   | 'selectOrg.title'
   | 'selectOrg.subtitle'
@@ -762,6 +789,37 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.security.signOutEverywhereHint':
       'Signs out every other device. Your current session stays active.',
     'account.toast.signedOutEverywhere': 'Signed out of all other sessions.',
+    // Account orders
+    'account.orders.title': 'Your orders',
+    'account.orders.empty': 'No orders in this organization yet.',
+    'account.orders.linesLabel': 'lines',
+    'account.orders.orderLabel': 'Order',
+    'account.orders.placedBy': 'Placed by {email}',
+    'account.orders.linesSection': 'Lines',
+    'account.orders.col.sku': 'SKU',
+    'account.orders.col.product': 'Product',
+    'account.orders.col.price': 'Price',
+    'account.orders.col.qty': 'Qty',
+    'account.orders.col.total': 'Total',
+    'account.orders.addresses': 'Addresses',
+    'account.orders.billing': 'Billing',
+    'account.orders.shipping': 'Shipping',
+    'account.orders.notes': 'Notes',
+    'account.orders.subtotal': 'Subtotal',
+    'account.orders.total': 'Total',
+    'account.orders.payCard': 'Pay by card',
+    'account.orders.payCardHint':
+      'We redirect you to Stripe Checkout (hosted). Payment is confirmed via a signed webhook — never from the return URL.',
+    'account.orders.payCta': 'Pay {amount}',
+    'account.orders.pp.processingTitle': 'Processing payment',
+    'account.orders.pp.confirmedTitle': 'Thank you! Payment confirmed',
+    'account.orders.pp.confirmedBody':
+      'We received the processor confirmation. We emailed you a receipt and next steps. Shipment tracking will appear here soon.',
+    'account.orders.pp.processingBody1':
+      'We received your payment at Stripe. We are waiting for the signed processor confirmation to credit it to your order (usually seconds).',
+    'account.orders.pp.processingBody2':
+      'You can refresh this page or go back to the order detail at any time.',
+    'account.orders.pp.backToOrder': 'Back to order detail',
     // Select org
     'selectOrg.title': 'Choose your organization',
     'selectOrg.subtitle': 'Switching organizations later will empty your cart.',
@@ -1320,6 +1378,37 @@ export const MESSAGES: Record<Locale, Dict> = {
     'account.security.signOutEverywhereHint':
       'Cierra todos los otros dispositivos. Tu sesión actual sigue activa.',
     'account.toast.signedOutEverywhere': 'Cerraste sesión en todas las otras sesiones.',
+    // Account orders
+    'account.orders.title': 'Tus órdenes',
+    'account.orders.empty': 'Aún no hay órdenes en esta organización.',
+    'account.orders.linesLabel': 'líneas',
+    'account.orders.orderLabel': 'Orden',
+    'account.orders.placedBy': 'Colocada por {email}',
+    'account.orders.linesSection': 'Líneas',
+    'account.orders.col.sku': 'SKU',
+    'account.orders.col.product': 'Producto',
+    'account.orders.col.price': 'Precio',
+    'account.orders.col.qty': 'Cant.',
+    'account.orders.col.total': 'Total',
+    'account.orders.addresses': 'Direcciones',
+    'account.orders.billing': 'Facturación',
+    'account.orders.shipping': 'Envío',
+    'account.orders.notes': 'Notas',
+    'account.orders.subtotal': 'Subtotal',
+    'account.orders.total': 'Total',
+    'account.orders.payCard': 'Pagar con tarjeta',
+    'account.orders.payCardHint':
+      'Te redirigimos a Stripe Checkout (hosted). El pago se confirma vía webhook firmado — nunca desde la URL de retorno.',
+    'account.orders.payCta': 'Pagar {amount}',
+    'account.orders.pp.processingTitle': 'Procesando pago',
+    'account.orders.pp.confirmedTitle': '¡Gracias! Pago confirmado',
+    'account.orders.pp.confirmedBody':
+      'Recibimos la confirmación del procesador. Te enviamos un email con el recibo y los próximos pasos. Pronto verás el tracking del envío acá.',
+    'account.orders.pp.processingBody1':
+      'Recibimos tu pago en Stripe. Estamos esperando la confirmación firmada del procesador para acreditarlo en tu orden (suele tardar segundos).',
+    'account.orders.pp.processingBody2':
+      'Podés refrescar esta página o volver al detalle de la orden en cualquier momento.',
+    'account.orders.pp.backToOrder': 'Volver al detalle de la orden',
     // Select org
     'selectOrg.title': 'Elegí tu organización',
     'selectOrg.subtitle': 'Cambiar de organización en el futuro vaciará tu carrito.',

@@ -1,7 +1,7 @@
 import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
-import { Card, CardBody } from '@/components/ui/Card'
 import { requireActiveOrgId } from '@/lib/auth/active-org'
-import { getLocale } from '@/lib/i18n'
+import { requireVerifiedCustomer } from '@/lib/auth/customer'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { getStoreConfig } from '@/stores'
@@ -11,40 +11,45 @@ import { ReorderButton } from './ReorderButton'
 export const dynamic = 'force-dynamic'
 
 export default async function OrdersListPage() {
-  const { requireVerifiedCustomer } = await import('@/lib/auth/customer')
   const customer = await requireVerifiedCustomer()
   const locale = await getLocale({ userId: customer.userId })
   const orgId = await requireActiveOrgId()
   const orders = await ordersService.listForOrg(orgId)
+  const currency = getStoreConfig().currency.base
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-medium tracking-tight">Tus órdenes</h1>
+    <div className="mx-auto max-w-5xl px-6 py-10">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink-950">
+        {t(locale, 'account.orders.title')}
+      </h1>
 
       {orders.length === 0 ? (
-        <p className="mt-8 text-sm text-gray-500">Aún no hay órdenes en esta organización.</p>
+        <p className="mt-8 text-sm text-ink-500">{t(locale, 'account.orders.empty')}</p>
       ) : (
         <ul className="mt-6 space-y-3">
           {orders.map((order) => (
             <li key={order.id} className="flex items-stretch gap-3">
-              <Link href={`/orders/${order.id}`} className="flex-1">
-                <Card className="hover:border-gray-400 transition-colors">
-                  <CardBody className="flex items-center justify-between gap-4">
-                    <div>
-                      <div className="font-medium font-mono text-sm">{order.orderNumber}</div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {order.placedAt.toLocaleDateString()} · {order.lines.length} línea
-                        {order.lines.length === 1 ? '' : 's'}
-                      </div>
+              <Link
+                href={`/orders/${order.id}`}
+                className="flex-1 rounded-card border border-line p-4 transition-colors hover:border-accent"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="font-mono text-sm font-medium text-ink-950">
+                      {order.orderNumber}
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm tabular-nums font-medium">
-                        {formatMoney(order.total, getStoreConfig().currency.base)}
-                      </span>
-                      <OrderStatusBadge status={order.status} />
+                    <div className="mt-1 text-xs text-ink-500">
+                      {order.placedAt.toLocaleDateString()} · {order.lines.length}{' '}
+                      {t(locale, 'account.orders.linesLabel')}
                     </div>
-                  </CardBody>
-                </Card>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-mono text-sm font-medium tabular-nums text-ink-950">
+                      {formatMoney(order.total, currency)}
+                    </span>
+                    <OrderStatusBadge status={order.status} />
+                  </div>
+                </div>
               </Link>
               <div className="flex items-center">
                 <ReorderButton orderId={order.id} locale={locale} variant="secondary" />

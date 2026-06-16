@@ -10,9 +10,9 @@ type Props = { orderId: string; locale: Locale; variant?: 'primary' | 'secondary
 
 const STYLES = {
   primary:
-    'inline-flex items-center justify-center rounded-lg bg-gray-900 text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed',
+    'inline-flex items-center justify-center rounded-button bg-accent px-4 py-2 text-sm font-semibold text-ink-950 hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed',
   secondary:
-    'inline-flex items-center justify-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed',
+    'inline-flex items-center justify-center rounded-button border border-line px-3 py-1.5 text-sm font-medium text-ink-700 hover:border-accent hover:text-ink-950 disabled:opacity-50 disabled:cursor-not-allowed',
 }
 
 export function ReorderButton({ orderId, locale, variant = 'secondary' }: Props) {
@@ -48,7 +48,7 @@ export function ReorderButton({ orderId, locale, variant = 'secondary' }: Props)
         {t(locale, 'reorder.button')}
       </button>
       {nothingAvailable && (
-        <p className="text-xs text-gray-600 max-w-[14rem] text-right">
+        <p className="max-w-[14rem] text-right text-xs text-ink-500">
           {t(locale, 'reorder.notice.nothingAvailable')}
         </p>
       )}
