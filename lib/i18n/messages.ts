@@ -99,6 +99,15 @@ export type MessageKey =
   | 'auth.field.password'
   | 'auth.field.newPassword'
   | 'auth.field.confirmPassword'
+  | 'auth.invite.notFound.title'
+  | 'auth.invite.notFound.body'
+  | 'auth.invite.accepted.title'
+  | 'auth.invite.accepted.body'
+  | 'auth.invite.expired.title'
+  | 'auth.invite.expired.body'
+  | 'auth.invite.join'
+  | 'auth.invite.roleHint'
+  | 'auth.invite.accept'
   // Account password
   | 'account.password.title'
   | 'account.password.currentLabel'
@@ -552,6 +561,15 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.field.password': 'Password',
     'auth.field.newPassword': 'New password',
     'auth.field.confirmPassword': 'Confirm password',
+    'auth.invite.notFound.title': 'Invitation not found',
+    'auth.invite.notFound.body': 'The link may be invalid or removed.',
+    'auth.invite.accepted.title': 'Already accepted',
+    'auth.invite.accepted.body': 'This invitation has already been used.',
+    'auth.invite.expired.title': 'Invitation expired',
+    'auth.invite.expired.body': 'Ask the inviter to send a new one.',
+    'auth.invite.join': 'Join {org}',
+    'auth.invite.roleHint': 'You were invited to join as {role}.',
+    'auth.invite.accept': 'Accept invitation',
     // Account password
     'account.password.title': 'Password',
     'account.password.currentLabel': 'Current password',
@@ -1004,6 +1022,15 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.field.password': 'Contraseña',
     'auth.field.newPassword': 'Nueva contraseña',
     'auth.field.confirmPassword': 'Confirmar contraseña',
+    'auth.invite.notFound.title': 'Invitación no encontrada',
+    'auth.invite.notFound.body': 'El link puede ser inválido o haber sido eliminado.',
+    'auth.invite.accepted.title': 'Ya aceptada',
+    'auth.invite.accepted.body': 'Esta invitación ya fue usada.',
+    'auth.invite.expired.title': 'Invitación expirada',
+    'auth.invite.expired.body': 'Pedile a quien te invitó que envíe una nueva.',
+    'auth.invite.join': 'Unite a {org}',
+    'auth.invite.roleHint': 'Te invitaron a unirte como {role}.',
+    'auth.invite.accept': 'Aceptar invitación',
     // Account password
     'account.password.title': 'Contraseña',
     'account.password.currentLabel': 'Contraseña actual',

@@ -1,12 +1,17 @@
 import { prisma } from '@/lib/db/client'
+import { getLocale, t } from '@/lib/i18n'
 import { acceptInvitationAction } from './actions'
 
 type Props = {
   params: Promise<{ token: string }>
 }
 
+const titleCls = 'text-2xl font-semibold tracking-tight text-ink-950'
+const bodyCls = 'mt-2 text-sm text-ink-500'
+
 export default async function InvitePage({ params }: Props) {
   const { token } = await params
+  const locale = await getLocale({ userId: null })
   const invitation = await prisma.invitation.findUnique({
     where: { token },
     include: { organization: true },
@@ -15,8 +20,8 @@ export default async function InvitePage({ params }: Props) {
   if (!invitation) {
     return (
       <div>
-        <h1 className="text-xl font-medium">Invitation not found</h1>
-        <p className="mt-2 text-sm text-gray-600">The link may be invalid or removed.</p>
+        <h1 className={titleCls}>{t(locale, 'auth.invite.notFound.title')}</h1>
+        <p className={bodyCls}>{t(locale, 'auth.invite.notFound.body')}</p>
       </div>
     )
   }
@@ -24,8 +29,8 @@ export default async function InvitePage({ params }: Props) {
   if (invitation.acceptedAt) {
     return (
       <div>
-        <h1 className="text-xl font-medium">Already accepted</h1>
-        <p className="mt-2 text-sm text-gray-600">This invitation has already been used.</p>
+        <h1 className={titleCls}>{t(locale, 'auth.invite.accepted.title')}</h1>
+        <p className={bodyCls}>{t(locale, 'auth.invite.accepted.body')}</p>
       </div>
     )
   }
@@ -33,8 +38,8 @@ export default async function InvitePage({ params }: Props) {
   if (invitation.expiresAt < new Date()) {
     return (
       <div>
-        <h1 className="text-xl font-medium">Invitation expired</h1>
-        <p className="mt-2 text-sm text-gray-600">Ask the inviter to send a new one.</p>
+        <h1 className={titleCls}>{t(locale, 'auth.invite.expired.title')}</h1>
+        <p className={bodyCls}>{t(locale, 'auth.invite.expired.body')}</p>
       </div>
     )
   }
@@ -46,17 +51,16 @@ export default async function InvitePage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-xl font-medium">Join {invitation.organization.name}</h1>
-      <p className="mt-2 text-sm text-gray-600">
-        You were invited to join as <strong>{invitation.role}</strong>.
-      </p>
+      <h1 className={titleCls}>
+        {t(locale, 'auth.invite.join', { org: invitation.organization.name })}
+      </h1>
+      <p className={bodyCls}>{t(locale, 'auth.invite.roleHint', { role: invitation.role })}</p>
       <form action={accept} className="mt-6">
         <button
           type="submit"
-          className="w-full rounded-lg px-3 py-2 text-sm font-medium text-white"
-          style={{ background: 'var(--color-primary)' }}
+          className="w-full rounded-button bg-accent px-3 py-2.5 text-sm font-semibold text-ink-950 hover:bg-accent/90"
         >
-          Accept invitation
+          {t(locale, 'auth.invite.accept')}
         </button>
       </form>
     </div>
