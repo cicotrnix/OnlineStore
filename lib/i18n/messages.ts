@@ -108,6 +108,21 @@ export type MessageKey =
   | 'auth.invite.join'
   | 'auth.invite.roleHint'
   | 'auth.invite.accept'
+  // Forgot password
+  | 'auth.forgot.title'
+  | 'auth.forgot.subtitle'
+  | 'auth.forgot.submit'
+  | 'auth.forgot.sending'
+  | 'auth.forgot.backToSignIn'
+  | 'auth.forgot.checkInbox'
+  // Reset password
+  | 'auth.reset.title'
+  | 'auth.reset.subtitle'
+  | 'auth.reset.submit'
+  | 'auth.reset.sending'
+  | 'auth.reset.invalidTitle'
+  | 'auth.reset.invalidBody'
+  | 'auth.reset.requestNew'
   // Account password
   | 'account.password.title'
   | 'account.password.currentLabel'
@@ -328,6 +343,9 @@ export type MessageKey =
   | 'auth.toast.passwordAlreadySet'
   | 'auth.toast.passwordChanged'
   | 'auth.toast.passwordSet'
+  | 'auth.toast.resetLinkSent'
+  | 'auth.toast.resetTokenInvalid'
+  | 'auth.toast.passwordReset'
   | 'auth.toast.unauthenticated'
   // Onboarding toasts
   | 'onboarding.toast.submitted'
@@ -570,6 +588,23 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.invite.join': 'Join {org}',
     'auth.invite.roleHint': 'You were invited to join as {role}.',
     'auth.invite.accept': 'Accept invitation',
+    // Forgot password
+    'auth.forgot.title': 'Reset your password',
+    'auth.forgot.subtitle': "Enter your email and we'll send you a reset link.",
+    'auth.forgot.submit': 'Send reset link',
+    'auth.forgot.sending': 'Sending…',
+    'auth.forgot.backToSignIn': 'Back to sign in',
+    'auth.forgot.checkInbox':
+      'If an account exists for that email, a reset link is on its way. Check your inbox.',
+    // Reset password
+    'auth.reset.title': 'Choose a new password',
+    'auth.reset.subtitle':
+      'Your new password must be at least 8 characters with a letter and a number.',
+    'auth.reset.submit': 'Reset password',
+    'auth.reset.sending': 'Resetting…',
+    'auth.reset.invalidTitle': 'Link expired or invalid',
+    'auth.reset.invalidBody': 'This password reset link is no longer valid. Request a new one.',
+    'auth.reset.requestNew': 'Request a new link',
     // Account password
     'account.password.title': 'Password',
     'account.password.currentLabel': 'Current password',
@@ -800,6 +835,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.toast.passwordAlreadySet': 'You already have a password set.',
     'auth.toast.passwordChanged': 'Password updated. Other sessions were signed out.',
     'auth.toast.passwordSet': 'Password created. Other sessions were signed out.',
+    'auth.toast.resetLinkSent': 'If an account exists for that email, a reset link is on its way.',
+    'auth.toast.resetTokenInvalid': 'This reset link is invalid or has expired.',
+    'auth.toast.passwordReset': 'Password reset. You are now signed in.',
     'auth.toast.unauthenticated': 'Please sign in first.',
     // Onboarding
     'onboarding.toast.submitted': 'Application submitted. We will email you once reviewed.',
@@ -1031,6 +1069,23 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.invite.join': 'Unite a {org}',
     'auth.invite.roleHint': 'Te invitaron a unirte como {role}.',
     'auth.invite.accept': 'Aceptar invitación',
+    // Forgot password
+    'auth.forgot.title': 'Restablecé tu contraseña',
+    'auth.forgot.subtitle': 'Ingresá tu email y te enviamos un link para restablecerla.',
+    'auth.forgot.submit': 'Enviar link',
+    'auth.forgot.sending': 'Enviando…',
+    'auth.forgot.backToSignIn': 'Volver a iniciar sesión',
+    'auth.forgot.checkInbox':
+      'Si existe una cuenta con ese email, te enviamos un link para restablecerla. Revisá tu bandeja.',
+    // Reset password
+    'auth.reset.title': 'Elegí una contraseña nueva',
+    'auth.reset.subtitle':
+      'Tu nueva contraseña debe tener al menos 8 caracteres, con una letra y un número.',
+    'auth.reset.submit': 'Restablecer contraseña',
+    'auth.reset.sending': 'Restableciendo…',
+    'auth.reset.invalidTitle': 'Link vencido o inválido',
+    'auth.reset.invalidBody': 'Este link de restablecimiento ya no es válido. Pedí uno nuevo.',
+    'auth.reset.requestNew': 'Pedir un link nuevo',
     // Account password
     'account.password.title': 'Contraseña',
     'account.password.currentLabel': 'Contraseña actual',
@@ -1262,6 +1317,10 @@ export const MESSAGES: Record<Locale, Dict> = {
     'auth.toast.passwordAlreadySet': 'Ya tenés una contraseña configurada.',
     'auth.toast.passwordChanged': 'Contraseña actualizada. Las otras sesiones se cerraron.',
     'auth.toast.passwordSet': 'Contraseña creada. Las otras sesiones se cerraron.',
+    'auth.toast.resetLinkSent':
+      'Si existe una cuenta con ese email, te enviamos un link para restablecerla.',
+    'auth.toast.resetTokenInvalid': 'Este link de restablecimiento es inválido o ya venció.',
+    'auth.toast.passwordReset': 'Contraseña restablecida. Ya iniciaste sesión.',
     'auth.toast.unauthenticated': 'Iniciá sesión primero.',
     // Onboarding
     'onboarding.toast.submitted':

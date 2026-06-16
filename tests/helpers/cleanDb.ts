@@ -17,6 +17,7 @@ export async function cleanDb(): Promise<void> {
   await prisma.aiContentJob.deleteMany()
   await prisma.searchIndexQueue.deleteMany()
   await prisma.sensitiveActionToken.deleteMany()
+  await prisma.passwordResetToken.deleteMany()
   await prisma.paymentEvent.deleteMany()
   await prisma.payment.deleteMany()
   await prisma.taxDocument.deleteMany()
