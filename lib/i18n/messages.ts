@@ -400,6 +400,33 @@ export type MessageKey =
   // Payment status
   | 'payment.status.paid'
   | 'payment.status.pending'
+  // Status badges (admin — dominios completos)
+  | 'status.order.PENDING_PAYMENT'
+  | 'status.order.PENDING_APPROVAL'
+  | 'status.order.CONFIRMED'
+  | 'status.order.SHIPPED'
+  | 'status.order.DELIVERED'
+  | 'status.order.CANCELLED'
+  | 'status.quote.DRAFT'
+  | 'status.quote.SUBMITTED'
+  | 'status.quote.QUOTED'
+  | 'status.quote.ACCEPTED'
+  | 'status.quote.REJECTED'
+  | 'status.quote.EXPIRED'
+  | 'status.invoice.PENDING'
+  | 'status.invoice.PAID'
+  | 'status.invoice.OVERDUE'
+  | 'status.invoice.CANCELLED'
+  | 'status.approval.PENDING'
+  | 'status.approval.APPROVED'
+  | 'status.approval.REJECTED'
+  | 'status.payment.PENDING'
+  | 'status.payment.AUTHORIZED'
+  | 'status.payment.CAPTURED'
+  | 'status.payment.REFUND_PENDING'
+  | 'status.payment.REFUNDED'
+  | 'status.payment.FAILED'
+  | 'status.payment.NEEDS_REVIEW'
   | 'approvals.title'
   | 'approvals.empty'
   | 'notifications.title'
@@ -998,6 +1025,33 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Payment status
     'payment.status.paid': 'Paid',
     'payment.status.pending': 'Payment pending',
+    // Status badges
+    'status.order.PENDING_PAYMENT': 'Pending payment',
+    'status.order.PENDING_APPROVAL': 'Pending approval',
+    'status.order.CONFIRMED': 'Confirmed',
+    'status.order.SHIPPED': 'Shipped',
+    'status.order.DELIVERED': 'Delivered',
+    'status.order.CANCELLED': 'Cancelled',
+    'status.quote.DRAFT': 'Draft',
+    'status.quote.SUBMITTED': 'Submitted',
+    'status.quote.QUOTED': 'Quoted',
+    'status.quote.ACCEPTED': 'Accepted',
+    'status.quote.REJECTED': 'Rejected',
+    'status.quote.EXPIRED': 'Expired',
+    'status.invoice.PENDING': 'Pending',
+    'status.invoice.PAID': 'Paid',
+    'status.invoice.OVERDUE': 'Overdue',
+    'status.invoice.CANCELLED': 'Cancelled',
+    'status.approval.PENDING': 'Pending',
+    'status.approval.APPROVED': 'Approved',
+    'status.approval.REJECTED': 'Rejected',
+    'status.payment.PENDING': 'Pending',
+    'status.payment.AUTHORIZED': 'Authorized',
+    'status.payment.CAPTURED': 'Captured',
+    'status.payment.REFUND_PENDING': 'Refund pending',
+    'status.payment.REFUNDED': 'Refunded',
+    'status.payment.FAILED': 'Failed',
+    'status.payment.NEEDS_REVIEW': 'Needs review',
     'approvals.title': 'Approvals',
     'approvals.empty': 'No approvals pending.',
     'notifications.title': 'Notifications',
@@ -1588,6 +1642,33 @@ export const MESSAGES: Record<Locale, Dict> = {
     // Payment status
     'payment.status.paid': 'Pagado',
     'payment.status.pending': 'Pendiente de pago',
+    // Status badges
+    'status.order.PENDING_PAYMENT': 'Pago pendiente',
+    'status.order.PENDING_APPROVAL': 'Aprobación pendiente',
+    'status.order.CONFIRMED': 'Confirmada',
+    'status.order.SHIPPED': 'Enviada',
+    'status.order.DELIVERED': 'Entregada',
+    'status.order.CANCELLED': 'Cancelada',
+    'status.quote.DRAFT': 'Borrador',
+    'status.quote.SUBMITTED': 'Enviada',
+    'status.quote.QUOTED': 'Cotizada',
+    'status.quote.ACCEPTED': 'Aceptada',
+    'status.quote.REJECTED': 'Rechazada',
+    'status.quote.EXPIRED': 'Vencida',
+    'status.invoice.PENDING': 'Pendiente',
+    'status.invoice.PAID': 'Pagada',
+    'status.invoice.OVERDUE': 'Vencida',
+    'status.invoice.CANCELLED': 'Cancelada',
+    'status.approval.PENDING': 'Pendiente',
+    'status.approval.APPROVED': 'Aprobada',
+    'status.approval.REJECTED': 'Rechazada',
+    'status.payment.PENDING': 'Pendiente',
+    'status.payment.AUTHORIZED': 'Autorizado',
+    'status.payment.CAPTURED': 'Cobrado',
+    'status.payment.REFUND_PENDING': 'Reembolso pendiente',
+    'status.payment.REFUNDED': 'Reembolsado',
+    'status.payment.FAILED': 'Fallido',
+    'status.payment.NEEDS_REVIEW': 'Requiere revisión',
     'approvals.title': 'Aprobaciones',
     'approvals.empty': 'No hay aprobaciones pendientes.',
     'notifications.title': 'Notificaciones',
