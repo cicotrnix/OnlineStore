@@ -190,20 +190,38 @@ const plugAndPlay: CatalogProduct[] = pnpModels.map((m) => ({
   attributes: PNP,
 }))
 
-// ── Tag-on Flex (11) — un SKU por modelo (parte física distinta). $3.50, in stock.
-//    Imágenes pendientes → placeholder. 12/12 Pro combinado.
-const tagOnModels: { sku: string; slug: string; model: string }[] = [
-  { sku: 'PP-TO-1212P', slug: 'tag-on-flex-12-12-pro', model: 'iPhone 12 / 12 Pro' },
-  { sku: 'PP-TO-12PM', slug: 'tag-on-flex-12-pro-max', model: 'iPhone 12 Pro Max' },
-  { sku: 'PP-TO-13', slug: 'tag-on-flex-13', model: 'iPhone 13' },
-  { sku: 'PP-TO-13P', slug: 'tag-on-flex-13-pro', model: 'iPhone 13 Pro' },
-  { sku: 'PP-TO-13PM', slug: 'tag-on-flex-13-pro-max', model: 'iPhone 13 Pro Max' },
-  { sku: 'PP-TO-14', slug: 'tag-on-flex-14', model: 'iPhone 14' },
-  { sku: 'PP-TO-14P', slug: 'tag-on-flex-14-pro', model: 'iPhone 14 Pro' },
-  { sku: 'PP-TO-14PM', slug: 'tag-on-flex-14-pro-max', model: 'iPhone 14 Pro Max' },
-  { sku: 'PP-TO-15', slug: 'tag-on-flex-15', model: 'iPhone 15' },
-  { sku: 'PP-TO-15P', slug: 'tag-on-flex-15-pro', model: 'iPhone 15 Pro' },
-  { sku: 'PP-TO-15PM', slug: 'tag-on-flex-15-pro-max', model: 'iPhone 15 Pro Max' },
+// ── Tag-on Flex (8) — imágenes reales (composición Back-to-100% de las fotos del
+//    vendor). $3.50, in stock. La placa de 13 Pro/13 Pro Max/14 Pro/14 Pro Max es
+//    UNA pieza compartida → SKU único PP-TO-PRO-1314. 12/12 Pro combinado.
+const tagOnModels: { sku: string; slug: string; model: string; image: string }[] = [
+  {
+    sku: 'PP-TO-1212P',
+    slug: 'tag-on-flex-12-12-pro',
+    model: 'iPhone 12 / 12 Pro',
+    image: '12-12pro.png',
+  },
+  {
+    sku: 'PP-TO-12PM',
+    slug: 'tag-on-flex-12-pro-max',
+    model: 'iPhone 12 Pro Max',
+    image: '12promax.png',
+  },
+  { sku: 'PP-TO-13', slug: 'tag-on-flex-13', model: 'iPhone 13', image: '13-13mini.png' },
+  {
+    sku: 'PP-TO-PRO-1314',
+    slug: 'tag-on-flex-pro-13-14',
+    model: 'iPhone 13 Pro / 13 Pro Max / 14 Pro / 14 Pro Max',
+    image: '13-14-pro-promax-shared.png',
+  },
+  { sku: 'PP-TO-14', slug: 'tag-on-flex-14', model: 'iPhone 14', image: '14-14plus.png' },
+  { sku: 'PP-TO-15', slug: 'tag-on-flex-15', model: 'iPhone 15', image: '15-15plus.png' },
+  { sku: 'PP-TO-15P', slug: 'tag-on-flex-15-pro', model: 'iPhone 15 Pro', image: '15pro-15pm.png' },
+  {
+    sku: 'PP-TO-15PM',
+    slug: 'tag-on-flex-15-pro-max',
+    model: 'iPhone 15 Pro Max',
+    image: '15pro-15pm.png',
+  },
 ]
 const tagOn: CatalogProduct[] = tagOnModels.map((m) => ({
   sku: m.sku,
@@ -212,14 +230,16 @@ const tagOn: CatalogProduct[] = tagOnModels.map((m) => ({
   description: `Flex tag-on para ${m.model}. Para celdas que no lo incluyen.`,
   basePrice: '3.50',
   stockQuantity: 200,
-  imageUrl: null,
+  imageUrl: `/products/tag-on/${m.image}`,
   categorySlug: 'tag-on-flex',
   attributes: null,
 }))
 
 export const PIPOWER_PRODUCTS: CatalogProduct[] = [...batteryCell, ...plugAndPlay, ...tagOn]
 
-/** SKUs del catálogo Fase 3 viejo, a desactivar en prod (reemplazados por el nuevo). */
+/** SKUs a desactivar en prod (sin borrar → preserva FKs de órdenes/precios):
+ *  - Catálogo Fase 3 viejo (PI-2004xx).
+ *  - Tag-on Pro 13/14 consolidados en PP-TO-PRO-1314 (eran la misma placa física). */
 export const LEGACY_SKUS: string[] = [
   'PI-200450',
   'PI-200451',
@@ -233,6 +253,11 @@ export const LEGACY_SKUS: string[] = [
   'PI-200459',
   'PI-200460',
   'PI-200461',
+  // Tag-on Pro/Pro Max 13+14 → consolidados en PP-TO-PRO-1314
+  'PP-TO-13P',
+  'PP-TO-13PM',
+  'PP-TO-14P',
+  'PP-TO-14PM',
 ]
 
 /** Categorías del catálogo Fase 3 viejo, a desactivar (reemplazadas por las 3
