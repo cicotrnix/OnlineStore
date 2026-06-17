@@ -595,6 +595,27 @@ export type MessageKey =
   | 'admin.prices.hint'
   | 'admin.prices.basePrice'
   | 'admin.prices.yourPrice'
+  // Admin platform (Fase 4)
+  | 'admin.search.title'
+  | 'admin.search.subtitle'
+  | 'admin.search.statPending'
+  | 'admin.search.statProcessing'
+  | 'admin.search.statDone'
+  | 'admin.search.statFailed'
+  | 'admin.search.reindexTitle'
+  | 'admin.search.reindexHint'
+  | 'admin.search.failedTitle'
+  | 'admin.search.colAttempts'
+  | 'admin.search.colError'
+  | 'admin.search.noFailed'
+  | 'admin.settings.title'
+  | 'admin.settings.createOrg'
+  | 'admin.settings.namePlaceholder'
+  | 'admin.settings.slugPlaceholder'
+  | 'admin.settings.invitePlaceholder'
+  | 'admin.settings.yourOrgs'
+  | 'admin.settings.noOrgs'
+  | 'admin.settings.signedInAs'
   | 'admin.nav.dashboard'
   | 'admin.nav.products'
   | 'admin.nav.categories'
@@ -1383,6 +1404,28 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.prices.hint': 'Set a price override per product. Empty = base price applies.',
     'admin.prices.basePrice': 'Base price',
     'admin.prices.yourPrice': 'Your price',
+    // Admin platform (Fase 4)
+    'admin.search.title': 'Search',
+    'admin.search.subtitle': 'Index queue status. The worker runs every minute in production.',
+    'admin.search.statPending': 'Pending',
+    'admin.search.statProcessing': 'Processing',
+    'admin.search.statDone': 'Done',
+    'admin.search.statFailed': 'Failed',
+    'admin.search.reindexTitle': 'Reindex all',
+    'admin.search.reindexHint':
+      'Enqueues an UPSERT per product. The worker processes them gradually.',
+    'admin.search.failedTitle': 'Last 20 failed items',
+    'admin.search.colAttempts': 'Attempts',
+    'admin.search.colError': 'Error',
+    'admin.search.noFailed': 'No failed items.',
+    'admin.settings.title': 'Settings',
+    'admin.settings.createOrg': 'Create organization',
+    'admin.settings.namePlaceholder': 'My Repair Shop Co',
+    'admin.settings.slugPlaceholder': 'acme-wholesale',
+    'admin.settings.invitePlaceholder': 'invitee@company.com',
+    'admin.settings.yourOrgs': 'Your organizations',
+    'admin.settings.noOrgs': 'No organizations yet.',
+    'admin.settings.signedInAs': 'Signed in as {email}',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Products',
     'admin.nav.categories': 'Categories',
@@ -2164,6 +2207,29 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.prices.hint': 'Definí un precio override por producto. Vacío = aplica el precio base.',
     'admin.prices.basePrice': 'Precio base',
     'admin.prices.yourPrice': 'Tu precio',
+    // Admin platform (Fase 4)
+    'admin.search.title': 'Búsqueda',
+    'admin.search.subtitle':
+      'Estado de la cola de indexación. El worker corre cada minuto en producción.',
+    'admin.search.statPending': 'Pendientes',
+    'admin.search.statProcessing': 'Procesando',
+    'admin.search.statDone': 'Hechas',
+    'admin.search.statFailed': 'Fallidas',
+    'admin.search.reindexTitle': 'Reindexar todo',
+    'admin.search.reindexHint':
+      'Encola un UPSERT por cada producto. El worker los procesa gradualmente.',
+    'admin.search.failedTitle': 'Últimos 20 ítems fallidos',
+    'admin.search.colAttempts': 'Intentos',
+    'admin.search.colError': 'Error',
+    'admin.search.noFailed': 'Sin ítems fallidos.',
+    'admin.settings.title': 'Settings',
+    'admin.settings.createOrg': 'Crear organización',
+    'admin.settings.namePlaceholder': 'My Repair Shop Co',
+    'admin.settings.slugPlaceholder': 'acme-wholesale',
+    'admin.settings.invitePlaceholder': 'invitee@company.com',
+    'admin.settings.yourOrgs': 'Tus organizaciones',
+    'admin.settings.noOrgs': 'Todavía no hay organizaciones.',
+    'admin.settings.signedInAs': 'Sesión de {email}',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Productos',
     'admin.nav.categories': 'Categorías',

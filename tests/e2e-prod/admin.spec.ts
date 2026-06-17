@@ -302,3 +302,34 @@ test.describe('admin customers (prod build) — Fase 3', () => {
     }
   })
 })
+
+test.describe('admin platform (prod build) — Fase 4', () => {
+  async function axeBlocking(page: import('@playwright/test').Page) {
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze()
+    return results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+  }
+
+  test('search + settings renderizan y pasan axe', async ({ browser }) => {
+    const { user, token } = await seedUser(true)
+    try {
+      const ctx = await browser.newContext()
+      await withSession(ctx, token)
+      const page = await ctx.newPage()
+
+      await page.goto('/admin/search', { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'Search' })).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/search').toEqual([])
+
+      await page.goto('/admin/settings', { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/settings').toEqual([])
+
+      await ctx.close()
+    } finally {
+      await prisma.session.deleteMany({ where: { userId: user.id } })
+      await prisma.user.delete({ where: { id: user.id } }).catch(() => {})
+    }
+  })
+})

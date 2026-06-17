@@ -1,3 +1,5 @@
+import { AuthField } from '@/app/(auth)/AuthField'
+import { AdminPageHeader } from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { getLocale, t } from '@/lib/i18n'
@@ -11,55 +13,58 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-medium">Settings</h1>
+      <AdminPageHeader title={t(locale, 'admin.settings.title')} />
 
-      <section className="mt-8">
-        <h2 className="text-sm font-medium text-gray-500">Create organization</h2>
+      <section className="rounded-card border border-line p-5">
+        <h2 className="text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.settings.createOrg')}
+        </h2>
         <form action={createOrganizationAction} className="mt-3 space-y-3">
-          <input
+          <AuthField
             name="name"
+            label={t(locale, 'admin.customers.col.org')}
             required
-            placeholder="My Repair Shop Co"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            placeholder={t(locale, 'admin.settings.namePlaceholder')}
           />
-          <input
+          <AuthField
             name="slug"
+            label={t(locale, 'admin.customers.col.slug')}
             required
             pattern="[a-z0-9-]+"
-            placeholder="acme-wholesale"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            placeholder={t(locale, 'admin.settings.slugPlaceholder')}
           />
-          <SubmitButton pendingLabel={t(locale, 'admin.action.creating')}>
+          <SubmitButton variant="lime" pendingLabel={t(locale, 'admin.action.creating')}>
             {t(locale, 'admin.action.create')}
           </SubmitButton>
         </form>
       </section>
 
-      <section className="mt-12">
-        <h2 className="text-sm font-medium text-gray-500">Your organizations</h2>
+      <section className="mt-8">
+        <h2 className="mb-3 text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.settings.yourOrgs')}
+        </h2>
         {orgs.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">No organizations yet.</p>
+          <p className="text-sm text-ink-500">{t(locale, 'admin.settings.noOrgs')}</p>
         ) : (
-          <ul className="mt-3 space-y-6">
+          <ul className="space-y-4">
             {orgs.map((org) => (
-              <li key={org.id} className="border rounded-lg p-4">
+              <li key={org.id} className="rounded-card border border-line p-4">
                 <div className="flex items-baseline justify-between">
-                  <strong className="text-sm">{org.name}</strong>
-                  <span className="text-xs text-gray-500">{org.slug}</span>
+                  <strong className="text-sm text-ink-950">{org.name}</strong>
+                  <span className="font-mono text-xs text-ink-500">{org.slug}</span>
                 </div>
-                <form action={inviteMemberAction} className="mt-3 flex gap-2">
+                <form action={inviteMemberAction} className="mt-3 flex items-end gap-2">
                   <input type="hidden" name="organizationId" value={org.id} />
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    placeholder="invitee@company.com"
-                    className="flex-1 border rounded-lg px-3 py-2 text-sm"
-                  />
-                  <SubmitButton
-                    variant="secondary"
-                    pendingLabel={t(locale, 'admin.action.inviting')}
-                  >
+                  <div className="flex-1">
+                    <AuthField
+                      name="email"
+                      label={t(locale, 'account.overview.email')}
+                      type="email"
+                      required
+                      placeholder={t(locale, 'admin.settings.invitePlaceholder')}
+                    />
+                  </div>
+                  <SubmitButton variant="outline" pendingLabel={t(locale, 'admin.action.inviting')}>
                     {t(locale, 'admin.action.invite')}
                   </SubmitButton>
                 </form>
@@ -69,7 +74,9 @@ export default async function SettingsPage() {
         )}
       </section>
 
-      <p className="mt-12 text-xs text-gray-400">Signed in as {user.email}</p>
+      <p className="mt-12 text-xs text-ink-500">
+        {t(locale, 'admin.settings.signedInAs', { email: user.email ?? '' })}
+      </p>
     </div>
   )
 }

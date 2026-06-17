@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { AdminPageHeader, type Column, DataTable, MetricCard } from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
@@ -29,113 +29,83 @@ export default async function AdminSearchPage() {
     }),
   ])
 
+  type Row = (typeof failedRows)[number]
+  const columns: Column<Row>[] = [
+    {
+      key: 'product',
+      header: t(locale, 'admin.col.product'),
+      className: 'font-mono text-xs',
+      cell: (r) => r.productId,
+    },
+    { key: 'action', header: t(locale, 'admin.col.action'), cell: (r) => r.action },
+    {
+      key: 'attempts',
+      header: t(locale, 'admin.search.colAttempts'),
+      align: 'right',
+      className: 'tabular-nums',
+      cell: (r) => r.attempts,
+    },
+    {
+      key: 'error',
+      header: t(locale, 'admin.search.colError'),
+      className: 'max-w-md truncate text-xs text-red-600',
+      cell: (r) => r.lastError ?? '—',
+    },
+    {
+      key: 'retry',
+      header: '',
+      align: 'right',
+      cell: (r) => (
+        <form action={retryFailedAction}>
+          <input type="hidden" name="queueItemId" value={r.id} />
+          <SubmitButton variant="outline" size="sm" pendingLabel={t(locale, 'common.pending')}>
+            {t(locale, 'admin.action.retry')}
+          </SubmitButton>
+        </form>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-medium tracking-tight">Búsqueda</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Estado de la cola de indexación. Worker corre cada 1 minuto en producción.
-        </p>
-      </div>
+      <AdminPageHeader
+        title={t(locale, 'admin.search.title')}
+        subtitle={t(locale, 'admin.search.subtitle')}
+      />
 
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard label="Pendientes" value={pending} />
-        <StatCard label="Procesando" value={processing} />
-        <StatCard label="Hechas" value={done} />
-        <StatCard label="Fallidas" value={failed} variant="danger" />
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <MetricCard label={t(locale, 'admin.search.statPending')} value={pending} />
+        <MetricCard label={t(locale, 'admin.search.statProcessing')} value={processing} />
+        <MetricCard label={t(locale, 'admin.search.statDone')} value={done} />
+        <MetricCard
+          label={t(locale, 'admin.search.statFailed')}
+          value={<span className={failed > 0 ? 'text-red-600' : undefined}>{failed}</span>}
+        />
       </section>
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">Reindexar todo</h2>
-          <p className="mt-1 text-xs text-gray-500">
-            Encola un UPSERT por cada producto. El worker los procesa gradualmente.
-          </p>
-        </CardHeader>
-        <CardBody>
-          <form action={reindexAllAction}>
-            <SubmitButton pendingLabel={t(locale, 'admin.action.enqueuing')}>
-              {t(locale, 'admin.action.reindexAll')}
-            </SubmitButton>
-          </form>
-        </CardBody>
-      </Card>
+      <section className="rounded-card border border-line p-5">
+        <h2 className="text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.search.reindexTitle')}
+        </h2>
+        <p className="mt-1 text-xs text-ink-500">{t(locale, 'admin.search.reindexHint')}</p>
+        <form action={reindexAllAction} className="mt-3">
+          <SubmitButton variant="lime" pendingLabel={t(locale, 'admin.action.enqueuing')}>
+            {t(locale, 'admin.action.reindexAll')}
+          </SubmitButton>
+        </form>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">Últimos 20 ítems fallidos</h2>
-        </CardHeader>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wide text-gray-500 bg-gray-50">
-              <tr>
-                <th className="text-left px-5 py-3 font-medium">Producto</th>
-                <th className="text-left px-5 py-3 font-medium">Acción</th>
-                <th className="text-left px-5 py-3 font-medium">Intentos</th>
-                <th className="text-left px-5 py-3 font-medium">Error</th>
-                <th className="text-right px-5 py-3 font-medium">Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {failedRows.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-5 py-6 text-center text-sm text-gray-500">
-                    Sin items fallidos.
-                  </td>
-                </tr>
-              ) : (
-                failedRows.map((r) => (
-                  <tr key={r.id} className="border-t border-gray-100">
-                    <td className="px-5 py-3 font-mono text-xs">{r.productId}</td>
-                    <td className="px-5 py-3">{r.action}</td>
-                    <td className="px-5 py-3 tabular-nums">{r.attempts}</td>
-                    <td className="px-5 py-3 text-xs text-red-600 max-w-md truncate">
-                      {r.lastError ?? '—'}
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <form action={retryFailedAction}>
-                        <input type="hidden" name="queueItemId" value={r.id} />
-                        <SubmitButton
-                          variant="ghost"
-                          size="sm"
-                          pendingLabel={t(locale, 'common.pending')}
-                        >
-                          {t(locale, 'admin.action.retry')}
-                        </SubmitButton>
-                      </form>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      <section>
+        <h2 className="mb-2 text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.search.failedTitle')}
+        </h2>
+        <DataTable
+          columns={columns}
+          rows={failedRows}
+          getRowKey={(r) => r.id}
+          empty={t(locale, 'admin.search.noFailed')}
+        />
+      </section>
     </div>
-  )
-}
-
-function StatCard({
-  label,
-  value,
-  variant = 'default',
-}: {
-  label: string
-  value: number
-  variant?: 'default' | 'danger'
-}) {
-  return (
-    <Card>
-      <CardBody>
-        <div className="text-xs uppercase tracking-wide text-gray-500">{label}</div>
-        <div
-          className={`mt-2 text-2xl font-medium tabular-nums ${
-            variant === 'danger' && value > 0 ? 'text-red-600' : ''
-          }`}
-        >
-          {value}
-        </div>
-      </CardBody>
-    </Card>
   )
 }
