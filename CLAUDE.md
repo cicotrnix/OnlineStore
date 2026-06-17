@@ -102,7 +102,9 @@ Antes de tocar código, leer en este orden:
 - Runbooks: event-bus, payments, accounting, shipments, outbound-webhooks.
 - Pendientes ops (Herney provisiona): Stripe live keys, FedEx API, Cloudflare R2, PostHog/GA4, rol Postgres `app_rw` (hardening append-only DB), staging Coolify con Stripe test-mode.
 
-## Rediseño UI en curso (pre-launch)
+## Rediseño UI "Back to 100%" — CERRADO (2026-06-16)
+
+**Estado: COMPLETO.** Las 16 superficies del producto (7 storefront + admin completo) están rediseñadas y mergeadas a `main`. Detalle histórico abajo.
 
 **Dirección aprobada:** "Back to 100%" — oscuro, técnico, lima como acento único.  
 **Spec maestro:** `docs/specs/2026-06-11-ui-redesign-design-system.md`  
@@ -118,10 +120,14 @@ Antes de tocar código, leer en este orden:
 - **PDP — HECHO** (branch `redesign/pdp`, mergeada). Hero de imagen + `AttributeChips` overlay (card único reusado) + `ProductBuyBox` (SpecReadout instrumento 2 col, capacity gated FU-010; 3 estados de stock; stepper/Notify según ordenabilidad). Below-fold full-width: `MarkdownContent` dep-free (markdown AI) + tier table instrument + RFQ secundario. `SpecReadout` columnas dinámicas (2/3). Fix: `coming_soon`/`incoming` no muestran precio (card + buy box). Spec: `docs/superpowers/specs/2026-06-14-pdp-design.md`.
 - **Carrito + Checkout — HECHO** (branch `redesign/cart-checkout`, mergeada). `MiniCart` drawer (Vaul) desde el ícono del header (open **controlado**: el `<a href=/cart>` se clona con onClick → `role=link` + fallback no-JS; `cartEnabled` verificado, si no link plano). `CartLine` compartida (compact mini-cart / full `/cart`) + server actions lazy que devuelven el carrito (edición inline sin redirect). `/cart` = `CartEditor` (resumen sticky). `/checkout` = banner `role=alert` prominente + `hasBlockingIssue` extraído a `modules/checkout` (puro, testeable) + resumen sticky desktop / **barra sticky mobile (no Vaul drawer — decisión aprobada)**. Lógica de dinero intacta (snapshot pricing, gating, issues, `placeOrder`/wire). Spec: `docs/superpowers/specs/2026-06-14-cart-checkout-design.md`.
 
-**Orden restante:**
-1. **Auth** (sign-in / sign-up) ← siguiente superficie
-2. Cuenta / Admin
-3. Barrido i18n storefront (claves pendientes — transversal)
+- **Auth — HECHO** (branch `redesign/auth`, mergeada). Shell dos columnas (`AuthBrandPanel` + `AuthGauge` SVG estático, sin GSAP) + `AuthField` accesible. Flujo de reset de contraseña net-new (`PasswordResetToken`, token un-solo-uso hash-at-rest, revoca todas las sesiones, anti-enum, rate-limit IP+email, email fire-and-forget). security-review limpio. Spec: `docs/superpowers/specs/2026-06-15-auth-design.md`.
+- **Cuenta — HECHO** (branch `redesign/account`, mergeada). Hub con sub-nav (Overview/Profile/Addresses/Security). Net-new TDD: `updateProfileAction`, address CRUD gateado por rol (default uniqueness + in-use guard), `signOutEverywhereAction`. Órdenes restiladas + i18n cerrado. Sin modelo Prisma nuevo. Spec: `docs/superpowers/specs/2026-06-16-account-design.md`.
+- **Admin — HECHO** (5 fases, 16 pantallas, branches `redesign/admin-*`, mergeadas). Fundación: shell slate (sidebar `neutral-900` + drawer Vaul) + set de componentes compartidos `components/admin/` (`DataTable`, `AdminPageHeader`, `StatusBadge` modo i18n con los 5 dominios completos, `FilterBar`, `MetricCard`, variantes Button `lime`/`outline`). Fases: Catálogo · Comercio · Clientes · Plataforma. i18n admin cerrado por pantalla. Spec: `docs/superpowers/specs/2026-06-16-admin-design.md`.
+
+**Follow-ups fuera de scope del rediseño (specs aparte si se retoman):**
+- Members (gestión de equipo en el área de cuenta).
+- Cambio de email (identidad de auth).
+- Barrido i18n storefront residual (las superficies rediseñadas cerraron su i18n; revisar claves sueltas del storefront viejo si quedan).
 
 **Nota DX importante:** vitest necesita `DATABASE_URL` explícito en el entorno.  
 Sin él, ~239 tests fallan con `PrismaClientInitializationError` — **no son regresión**, es un problema de entorno.  
