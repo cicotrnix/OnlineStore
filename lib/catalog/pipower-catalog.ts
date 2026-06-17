@@ -167,16 +167,46 @@ const batteryCell: CatalogProduct[] = [
 // ── Plug & Play (9, coming soon) — rango iPhone 13 → 15 Pro Max. Sin soldadura.
 //    Precio 0.00 placeholder inerte (pendiente Herney; coming_soon no lo muestra).
 const PNP = { plug_and_play: true, coming_soon: true }
-const pnpModels: { sku: string; slug: string; model: string }[] = [
-  { sku: 'PP-PP-13', slug: 'iphone-13-plug-and-play', model: 'iPhone 13' },
-  { sku: 'PP-PP-13P', slug: 'iphone-13-pro-plug-and-play', model: 'iPhone 13 Pro' },
-  { sku: 'PP-PP-13PM', slug: 'iphone-13-pro-max-plug-and-play', model: 'iPhone 13 Pro Max' },
-  { sku: 'PP-PP-14', slug: 'iphone-14-plug-and-play', model: 'iPhone 14' },
-  { sku: 'PP-PP-14P', slug: 'iphone-14-pro-plug-and-play', model: 'iPhone 14 Pro' },
-  { sku: 'PP-PP-14PM', slug: 'iphone-14-pro-max-plug-and-play', model: 'iPhone 14 Pro Max' },
-  { sku: 'PP-PP-15', slug: 'iphone-15-plug-and-play', model: 'iPhone 15' },
-  { sku: 'PP-PP-15P', slug: 'iphone-15-pro-plug-and-play', model: 'iPhone 15 Pro' },
-  { sku: 'PP-PP-15PM', slug: 'iphone-15-pro-max-plug-and-play', model: 'iPhone 15 Pro Max' },
+const pnpModels: { sku: string; slug: string; model: string; image: string }[] = [
+  { sku: 'PP-PP-13', slug: 'iphone-13-plug-and-play', model: 'iPhone 13', image: 'iphone-13.png' },
+  {
+    sku: 'PP-PP-13P',
+    slug: 'iphone-13-pro-plug-and-play',
+    model: 'iPhone 13 Pro',
+    image: 'iphone-13-pro.png',
+  },
+  {
+    sku: 'PP-PP-13PM',
+    slug: 'iphone-13-pro-max-plug-and-play',
+    model: 'iPhone 13 Pro Max',
+    image: 'iphone-13-pro-max.png',
+  },
+  { sku: 'PP-PP-14', slug: 'iphone-14-plug-and-play', model: 'iPhone 14', image: 'iphone-14.png' },
+  {
+    sku: 'PP-PP-14P',
+    slug: 'iphone-14-pro-plug-and-play',
+    model: 'iPhone 14 Pro',
+    image: 'iphone-14-pro.png',
+  },
+  {
+    sku: 'PP-PP-14PM',
+    slug: 'iphone-14-pro-max-plug-and-play',
+    model: 'iPhone 14 Pro Max',
+    image: 'iphone-14-pro-max.png',
+  },
+  { sku: 'PP-PP-15', slug: 'iphone-15-plug-and-play', model: 'iPhone 15', image: 'iphone-15.png' },
+  {
+    sku: 'PP-PP-15P',
+    slug: 'iphone-15-pro-plug-and-play',
+    model: 'iPhone 15 Pro',
+    image: 'iphone-15-pro.png',
+  },
+  {
+    sku: 'PP-PP-15PM',
+    slug: 'iphone-15-pro-max-plug-and-play',
+    model: 'iPhone 15 Pro Max',
+    image: 'iphone-15-pro-max.png',
+  },
 ]
 const plugAndPlay: CatalogProduct[] = pnpModels.map((m) => ({
   sku: m.sku,
@@ -185,7 +215,7 @@ const plugAndPlay: CatalogProduct[] = pnpModels.map((m) => ({
   description: `Reemplazo sin soldadura para ${m.model}. Próximamente.`,
   basePrice: '0.00',
   stockQuantity: 0,
-  imageUrl: null,
+  imageUrl: `/products/plug-and-play/${m.image}`,
   categorySlug: 'plug-and-play',
   attributes: PNP,
 }))

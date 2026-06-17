@@ -35,6 +35,16 @@ describe('pipower-catalog — tag-on flex consolidation', () => {
     }
   })
 
+  it('plug-and-play: 9 SKUs, cada uno con imageUrl real, coming_soon + precio 0', () => {
+    const pnp = PIPOWER_PRODUCTS.filter((p) => p.categorySlug === 'plug-and-play')
+    expect(pnp).toHaveLength(9)
+    for (const p of pnp) {
+      expect(p.imageUrl, p.sku).toMatch(/^\/products\/plug-and-play\/.+\.png$/)
+      expect(p.basePrice, p.sku).toBe('0.00')
+      expect((p.attributes as { coming_soon?: boolean } | null)?.coming_soon, p.sku).toBe(true)
+    }
+  })
+
   it('sin SKUs ni slugs duplicados en el catálogo', () => {
     const skus = PIPOWER_PRODUCTS.map((p) => p.sku)
     const slugs = PIPOWER_PRODUCTS.map((p) => p.slug)

@@ -67,3 +67,4 @@ Thumbs.db
 
 # Assets sueltos de catálogo en el root (Herney los stagea local, no se versionan)
 /tag-on*
+/labels/
