@@ -64,5 +64,6 @@ next-env.d.ts
 Thumbs.db
 
 # Stray catálogo assets sueltos en el root (no versionar)
-/tag-on flex all.png
-/tag-on-bases/
+
+# Assets sueltos de catálogo en el root (Herney los stagea local, no se versionan)
+/tag-on*
