@@ -152,3 +152,103 @@ test.describe('admin catalog (prod build) — Fase 1', () => {
     }
   })
 })
+
+test.describe('admin commerce (prod build) — Fase 2', () => {
+  async function axeBlocking(page: import('@playwright/test').Page) {
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze()
+    return results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+  }
+
+  test('listas + detalle de orden con acciones (StatusBadge i18n) pasan axe', async ({
+    browser,
+  }) => {
+    const { user, token } = await seedUser(true)
+    // Orden PENDING_PAYMENT seedeada → ejercita botones lime/outline/danger del detalle.
+    const product = await prisma.product.findFirst({ select: { id: true, sku: true, name: true } })
+    const org = await prisma.organization.create({
+      data: {
+        name: 'Commerce E2E Co',
+        slug: `commerce-e2e-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        verificationStatus: 'VERIFIED',
+        verifiedAt: new Date(),
+        addresses: {
+          create: {
+            label: 'HQ',
+            recipient: 'R',
+            line1: 'L1',
+            city: 'Miami',
+            postalCode: '33101',
+            country: 'US',
+            isDefaultBilling: true,
+            isDefaultShipping: true,
+          },
+        },
+      },
+      include: { addresses: true },
+    })
+    const addr = org.addresses[0]!
+    const order = await prisma.order.create({
+      data: {
+        orderNumber: `O-E2E-${Date.now()}`,
+        organizationId: org.id,
+        placedByUserId: user.id,
+        status: 'PENDING_PAYMENT',
+        billingAddressId: addr.id,
+        shippingAddressId: addr.id,
+        subtotal: 100,
+        total: 100,
+        currency: 'USD',
+        lines: {
+          create: {
+            productId: product!.id,
+            sku: product!.sku,
+            name: product!.name,
+            unitPrice: 100,
+            quantity: 1,
+            lineTotal: 100,
+          },
+        },
+      },
+    })
+
+    try {
+      const ctx = await browser.newContext()
+      await withSession(ctx, token)
+      const page = await ctx.newPage()
+
+      for (const [path, heading] of [
+        ['/admin/orders', 'Orders'],
+        ['/admin/quotes', 'Quotes'],
+        ['/admin/invoices', 'Invoices'],
+        ['/admin/approvals', 'Approvals'],
+      ] as const) {
+        await page.goto(path, { waitUntil: 'networkidle' })
+        await expect(page.getByRole('heading', { name: heading })).toBeVisible()
+        expect(await axeBlocking(page), `axe ${path}`).toEqual([])
+      }
+
+      // Detalle de orden: acciones (transición lime / extend outline / cancel danger).
+      await page.goto(`/admin/orders/${order.id}`, { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'Actions' })).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/orders/[id]').toEqual([])
+
+      // Detalle de cotización (la seed crea una) — form editable con botón lime.
+      const quote = await prisma.quote.findFirst({ select: { id: true } })
+      if (quote) {
+        await page.goto(`/admin/quotes/${quote.id}`, { waitUntil: 'networkidle' })
+        expect(await axeBlocking(page), 'axe /admin/quotes/[id]').toEqual([])
+      }
+
+      await ctx.close()
+    } finally {
+      await prisma.orderLine.deleteMany({ where: { orderId: order.id } })
+      await prisma.order.delete({ where: { id: order.id } }).catch(() => {})
+      await prisma.organizationAddress.deleteMany({ where: { organizationId: org.id } })
+      await prisma.organization.delete({ where: { id: org.id } }).catch(() => {})
+      await prisma.session.deleteMany({ where: { userId: user.id } })
+      await prisma.user.delete({ where: { id: user.id } }).catch(() => {})
+    }
+  })
+})

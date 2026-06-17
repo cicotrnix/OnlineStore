@@ -1,7 +1,6 @@
+import { AuthField } from '@/app/(auth)/AuthField'
 import { quoteOrReviseAction } from '@/app/admin/_actions-fase2'
-import { Badge } from '@/components/ui/Badge'
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
+import { AdminPageHeader, type Column, DataTable, StatusBadge } from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
@@ -30,149 +29,155 @@ export default async function AdminQuoteDetailPage({ params }: Props) {
 
   const canQuote = q.status === 'SUBMITTED'
   const canRevise = q.status === 'QUOTED'
-
+  const editable = canQuote || canRevise
   const defaultValidUntil = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)
+
+  type Line = (typeof q.lines)[number]
+  const inputCls =
+    'w-24 rounded-button border border-ink-100 bg-surface px-2 py-1 text-right text-sm text-ink-950 focus:outline-none focus:ring-2 focus:ring-accent'
+
+  const editColumns: Column<Line>[] = [
+    {
+      key: 'sku',
+      header: t(locale, 'admin.col.sku'),
+      className: 'font-mono text-xs text-ink-500',
+      cell: (l) => l.sku,
+    },
+    { key: 'name', header: t(locale, 'admin.col.product'), cell: (l) => l.name },
+    {
+      key: 'base',
+      header: t(locale, 'admin.col.base'),
+      align: 'right',
+      className: 'font-mono tabular-nums text-ink-500',
+      cell: (l) => formatMoney(l.unitPriceBase, q.currency),
+    },
+    {
+      key: 'qty',
+      header: t(locale, 'admin.col.qty'),
+      align: 'right',
+      className: 'font-mono tabular-nums',
+      cell: (l) => l.qty,
+    },
+    {
+      key: 'quoted',
+      header: t(locale, 'admin.col.quoted'),
+      align: 'right',
+      cell: (l) => (
+        <input
+          name={`price[${l.id}]`}
+          aria-label={t(locale, 'admin.quotes.quotedPriceFor', { sku: l.sku })}
+          type="number"
+          step="0.01"
+          min="0.01"
+          defaultValue={l.unitPriceQuoted?.toString() ?? ''}
+          required
+          className={inputCls}
+        />
+      ),
+    },
+  ]
+
+  const readColumns: Column<Line>[] = [
+    {
+      key: 'sku',
+      header: t(locale, 'admin.col.sku'),
+      className: 'font-mono text-xs text-ink-500',
+      cell: (l) => l.sku,
+    },
+    { key: 'name', header: t(locale, 'admin.col.product'), cell: (l) => l.name },
+    {
+      key: 'price',
+      header: t(locale, 'admin.col.price'),
+      align: 'right',
+      className: 'font-mono tabular-nums',
+      cell: (l) =>
+        l.unitPriceQuoted
+          ? formatMoney(l.unitPriceQuoted, q.currency)
+          : formatMoney(l.unitPriceBase, q.currency),
+    },
+    {
+      key: 'qty',
+      header: t(locale, 'admin.col.qty'),
+      align: 'right',
+      className: 'font-mono tabular-nums',
+      cell: (l) => l.qty,
+    },
+    {
+      key: 'total',
+      header: t(locale, 'admin.col.total'),
+      align: 'right',
+      className: 'font-mono font-medium tabular-nums',
+      cell: (l) => formatMoney(l.lineTotal, q.currency),
+    },
+  ]
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight font-mono">{q.number}</h1>
-          <p className="mt-1 text-xs text-gray-500">
-            {q.organization.name} · {q.requestedBy.email} · {q.createdAt.toLocaleString()}
-          </p>
-        </div>
-        <Badge variant="info">{q.status}</Badge>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <AdminPageHeader
+          title={<span className="font-mono">{q.number}</span>}
+          subtitle={`${q.organization.name} · ${q.requestedBy.email} · ${q.createdAt.toLocaleString()}`}
+        />
+        <StatusBadge domain="quote" status={q.status} locale={locale} />
       </div>
 
       {q.notes && (
-        <Card>
-          <CardBody>
-            <h2 className="text-xs uppercase tracking-wide text-gray-500">Notas del cliente</h2>
-            <p className="mt-1 text-sm whitespace-pre-wrap">{q.notes}</p>
-          </CardBody>
-        </Card>
+        <section className="rounded-card border border-line p-5">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-ink-500">
+            {t(locale, 'admin.quotes.customerNotes')}
+          </h2>
+          <p className="mt-1 whitespace-pre-wrap text-sm text-ink-950">{q.notes}</p>
+        </section>
       )}
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">
-            {canQuote ? 'Cotizar' : canRevise ? 'Revisar precios' : 'Líneas'}
-          </h2>
-        </CardHeader>
-        <CardBody>
-          {canQuote || canRevise ? (
-            <form action={quoteOrReviseAction} className="space-y-4">
-              <input type="hidden" name="quoteId" value={q.id} />
-              <input type="hidden" name="action" value={canRevise ? 'revise' : 'quote'} />
+      <section>
+        <h2 className="mb-2 text-sm font-semibold text-ink-950">
+          {canQuote
+            ? t(locale, 'admin.quotes.doQuote')
+            : canRevise
+              ? t(locale, 'admin.quotes.doRevise')
+              : t(locale, 'admin.quotes.lines')}
+        </h2>
 
-              <table className="w-full text-sm">
-                <thead className="text-xs uppercase tracking-wide text-gray-500">
-                  <tr>
-                    <th className="text-left py-2 font-medium">SKU</th>
-                    <th className="text-left py-2 font-medium">Producto</th>
-                    <th className="text-right py-2 font-medium">Base</th>
-                    <th className="text-right py-2 font-medium">Cant.</th>
-                    <th className="text-right py-2 font-medium">Cotizado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {q.lines.map((l) => (
-                    <tr key={l.id} className="border-t border-gray-100">
-                      <td className="py-2 font-mono text-xs">{l.sku}</td>
-                      <td className="py-2">{l.name}</td>
-                      <td className="py-2 text-right tabular-nums text-gray-500">
-                        {formatMoney(l.unitPriceBase, q.currency)}
-                      </td>
-                      <td className="py-2 text-right tabular-nums">{l.qty}</td>
-                      <td className="py-2 text-right">
-                        <Input
-                          name={`price[${l.id}]`}
-                          aria-label={`Precio cotizado para ${l.sku}`}
-                          type="number"
-                          step="0.01"
-                          min="0.01"
-                          defaultValue={l.unitPriceQuoted?.toString() ?? ''}
-                          required
-                          className="w-24 text-right"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="validUntil"
-                    className="text-xs uppercase tracking-wide text-gray-500"
-                  >
-                    Válida hasta
-                  </label>
-                  <Input
-                    id="validUntil"
-                    name="validUntil"
-                    type="date"
-                    required
-                    defaultValue={q.validUntil?.toISOString().slice(0, 10) ?? defaultValidUntil}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="adminNotes"
-                  className="text-xs uppercase tracking-wide text-gray-500"
-                >
-                  Notas internas
-                </label>
-                <textarea
-                  id="adminNotes"
-                  name="adminNotes"
-                  rows={2}
-                  defaultValue={q.adminNotes ?? ''}
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-                />
-              </div>
-              <div className="flex justify-end">
-                <SubmitButton pendingLabel={t(locale, 'admin.action.sending')}>
-                  {canRevise ? t(locale, 'admin.action.revise') : t(locale, 'admin.action.quote')}
-                </SubmitButton>
-              </div>
-            </form>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="text-xs uppercase tracking-wide text-gray-500">
-                <tr>
-                  <th className="text-left py-2 font-medium">SKU</th>
-                  <th className="text-left py-2 font-medium">Producto</th>
-                  <th className="text-right py-2 font-medium">Precio</th>
-                  <th className="text-right py-2 font-medium">Cant.</th>
-                  <th className="text-right py-2 font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {q.lines.map((l) => (
-                  <tr key={l.id} className="border-t border-gray-100">
-                    <td className="py-2 font-mono text-xs">{l.sku}</td>
-                    <td className="py-2">{l.name}</td>
-                    <td className="py-2 text-right tabular-nums">
-                      {l.unitPriceQuoted
-                        ? formatMoney(l.unitPriceQuoted, q.currency)
-                        : formatMoney(l.unitPriceBase, q.currency)}
-                    </td>
-                    <td className="py-2 text-right tabular-nums">{l.qty}</td>
-                    <td className="py-2 text-right tabular-nums font-medium">
-                      {formatMoney(l.lineTotal, q.currency)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardBody>
-      </Card>
+        {editable ? (
+          <form action={quoteOrReviseAction} className="space-y-4">
+            <input type="hidden" name="quoteId" value={q.id} />
+            <input type="hidden" name="action" value={canRevise ? 'revise' : 'quote'} />
+            <DataTable columns={editColumns} rows={q.lines} getRowKey={(l) => l.id} empty="—" />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <AuthField
+                name="validUntil"
+                label={t(locale, 'admin.quotes.validUntil')}
+                type="date"
+                required
+                defaultValue={q.validUntil?.toISOString().slice(0, 10) ?? defaultValidUntil}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="adminNotes"
+                className="block text-xs font-medium uppercase tracking-wide text-ink-500"
+              >
+                {t(locale, 'admin.quotes.internalNotes')}
+              </label>
+              <textarea
+                id="adminNotes"
+                name="adminNotes"
+                rows={2}
+                defaultValue={q.adminNotes ?? ''}
+                className="mt-1 w-full rounded-button border border-ink-100 bg-surface px-3 py-2.5 text-sm text-ink-950 focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <div className="flex justify-end">
+              <SubmitButton variant="lime" pendingLabel={t(locale, 'admin.action.sending')}>
+                {canRevise ? t(locale, 'admin.action.revise') : t(locale, 'admin.action.quote')}
+              </SubmitButton>
+            </div>
+          </form>
+        ) : (
+          <DataTable columns={readColumns} rows={q.lines} getRowKey={(l) => l.id} empty="—" />
+        )}
+      </section>
     </div>
   )
 }

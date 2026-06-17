@@ -3,13 +3,11 @@ import {
   extendPaymentDueAction,
   transitionOrderStatusAction,
 } from '@/app/admin/_actions'
-import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
-import { PaymentBadge } from '@/components/commerce/PaymentBadge'
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { AdminPageHeader, type Column, DataTable, StatusBadge } from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
-import { getLocale, t } from '@/lib/i18n'
+import { type MessageKey, getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { notFound } from 'next/navigation'
@@ -34,76 +32,79 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   if (!order) notFound()
 
   const nextStatuses = TRANSITIONS[order.status] ?? []
-
-  // Pago existente (si lo hay).
   const payment = await prisma.payment.findUnique({
     where: { orderId: order.id },
     select: { id: true, status: true, method: true, wireReference: true },
   })
 
+  type Line = (typeof order.lines)[number]
+  const lineColumns: Column<Line>[] = [
+    {
+      key: 'sku',
+      header: t(locale, 'admin.col.sku'),
+      className: 'font-mono text-xs text-ink-500',
+      cell: (l) => l.sku,
+    },
+    { key: 'name', header: t(locale, 'admin.col.product'), cell: (l) => l.name },
+    {
+      key: 'price',
+      header: t(locale, 'admin.col.price'),
+      align: 'right',
+      className: 'font-mono tabular-nums text-ink-500',
+      cell: (l) => formatMoney(l.unitPrice, order.currency),
+    },
+    {
+      key: 'qty',
+      header: t(locale, 'admin.col.qty'),
+      align: 'right',
+      className: 'font-mono tabular-nums',
+      cell: (l) => l.quantity,
+    },
+    {
+      key: 'total',
+      header: t(locale, 'admin.col.total'),
+      align: 'right',
+      className: 'font-mono font-medium tabular-nums',
+      cell: (l) => formatMoney(l.lineTotal, order.currency),
+    },
+  ]
+
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight font-mono">{order.orderNumber}</h1>
-          <p className="mt-1 text-xs text-gray-500">
-            {order.organization.name} · {order.placedBy.email} · {order.placedAt.toLocaleString()}
-          </p>
-        </div>
-        <OrderStatusBadge status={order.status} />
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <AdminPageHeader
+          title={<span className="font-mono">{order.orderNumber}</span>}
+          subtitle={`${order.organization.name} · ${order.placedBy.email} · ${order.placedAt.toLocaleString()}`}
+        />
+        <StatusBadge domain="order" status={order.status} locale={locale} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">Líneas</h2>
-        </CardHeader>
-        <CardBody className="px-0 py-0">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wide text-gray-500 bg-gray-50">
-              <tr>
-                <th className="text-left px-5 py-2 font-medium">SKU</th>
-                <th className="text-left px-5 py-2 font-medium">Producto</th>
-                <th className="text-right px-5 py-2 font-medium">Precio</th>
-                <th className="text-right px-5 py-2 font-medium">Cant.</th>
-                <th className="text-right px-5 py-2 font-medium">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.lines.map((line) => (
-                <tr key={line.id} className="border-t border-gray-100">
-                  <td className="px-5 py-2 font-mono text-xs">{line.sku}</td>
-                  <td className="px-5 py-2">{line.name}</td>
-                  <td className="px-5 py-2 text-right tabular-nums">
-                    {formatMoney(line.unitPrice, order.currency)}
-                  </td>
-                  <td className="px-5 py-2 text-right tabular-nums">{line.quantity}</td>
-                  <td className="px-5 py-2 text-right tabular-nums font-medium">
-                    {formatMoney(line.lineTotal, order.currency)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardBody>
-      </Card>
+      <section>
+        <h2 className="mb-2 text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.orders.lines')}
+        </h2>
+        <DataTable columns={lineColumns} rows={order.lines} getRowKey={(l) => l.id} empty="—" />
+      </section>
 
       {(nextStatuses.length > 0 || CAN_CANCEL.has(order.status)) && (
-        <Card>
-          <CardHeader>
-            <h2 className="font-medium">Acciones</h2>
-          </CardHeader>
-          <CardBody className="flex flex-wrap gap-3">
+        <section className="rounded-card border border-line p-5">
+          <h2 className="text-sm font-semibold text-ink-950">
+            {t(locale, 'admin.orders.actions')}
+          </h2>
+          <div className="mt-3 flex flex-wrap gap-3">
             {nextStatuses.map((s) => (
               <form key={s} action={transitionOrderStatusAction}>
                 <input type="hidden" name="orderId" value={order.id} />
                 <input type="hidden" name="newStatus" value={s} />
-                <SubmitButton pendingLabel={t(locale, 'common.pending')}>→ {s}</SubmitButton>
+                <SubmitButton variant="lime" pendingLabel={t(locale, 'common.pending')}>
+                  → {t(locale, `status.order.${s}` as MessageKey)}
+                </SubmitButton>
               </form>
             ))}
             {order.status === 'PENDING_PAYMENT' && (
               <form action={extendPaymentDueAction}>
                 <input type="hidden" name="orderId" value={order.id} />
-                <SubmitButton pendingLabel={t(locale, 'common.pending')}>
+                <SubmitButton variant="outline" pendingLabel={t(locale, 'common.pending')}>
                   {t(locale, 'admin.action.extendPaymentDue')}
                 </SubmitButton>
               </form>
@@ -120,54 +121,57 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 </SubmitButton>
               </form>
             )}
-          </CardBody>
+          </div>
           {order.status === 'PENDING_PAYMENT' && order.paymentDueAt && (
-            <CardBody className="border-t border-gray-100 text-xs text-gray-500">
+            <p className="mt-3 border-t border-line pt-3 text-xs text-ink-500">
               {t(locale, 'admin.order.paymentDue')}: {order.paymentDueAt.toLocaleString()}
-            </CardBody>
+            </p>
           )}
-        </Card>
+        </section>
       )}
 
       {payment && (
-        <Card>
-          <CardHeader>
-            <h2 className="font-medium">Pago</h2>
-          </CardHeader>
-          <CardBody className="text-sm space-y-1">
+        <section className="rounded-card border border-line p-5">
+          <h2 className="text-sm font-semibold text-ink-950">
+            {t(locale, 'admin.orders.payment')}
+          </h2>
+          <dl className="mt-3 space-y-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Método</span>
-              <span className="font-mono">{payment.method}</span>
+              <dt className="text-ink-500">{t(locale, 'admin.orders.method')}</dt>
+              <dd className="font-mono text-ink-950">{payment.method}</dd>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Estado</span>
-              <PaymentBadge
-                paymentStatus={payment.status === 'CAPTURED' ? 'CAPTURED' : 'PENDING'}
-                locale={locale}
-              />
+            <div className="flex items-center justify-between">
+              <dt className="text-ink-500">{t(locale, 'admin.col.status')}</dt>
+              <dd>
+                <StatusBadge domain="payment" status={payment.status} locale={locale} />
+              </dd>
             </div>
             {payment.wireReference && (
               <div className="flex justify-between">
-                <span className="text-gray-500">Referencia wire</span>
-                <span className="font-mono">{payment.wireReference}</span>
+                <dt className="text-ink-500">{t(locale, 'admin.orders.wireRef')}</dt>
+                <dd className="font-mono text-ink-950">{payment.wireReference}</dd>
               </div>
             )}
-          </CardBody>
-        </Card>
+          </dl>
+        </section>
       )}
 
-      <Card>
-        <CardBody className="text-sm space-y-2">
+      <section className="rounded-card border border-line p-5">
+        <dl className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">Subtotal</span>
-            <span className="tabular-nums">{formatMoney(order.subtotal, order.currency)}</span>
+            <dt className="text-ink-500">{t(locale, 'admin.orders.subtotal')}</dt>
+            <dd className="font-mono tabular-nums text-ink-950">
+              {formatMoney(order.subtotal, order.currency)}
+            </dd>
           </div>
           <div className="flex justify-between font-medium">
-            <span>Total</span>
-            <span className="tabular-nums">{formatMoney(order.total, order.currency)}</span>
+            <dt className="text-ink-950">{t(locale, 'admin.orders.total')}</dt>
+            <dd className="font-mono tabular-nums text-ink-950">
+              {formatMoney(order.total, order.currency)}
+            </dd>
           </div>
-        </CardBody>
-      </Card>
+        </dl>
+      </section>
     </div>
   )
 }

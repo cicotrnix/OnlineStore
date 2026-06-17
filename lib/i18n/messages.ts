@@ -494,6 +494,51 @@ export type MessageKey =
   | 'admin.productDetail.longDescription'
   | 'admin.productDetail.published'
   | 'admin.productDetail.draft'
+  // Admin commerce (Fase 2)
+  | 'admin.col.number'
+  | 'admin.col.customer'
+  | 'admin.col.date'
+  | 'admin.col.created'
+  | 'admin.col.total'
+  | 'admin.col.status'
+  | 'admin.col.sku'
+  | 'admin.col.product'
+  | 'admin.col.price'
+  | 'admin.col.qty'
+  | 'admin.col.requester'
+  | 'admin.col.amount'
+  | 'admin.col.action'
+  | 'admin.col.order'
+  | 'admin.col.dueDate'
+  | 'admin.col.payment'
+  | 'admin.col.subject'
+  | 'admin.col.threshold'
+  | 'admin.col.base'
+  | 'admin.col.quoted'
+  | 'admin.orders.title'
+  | 'admin.orders.count'
+  | 'admin.orders.lines'
+  | 'admin.orders.actions'
+  | 'admin.orders.payment'
+  | 'admin.orders.method'
+  | 'admin.orders.wireRef'
+  | 'admin.orders.subtotal'
+  | 'admin.orders.total'
+  | 'admin.quotes.title'
+  | 'admin.quotes.count'
+  | 'admin.quotes.customerNotes'
+  | 'admin.quotes.doQuote'
+  | 'admin.quotes.doRevise'
+  | 'admin.quotes.lines'
+  | 'admin.quotes.validUntil'
+  | 'admin.quotes.internalNotes'
+  | 'admin.quotes.quotedPriceFor'
+  | 'admin.invoices.title'
+  | 'admin.invoices.count'
+  | 'admin.invoices.refPlaceholder'
+  | 'admin.invoices.refAria'
+  | 'admin.approvals.title'
+  | 'admin.approvals.pendingCount'
   | 'admin.nav.dashboard'
   | 'admin.nav.products'
   | 'admin.nav.categories'
@@ -1181,6 +1226,51 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.productDetail.longDescription': 'Long description (markdown)',
     'admin.productDetail.published': 'Published',
     'admin.productDetail.draft': 'Draft',
+    // Admin commerce (Fase 2)
+    'admin.col.number': 'Number',
+    'admin.col.customer': 'Customer',
+    'admin.col.date': 'Date',
+    'admin.col.created': 'Created',
+    'admin.col.total': 'Total',
+    'admin.col.status': 'Status',
+    'admin.col.sku': 'SKU',
+    'admin.col.product': 'Product',
+    'admin.col.price': 'Price',
+    'admin.col.qty': 'Qty',
+    'admin.col.requester': 'Requester',
+    'admin.col.amount': 'Amount',
+    'admin.col.action': 'Action',
+    'admin.col.order': 'Order',
+    'admin.col.dueDate': 'Due',
+    'admin.col.payment': 'Payment',
+    'admin.col.subject': 'Subject',
+    'admin.col.threshold': 'Threshold',
+    'admin.col.base': 'Base',
+    'admin.col.quoted': 'Quoted',
+    'admin.orders.title': 'Orders',
+    'admin.orders.count': '{count} orders total.',
+    'admin.orders.lines': 'Lines',
+    'admin.orders.actions': 'Actions',
+    'admin.orders.payment': 'Payment',
+    'admin.orders.method': 'Method',
+    'admin.orders.wireRef': 'Wire reference',
+    'admin.orders.subtotal': 'Subtotal',
+    'admin.orders.total': 'Total',
+    'admin.quotes.title': 'Quotes',
+    'admin.quotes.count': '{count} total',
+    'admin.quotes.customerNotes': 'Customer notes',
+    'admin.quotes.doQuote': 'Quote',
+    'admin.quotes.doRevise': 'Revise prices',
+    'admin.quotes.lines': 'Lines',
+    'admin.quotes.validUntil': 'Valid until',
+    'admin.quotes.internalNotes': 'Internal notes',
+    'admin.quotes.quotedPriceFor': 'Quoted price for {sku}',
+    'admin.invoices.title': 'Invoices',
+    'admin.invoices.count': '{count} total',
+    'admin.invoices.refPlaceholder': 'Reference',
+    'admin.invoices.refAria': 'Payment reference for invoice {number}',
+    'admin.approvals.title': 'Approvals',
+    'admin.approvals.pendingCount': '{count} pending',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Products',
     'admin.nav.categories': 'Categories',
@@ -1861,6 +1951,51 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.productDetail.longDescription': 'Descripción larga (markdown)',
     'admin.productDetail.published': 'Publicado',
     'admin.productDetail.draft': 'Borrador',
+    // Admin commerce (Fase 2)
+    'admin.col.number': 'Número',
+    'admin.col.customer': 'Cliente',
+    'admin.col.date': 'Fecha',
+    'admin.col.created': 'Creada',
+    'admin.col.total': 'Total',
+    'admin.col.status': 'Estado',
+    'admin.col.sku': 'SKU',
+    'admin.col.product': 'Producto',
+    'admin.col.price': 'Precio',
+    'admin.col.qty': 'Cant.',
+    'admin.col.requester': 'Solicitante',
+    'admin.col.amount': 'Monto',
+    'admin.col.action': 'Acción',
+    'admin.col.order': 'Orden',
+    'admin.col.dueDate': 'Vence',
+    'admin.col.payment': 'Pago',
+    'admin.col.subject': 'Subject',
+    'admin.col.threshold': 'Threshold',
+    'admin.col.base': 'Base',
+    'admin.col.quoted': 'Cotizado',
+    'admin.orders.title': 'Órdenes',
+    'admin.orders.count': '{count} órdenes total.',
+    'admin.orders.lines': 'Líneas',
+    'admin.orders.actions': 'Acciones',
+    'admin.orders.payment': 'Pago',
+    'admin.orders.method': 'Método',
+    'admin.orders.wireRef': 'Referencia wire',
+    'admin.orders.subtotal': 'Subtotal',
+    'admin.orders.total': 'Total',
+    'admin.quotes.title': 'Cotizaciones',
+    'admin.quotes.count': '{count} total',
+    'admin.quotes.customerNotes': 'Notas del cliente',
+    'admin.quotes.doQuote': 'Cotizar',
+    'admin.quotes.doRevise': 'Revisar precios',
+    'admin.quotes.lines': 'Líneas',
+    'admin.quotes.validUntil': 'Válida hasta',
+    'admin.quotes.internalNotes': 'Notas internas',
+    'admin.quotes.quotedPriceFor': 'Precio cotizado para {sku}',
+    'admin.invoices.title': 'Facturas',
+    'admin.invoices.count': '{count} total',
+    'admin.invoices.refPlaceholder': 'Referencia',
+    'admin.invoices.refAria': 'Referencia de pago para factura {number}',
+    'admin.approvals.title': 'Aprobaciones',
+    'admin.approvals.pendingCount': '{count} pendientes',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Productos',
     'admin.nav.categories': 'Categorías',

@@ -1,56 +1,59 @@
-import { OrderStatusBadge } from '@/components/commerce/OrderStatusBadge'
-import { Card } from '@/components/ui/Card'
+import { AdminPageHeader, type Column, DataTable, StatusBadge } from '@/components/admin'
+import { requireAuth } from '@/lib/auth/helpers'
+import { getLocale, t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/money'
 import { ordersService } from '@/modules/orders'
 import { getStoreConfig } from '@/stores'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminOrdersPage() {
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
   const orders = await ordersService.listAll()
+  const currency = getStoreConfig().currency.base
+
+  type Row = (typeof orders)[number]
+  const columns: Column<Row>[] = [
+    {
+      key: 'number',
+      header: t(locale, 'admin.col.number'),
+      className: 'font-mono text-xs',
+      cell: (o) => (
+        <Link href={`/admin/orders/${o.id}`} className="text-lime-deep hover:underline">
+          {o.orderNumber}
+        </Link>
+      ),
+    },
+    { key: 'customer', header: t(locale, 'admin.col.customer'), cell: (o) => o.organization.name },
+    {
+      key: 'date',
+      header: t(locale, 'admin.col.date'),
+      className: 'text-xs text-ink-500',
+      cell: (o) => o.placedAt.toLocaleDateString(),
+    },
+    {
+      key: 'total',
+      header: t(locale, 'admin.col.total'),
+      align: 'right',
+      className: 'font-mono tabular-nums',
+      cell: (o) => formatMoney(o.total, currency),
+    },
+    {
+      key: 'status',
+      header: t(locale, 'admin.col.status'),
+      cell: (o) => <StatusBadge domain="order" status={o.status} locale={locale} />,
+    },
+  ]
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-medium tracking-tight">Órdenes</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {orders.length} orden{orders.length === 1 ? '' : 'es'} total.
-        </p>
-      </div>
-
-      <Card>
-        <table className="w-full text-sm">
-          <thead className="text-xs uppercase tracking-wide text-gray-500 bg-gray-50">
-            <tr>
-              <th className="text-left px-5 py-3 font-medium">Número</th>
-              <th className="text-left px-5 py-3 font-medium">Cliente</th>
-              <th className="text-left px-5 py-3 font-medium">Fecha</th>
-              <th className="text-left px-5 py-3 font-medium">Total</th>
-              <th className="text-left px-5 py-3 font-medium">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id} className="border-t border-gray-100 hover:bg-gray-50">
-                <td className="px-5 py-3 font-mono text-xs">
-                  <Link href={`/admin/orders/${order.id}`} className="hover:underline">
-                    {order.orderNumber}
-                  </Link>
-                </td>
-                <td className="px-5 py-3">{order.organization.name}</td>
-                <td className="px-5 py-3 text-xs text-gray-500">
-                  {order.placedAt.toLocaleDateString()}
-                </td>
-                <td className="px-5 py-3 tabular-nums">
-                  {formatMoney(order.total, getStoreConfig().currency.base)}
-                </td>
-                <td className="px-5 py-3">
-                  <OrderStatusBadge status={order.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+      <AdminPageHeader
+        title={t(locale, 'admin.orders.title')}
+        subtitle={t(locale, 'admin.orders.count', { count: orders.length })}
+      />
+      <DataTable columns={columns} rows={orders} getRowKey={(o) => o.id} empty="—" />
     </div>
   )
 }
