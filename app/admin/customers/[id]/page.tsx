@@ -1,3 +1,4 @@
+import { AuthField } from '@/app/(auth)/AuthField'
 import {
   approveOrganizationAction,
   getTaxCertificateUrlAction,
@@ -5,19 +6,30 @@ import {
   startImpersonationAction,
   uploadTaxCertificateAction,
 } from '@/app/admin/_actions'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
+import {
+  AdminPageHeader,
+  type Column,
+  DataTable,
+  StatusBadge,
+  type StatusTone,
+} from '@/components/admin'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { prisma } from '@/lib/db/client'
-import { getLocale, t } from '@/lib/i18n'
+import { type MessageKey, getLocale, t } from '@/lib/i18n'
+import type { VerificationStatus } from '@prisma/client'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
-type Props = {
-  params: Promise<{ id: string }>
+type Props = { params: Promise<{ id: string }> }
+
+const VERIF_TONE: Record<VerificationStatus, StatusTone> = {
+  VERIFIED: 'success',
+  PENDING: 'warning',
+  REJECTED: 'danger',
 }
+
+const SELECT_CLS =
+  'mt-1 block w-full rounded-button border border-ink-100 bg-surface px-3 py-2.5 text-sm text-ink-950 focus:outline-none focus:ring-2 focus:ring-accent'
 
 export default async function AdminCustomerDetailPage({ params }: Props) {
   const { id } = await params
@@ -26,10 +38,7 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
   const locale = await getLocale({ userId: session?.user?.id ?? null })
   const org = await prisma.organization.findUnique({
     where: { id },
-    include: {
-      members: { include: { user: true } },
-      addresses: true,
-    },
+    include: { members: { include: { user: true } }, addresses: true },
   })
   if (!org) notFound()
 
@@ -44,118 +53,132 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
     redirect(url)
   }
 
+  type Member = (typeof org.members)[number]
+  const memberColumns: Column<Member>[] = [
+    { key: 'email', header: t(locale, 'admin.customers.col.email'), cell: (m) => m.user.email },
+    {
+      key: 'role',
+      header: t(locale, 'admin.customers.col.role'),
+      cell: (m) => (
+        <span className="rounded-button bg-ink-950/5 px-2 py-0.5 font-mono text-xs text-ink-950">
+          {m.role}
+        </span>
+      ),
+    },
+    {
+      key: 'since',
+      header: t(locale, 'admin.customers.col.since'),
+      className: 'text-xs text-ink-500',
+      cell: (m) => m.createdAt.toLocaleDateString(),
+    },
+  ]
+
+  const showVerifyActions =
+    org.verificationStatus === 'PENDING' || org.verificationStatus === 'REJECTED'
+
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight">{org.name}</h1>
-          <p className="mt-1 text-xs text-gray-500 font-mono">{org.slug}</p>
-        </div>
-        <Link href={`/admin/customers/${org.id}/prices`}>
-          <Button variant="secondary">Gestionar precios</Button>
-        </Link>
-      </div>
+      <AdminPageHeader
+        title={org.name}
+        subtitle={<span className="font-mono">{org.slug}</span>}
+        action={
+          <Link
+            href={`/admin/customers/${org.id}/prices`}
+            className="inline-flex items-center justify-center rounded-button border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-700 hover:border-accent hover:text-ink-950"
+          >
+            {t(locale, 'admin.customers.managePrices')}
+          </Link>
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">Miembros</h2>
-        </CardHeader>
-        <CardBody className="px-0 py-0">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wide text-gray-500 bg-gray-50">
-              <tr>
-                <th className="text-left px-5 py-2 font-medium">Email</th>
-                <th className="text-left px-5 py-2 font-medium">Rol</th>
-                <th className="text-left px-5 py-2 font-medium">Desde</th>
-              </tr>
-            </thead>
-            <tbody>
-              {org.members.map((m) => (
-                <tr key={m.id} className="border-t border-gray-100">
-                  <td className="px-5 py-2">{m.user.email}</td>
-                  <td className="px-5 py-2">
-                    <Badge variant="info">{m.role}</Badge>
-                  </td>
-                  <td className="px-5 py-2 text-xs text-gray-500">
-                    {m.createdAt.toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardBody>
-      </Card>
+      {/* Miembros */}
+      <section>
+        <h2 className="mb-2 text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.customers.members')}
+        </h2>
+        <DataTable columns={memberColumns} rows={org.members} getRowKey={(m) => m.id} empty="—" />
+      </section>
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">Direcciones</h2>
-        </CardHeader>
-        <CardBody>
-          {org.addresses.length === 0 ? (
-            <p className="text-sm text-gray-500">Sin direcciones.</p>
-          ) : (
-            <ul className="space-y-3">
-              {org.addresses.map((a) => (
-                <li key={a.id} className="text-sm">
-                  <div className="flex items-center gap-2">
-                    <strong>{a.label}</strong>
-                    {a.isDefaultBilling && <Badge variant="info">Facturación</Badge>}
-                    {a.isDefaultShipping && <Badge variant="info">Envío</Badge>}
-                  </div>
-                  <div className="text-gray-600 mt-0.5">
-                    {a.line1}
-                    {a.line2 ? `, ${a.line2}` : ''} · {a.city}
-                    {a.state ? `, ${a.state}` : ''} {a.postalCode}, {a.country}
-                  </div>
-                </li>
-              ))}
-            </ul>
+      {/* Direcciones */}
+      <section className="rounded-card border border-line p-5">
+        <h2 className="text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.customers.addresses')}
+        </h2>
+        {org.addresses.length === 0 ? (
+          <p className="mt-2 text-sm text-ink-500">{t(locale, 'admin.customers.noAddresses')}</p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {org.addresses.map((a) => (
+              <li key={a.id} className="text-sm">
+                <div className="flex items-center gap-2">
+                  <strong className="text-ink-950">{a.label}</strong>
+                  {a.isDefaultBilling && (
+                    <span className="rounded-button bg-accent/15 px-2 py-0.5 text-[11px] font-medium text-lime-deep">
+                      {t(locale, 'admin.customers.billing')}
+                    </span>
+                  )}
+                  {a.isDefaultShipping && (
+                    <span className="rounded-button bg-accent/15 px-2 py-0.5 text-[11px] font-medium text-lime-deep">
+                      {t(locale, 'admin.customers.shipping')}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-0.5 text-ink-500">
+                  {a.line1}
+                  {a.line2 ? `, ${a.line2}` : ''} · {a.city}
+                  {a.state ? `, ${a.state}` : ''} {a.postalCode}, {a.country}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* Verificación B2B */}
+      <section className="rounded-card border border-line p-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="text-sm font-semibold text-ink-950">
+            {t(locale, 'admin.customers.b2bVerification')}
+          </h2>
+          <StatusBadge tone={VERIF_TONE[org.verificationStatus]}>
+            {t(locale, `account.verification.${org.verificationStatus}` as MessageKey)}
+          </StatusBadge>
+          {org.taxExempt && (
+            <span className="rounded-button bg-accent/15 px-2 py-0.5 text-[11px] font-medium text-lime-deep">
+              {t(locale, 'admin.customers.taxExempt')}
+            </span>
           )}
-        </CardBody>
-      </Card>
+          {org.verificationSubmittedAt && org.verificationStatus === 'PENDING' && (
+            <span className="text-xs text-ink-500">
+              {t(locale, 'admin.customers.submittedAt', {
+                date: org.verificationSubmittedAt.toLocaleString(),
+              })}
+            </span>
+          )}
+        </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h2 className="font-medium">Verificación B2B</h2>
-            <Badge
-              variant={
-                org.verificationStatus === 'VERIFIED'
-                  ? 'success'
-                  : org.verificationStatus === 'REJECTED'
-                    ? 'danger'
-                    : 'warning'
-              }
-            >
-              {org.verificationStatus}
-            </Badge>
-            {org.taxExempt && <Badge variant="info">Tax exempt</Badge>}
-            {org.verificationSubmittedAt && org.verificationStatus === 'PENDING' && (
-              <span className="text-xs text-gray-500">
-                Submitted {org.verificationSubmittedAt.toLocaleString()}
-              </span>
-            )}
-          </div>
-        </CardHeader>
-        <CardBody className="space-y-4">
+        <div className="mt-4 space-y-4">
           {org.verificationStatus === 'VERIFIED' && org.verifiedAt && (
-            <p className="text-xs text-gray-500">
-              Verificada el {org.verifiedAt.toLocaleString()} · país {org.country ?? '?'}
+            <p className="text-xs text-ink-500">
+              {t(locale, 'admin.customers.verifiedOn', {
+                date: org.verifiedAt.toLocaleString(),
+                country: org.country ?? '?',
+              })}
             </p>
           )}
 
           {org.verificationStatus === 'REJECTED' && org.rejectionReason && (
-            <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-              <strong>Motivo de rechazo:</strong> {org.rejectionReason}
+            <p className="rounded-card border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+              <strong>{t(locale, 'admin.customers.rejectionReason')}</strong> {org.rejectionReason}
             </p>
           )}
 
-          {(org.verificationStatus === 'PENDING' || org.verificationStatus === 'REJECTED') && (
-            <div className="flex items-center gap-3 flex-wrap rounded border border-gray-200 bg-gray-50 p-3">
+          {showVerifyActions && (
+            <div className="flex flex-wrap items-end gap-3 rounded-card border border-line bg-muted p-3">
               <form action={approveOrganizationAction}>
                 <input type="hidden" name="organizationId" value={org.id} />
                 <SubmitButton
-                  variant="primary"
+                  variant="lime"
                   pendingLabel={t(locale, 'admin.action.approving')}
                   confirmMessage={t(locale, 'admin.confirm.approve', { name: org.name })}
                 >
@@ -164,16 +187,12 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
               </form>
               <form action={rejectOrganizationAction} className="flex items-end gap-2">
                 <input type="hidden" name="organizationId" value={org.id} />
-                <div>
-                  <label htmlFor="reason" className="block text-xs text-gray-500 mb-1">
-                    {t(locale, 'admin.action.rejectReasonLabel')}
-                  </label>
-                  <Input
-                    id="reason"
+                <div className="w-72">
+                  <AuthField
                     name="reason"
+                    label={t(locale, 'admin.action.rejectReasonLabel')}
                     required
                     placeholder={t(locale, 'admin.action.rejectReasonPlaceholder')}
-                    className="w-72"
                   />
                 </div>
                 <SubmitButton variant="danger" pendingLabel={t(locale, 'admin.action.rejecting')}>
@@ -185,21 +204,23 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
 
           {taxDocs.length > 0 && (
             <div>
-              <h3 className="text-xs uppercase tracking-wide text-gray-500 mb-2">Documentos</h3>
+              <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-500">
+                {t(locale, 'admin.customers.documents')}
+              </h3>
               <ul className="space-y-2">
                 {taxDocs.map((d) => (
-                  <li key={d.id} className="text-sm flex items-center gap-3">
-                    <Badge variant={d.status === 'APPROVED' ? 'success' : 'warning'}>
+                  <li key={d.id} className="flex items-center gap-3 text-sm">
+                    <StatusBadge tone={d.status === 'APPROVED' ? 'success' : 'warning'}>
                       {d.status}
-                    </Badge>
+                    </StatusBadge>
                     <span className="font-mono">{d.type}</span>
-                    <span className="text-gray-500">
+                    <span className="text-ink-500">
                       #{d.number} · {d.jurisdiction} · {d.uploadedAt.toLocaleDateString()}
                     </span>
                     <form action={viewCertificateAction} className="ml-auto">
                       <input type="hidden" name="taxDocumentId" value={d.id} />
                       <SubmitButton
-                        variant="secondary"
+                        variant="outline"
                         pendingLabel={t(locale, 'admin.action.opening')}
                       >
                         {t(locale, 'admin.action.viewCert')}
@@ -211,51 +232,46 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
             </div>
           )}
 
-          <form action={uploadTaxCertificateAction} className="space-y-3 max-w-md">
+          <form action={uploadTaxCertificateAction} className="max-w-md space-y-3">
             <input type="hidden" name="organizationId" value={org.id} />
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label htmlFor="type" className="block text-xs text-gray-500 mb-1">
-                  Tipo
-                </label>
-                <select
-                  id="type"
-                  name="type"
-                  required
-                  className="block w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                <label
+                  htmlFor="type"
+                  className="block text-xs font-medium uppercase tracking-wide text-ink-500"
                 >
-                  <option value="US_RESALE_CERT">US Resale Cert</option>
-                  <option value="FOREIGN_EQUIV">Equivalente extranjero</option>
+                  {t(locale, 'admin.customers.docType')}
+                </label>
+                <select id="type" name="type" required className={SELECT_CLS}>
+                  <option value="US_RESALE_CERT">
+                    {t(locale, 'admin.customers.docTypeUsResale')}
+                  </option>
+                  <option value="FOREIGN_EQUIV">
+                    {t(locale, 'admin.customers.docTypeForeign')}
+                  </option>
                 </select>
               </div>
-              <div>
-                <label htmlFor="country" className="block text-xs text-gray-500 mb-1">
-                  País (ISO-2)
-                </label>
-                <Input
-                  id="country"
-                  name="country"
-                  maxLength={2}
-                  placeholder="US"
-                  defaultValue={org.country ?? 'US'}
-                />
-              </div>
-              <div>
-                <label htmlFor="number" className="block text-xs text-gray-500 mb-1">
-                  Número del certificado
-                </label>
-                <Input id="number" name="number" required />
-              </div>
-              <div>
-                <label htmlFor="jurisdiction" className="block text-xs text-gray-500 mb-1">
-                  Jurisdicción
-                </label>
-                <Input id="jurisdiction" name="jurisdiction" required placeholder="TX, FL, ..." />
-              </div>
+              <AuthField
+                name="country"
+                label={t(locale, 'admin.customers.countryIso2')}
+                maxLength={2}
+                placeholder="US"
+                defaultValue={org.country ?? 'US'}
+              />
+              <AuthField name="number" label={t(locale, 'admin.customers.certNumber')} required />
+              <AuthField
+                name="jurisdiction"
+                label={t(locale, 'admin.customers.jurisdiction')}
+                required
+                placeholder="TX, FL, ..."
+              />
             </div>
             <div>
-              <label htmlFor="file" className="block text-xs text-gray-500 mb-1">
-                Archivo (PDF / imagen, máx 10 MB)
+              <label
+                htmlFor="file"
+                className="block text-xs font-medium uppercase tracking-wide text-ink-500"
+              >
+                {t(locale, 'admin.customers.file')}
               </label>
               <input
                 id="file"
@@ -263,35 +279,35 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
                 type="file"
                 required
                 accept="application/pdf,image/*"
-                className="block w-full text-sm"
+                className="mt-1 block w-full text-sm text-ink-700"
               />
             </div>
-            <SubmitButton pendingLabel={t(locale, 'admin.action.uploading')}>
+            <SubmitButton variant="lime" pendingLabel={t(locale, 'admin.action.uploading')}>
               {t(locale, 'admin.action.uploadAndApprove')}
             </SubmitButton>
           </form>
-        </CardBody>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <h2 className="font-medium">Impersonation</h2>
-        </CardHeader>
-        <CardBody>
-          <form action={startImpersonationAction} className="flex gap-2 items-end">
-            <input type="hidden" name="orgId" value={org.id} />
-            <div className="flex-1">
-              <label htmlFor="reason" className="text-xs uppercase tracking-wide text-gray-500">
-                Motivo (opcional)
-              </label>
-              <Input id="reason" name="reason" placeholder="Soporte ticket #..." className="mt-1" />
-            </div>
-            <SubmitButton variant="secondary" pendingLabel={t(locale, 'admin.action.entering')}>
-              {t(locale, 'admin.action.viewAsOrg')}
-            </SubmitButton>
-          </form>
-        </CardBody>
-      </Card>
+      {/* Impersonation */}
+      <section className="rounded-card border border-line p-5">
+        <h2 className="text-sm font-semibold text-ink-950">
+          {t(locale, 'admin.customers.impersonation')}
+        </h2>
+        <form action={startImpersonationAction} className="mt-3 flex items-end gap-2">
+          <input type="hidden" name="orgId" value={org.id} />
+          <div className="flex-1">
+            <AuthField
+              name="reason"
+              label={t(locale, 'admin.customers.reasonOptional')}
+              placeholder={t(locale, 'admin.customers.impersonationPlaceholder')}
+            />
+          </div>
+          <SubmitButton variant="outline" pendingLabel={t(locale, 'admin.action.entering')}>
+            {t(locale, 'admin.action.viewAsOrg')}
+          </SubmitButton>
+        </form>
+      </section>
     </div>
   )
 }

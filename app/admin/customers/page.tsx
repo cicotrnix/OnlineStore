@@ -1,21 +1,30 @@
-import { Badge } from '@/components/ui/Badge'
-import { Card } from '@/components/ui/Card'
+import {
+  AdminPageHeader,
+  type Column,
+  DataTable,
+  FilterBar,
+  FilterTab,
+  StatusBadge,
+  type StatusTone,
+} from '@/components/admin'
+import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
+import { type MessageKey, getLocale, t } from '@/lib/i18n'
 import type { Prisma, VerificationStatus } from '@prisma/client'
 import Link from 'next/link'
 
-type Props = {
-  searchParams: Promise<{ status?: string }>
-}
+export const dynamic = 'force-dynamic'
 
-const STATUS_FILTERS: Array<{ key: string; label: string; status?: VerificationStatus }> = [
-  { key: 'all', label: 'Todos' },
-  { key: 'pending', label: 'Pendientes', status: 'PENDING' },
-  { key: 'verified', label: 'Verificados', status: 'VERIFIED' },
-  { key: 'rejected', label: 'Rechazados', status: 'REJECTED' },
+type Props = { searchParams: Promise<{ status?: string }> }
+
+const FILTERS: Array<{ key: string; labelKey: MessageKey; status?: VerificationStatus }> = [
+  { key: 'all', labelKey: 'admin.customers.filter.all' },
+  { key: 'pending', labelKey: 'admin.customers.filter.pending', status: 'PENDING' },
+  { key: 'verified', labelKey: 'admin.customers.filter.verified', status: 'VERIFIED' },
+  { key: 'rejected', labelKey: 'admin.customers.filter.rejected', status: 'REJECTED' },
 ]
 
-const STATUS_VARIANT: Record<VerificationStatus, 'success' | 'warning' | 'danger'> = {
+const VERIF_TONE: Record<VerificationStatus, StatusTone> = {
   VERIFIED: 'success',
   PENDING: 'warning',
   REJECTED: 'danger',
@@ -23,82 +32,88 @@ const STATUS_VARIANT: Record<VerificationStatus, 'success' | 'warning' | 'danger
 
 export default async function AdminCustomersPage({ searchParams }: Props) {
   const { status } = await searchParams
-  const activeFilter = STATUS_FILTERS.find((f) => f.key === status) ?? STATUS_FILTERS[0]!
+  const user = await requireAuth()
+  const locale = await getLocale({ userId: user.id })
+  const activeFilter = FILTERS.find((f) => f.key === status) ?? FILTERS[0]!
   const where: Prisma.OrganizationWhereInput = activeFilter.status
     ? { verificationStatus: activeFilter.status }
     : {}
 
   const orgs = await prisma.organization.findMany({
     where,
-    include: {
-      members: { select: { id: true } },
-      addresses: { select: { id: true } },
-    },
-    // PENDING primero (revisar primero lo que requiere acción).
+    include: { members: { select: { id: true } }, addresses: { select: { id: true } } },
     orderBy: [{ verificationStatus: 'asc' }, { name: 'asc' }],
   })
 
+  type Row = (typeof orgs)[number]
+  const columns: Column<Row>[] = [
+    {
+      key: 'org',
+      header: t(locale, 'admin.customers.col.org'),
+      cell: (o) => (
+        <Link
+          href={`/admin/customers/${o.id}`}
+          className="font-medium text-lime-deep hover:underline"
+        >
+          {o.name}
+        </Link>
+      ),
+    },
+    {
+      key: 'status',
+      header: t(locale, 'admin.col.status'),
+      cell: (o) => (
+        <StatusBadge tone={VERIF_TONE[o.verificationStatus]}>
+          {t(locale, `account.verification.${o.verificationStatus}` as MessageKey)}
+        </StatusBadge>
+      ),
+    },
+    {
+      key: 'slug',
+      header: t(locale, 'admin.customers.col.slug'),
+      className: 'font-mono text-xs',
+      cell: (o) => o.slug,
+    },
+    {
+      key: 'members',
+      header: t(locale, 'admin.customers.col.members'),
+      align: 'right',
+      className: 'tabular-nums',
+      cell: (o) => o.members.length,
+    },
+    {
+      key: 'addresses',
+      header: t(locale, 'admin.customers.col.addresses'),
+      align: 'right',
+      className: 'tabular-nums',
+      cell: (o) => o.addresses.length,
+    },
+    {
+      key: 'submitted',
+      header: t(locale, 'admin.customers.col.submitted'),
+      className: 'text-xs text-ink-500',
+      cell: (o) => o.verificationSubmittedAt?.toLocaleDateString() ?? '—',
+    },
+  ]
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-medium tracking-tight">Clientes</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {orgs.length} organización{orgs.length === 1 ? '' : 'es'}.
-        </p>
-      </div>
-
-      <nav className="flex flex-wrap gap-2">
-        {STATUS_FILTERS.map((f) => (
-          <Link
+      <AdminPageHeader
+        title={t(locale, 'admin.customers.title')}
+        subtitle={t(locale, 'admin.customers.count', { count: orgs.length })}
+      />
+      <FilterBar>
+        {FILTERS.map((f) => (
+          <FilterTab
             key={f.key}
             href={f.key === 'all' ? '/admin/customers' : `/admin/customers?status=${f.key}`}
-            className={`rounded-full border px-3 py-1 text-xs ${
-              activeFilter.key === f.key
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white text-gray-700 border-gray-200'
-            }`}
+            active={activeFilter.key === f.key}
           >
-            {f.label}
-          </Link>
+            {t(locale, f.labelKey)}
+          </FilterTab>
         ))}
-      </nav>
-
-      <Card>
-        <table className="w-full text-sm">
-          <thead className="text-xs uppercase tracking-wide text-gray-500 bg-gray-50">
-            <tr>
-              <th className="text-left px-5 py-3 font-medium">Organización</th>
-              <th className="text-left px-5 py-3 font-medium">Estado</th>
-              <th className="text-left px-5 py-3 font-medium">Slug</th>
-              <th className="text-left px-5 py-3 font-medium">Miembros</th>
-              <th className="text-left px-5 py-3 font-medium">Direcciones</th>
-              <th className="text-left px-5 py-3 font-medium">Submitted</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orgs.map((org) => (
-              <tr key={org.id} className="border-t border-gray-100 hover:bg-gray-50">
-                <td className="px-5 py-3">
-                  <Link href={`/admin/customers/${org.id}`} className="font-medium hover:underline">
-                    {org.name}
-                  </Link>
-                </td>
-                <td className="px-5 py-3">
-                  <Badge variant={STATUS_VARIANT[org.verificationStatus]}>
-                    {org.verificationStatus}
-                  </Badge>
-                </td>
-                <td className="px-5 py-3 font-mono text-xs">{org.slug}</td>
-                <td className="px-5 py-3 tabular-nums">{org.members.length}</td>
-                <td className="px-5 py-3 tabular-nums">{org.addresses.length}</td>
-                <td className="px-5 py-3 text-xs text-gray-500">
-                  {org.verificationSubmittedAt?.toLocaleDateString() ?? '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+      </FilterBar>
+      <DataTable columns={columns} rows={orgs} getRowKey={(o) => o.id} empty="—" />
     </div>
   )
 }

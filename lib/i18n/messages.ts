@@ -539,6 +539,62 @@ export type MessageKey =
   | 'admin.invoices.refAria'
   | 'admin.approvals.title'
   | 'admin.approvals.pendingCount'
+  // Admin customers (Fase 3)
+  | 'admin.customers.title'
+  | 'admin.customers.count'
+  | 'admin.customers.filter.all'
+  | 'admin.customers.filter.pending'
+  | 'admin.customers.filter.verified'
+  | 'admin.customers.filter.rejected'
+  | 'admin.customers.col.org'
+  | 'admin.customers.col.slug'
+  | 'admin.customers.col.members'
+  | 'admin.customers.col.addresses'
+  | 'admin.customers.col.submitted'
+  | 'admin.customers.col.email'
+  | 'admin.customers.col.role'
+  | 'admin.customers.col.since'
+  | 'admin.customers.managePrices'
+  | 'admin.customers.members'
+  | 'admin.customers.addresses'
+  | 'admin.customers.noAddresses'
+  | 'admin.customers.billing'
+  | 'admin.customers.shipping'
+  | 'admin.customers.b2bVerification'
+  | 'admin.customers.taxExempt'
+  | 'admin.customers.submittedAt'
+  | 'admin.customers.verifiedOn'
+  | 'admin.customers.rejectionReason'
+  | 'admin.customers.documents'
+  | 'admin.customers.docType'
+  | 'admin.customers.docTypeUsResale'
+  | 'admin.customers.docTypeForeign'
+  | 'admin.customers.countryIso2'
+  | 'admin.customers.certNumber'
+  | 'admin.customers.jurisdiction'
+  | 'admin.customers.file'
+  | 'admin.customers.impersonation'
+  | 'admin.customers.reasonOptional'
+  | 'admin.customers.impersonationPlaceholder'
+  | 'admin.credit.title'
+  | 'admin.credit.creditApprovals'
+  | 'admin.credit.limit'
+  | 'admin.credit.limitHint'
+  | 'admin.credit.terms'
+  | 'admin.credit.termsPrepaid'
+  | 'admin.credit.threshold'
+  | 'admin.credit.thresholdHint'
+  | 'admin.credit.currentUsage'
+  | 'admin.credit.catalogAccess'
+  | 'admin.credit.noGrants'
+  | 'admin.credit.grantedProduct'
+  | 'admin.credit.grantedCategory'
+  | 'admin.credit.productOneOrOther'
+  | 'admin.credit.category'
+  | 'admin.prices.title'
+  | 'admin.prices.hint'
+  | 'admin.prices.basePrice'
+  | 'admin.prices.yourPrice'
   | 'admin.nav.dashboard'
   | 'admin.nav.products'
   | 'admin.nav.categories'
@@ -1271,6 +1327,62 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.invoices.refAria': 'Payment reference for invoice {number}',
     'admin.approvals.title': 'Approvals',
     'admin.approvals.pendingCount': '{count} pending',
+    // Admin customers (Fase 3)
+    'admin.customers.title': 'Customers',
+    'admin.customers.count': '{count} organizations.',
+    'admin.customers.filter.all': 'All',
+    'admin.customers.filter.pending': 'Pending',
+    'admin.customers.filter.verified': 'Verified',
+    'admin.customers.filter.rejected': 'Rejected',
+    'admin.customers.col.org': 'Organization',
+    'admin.customers.col.slug': 'Slug',
+    'admin.customers.col.members': 'Members',
+    'admin.customers.col.addresses': 'Addresses',
+    'admin.customers.col.submitted': 'Submitted',
+    'admin.customers.col.email': 'Email',
+    'admin.customers.col.role': 'Role',
+    'admin.customers.col.since': 'Since',
+    'admin.customers.managePrices': 'Manage prices',
+    'admin.customers.members': 'Members',
+    'admin.customers.addresses': 'Addresses',
+    'admin.customers.noAddresses': 'No addresses.',
+    'admin.customers.billing': 'Billing',
+    'admin.customers.shipping': 'Shipping',
+    'admin.customers.b2bVerification': 'B2B verification',
+    'admin.customers.taxExempt': 'Tax exempt',
+    'admin.customers.submittedAt': 'Submitted {date}',
+    'admin.customers.verifiedOn': 'Verified on {date} · country {country}',
+    'admin.customers.rejectionReason': 'Rejection reason:',
+    'admin.customers.documents': 'Documents',
+    'admin.customers.docType': 'Type',
+    'admin.customers.docTypeUsResale': 'US Resale Cert',
+    'admin.customers.docTypeForeign': 'Foreign equivalent',
+    'admin.customers.countryIso2': 'Country (ISO-2)',
+    'admin.customers.certNumber': 'Certificate number',
+    'admin.customers.jurisdiction': 'Jurisdiction',
+    'admin.customers.file': 'File (PDF / image, max 10 MB)',
+    'admin.customers.impersonation': 'Impersonation',
+    'admin.customers.reasonOptional': 'Reason (optional)',
+    'admin.customers.impersonationPlaceholder': 'Support ticket #...',
+    'admin.credit.title': '{org} · Credit & catalog',
+    'admin.credit.creditApprovals': 'Credit & approvals',
+    'admin.credit.limit': 'Credit limit',
+    'admin.credit.limitHint': 'empty = no credit',
+    'admin.credit.terms': 'Payment terms',
+    'admin.credit.termsPrepaid': 'Prepaid',
+    'admin.credit.threshold': 'Approval threshold',
+    'admin.credit.thresholdHint': 'empty = no approvals',
+    'admin.credit.currentUsage': 'Current usage:',
+    'admin.credit.catalogAccess': 'Private catalog access',
+    'admin.credit.noGrants': 'No active grants.',
+    'admin.credit.grantedProduct': 'Product: {name} ({sku})',
+    'admin.credit.grantedCategory': 'Category: {name}',
+    'admin.credit.productOneOrOther': 'Product (one or the other)',
+    'admin.credit.category': 'Category',
+    'admin.prices.title': 'Prices · {org}',
+    'admin.prices.hint': 'Set a price override per product. Empty = base price applies.',
+    'admin.prices.basePrice': 'Base price',
+    'admin.prices.yourPrice': 'Your price',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Products',
     'admin.nav.categories': 'Categories',
@@ -1996,6 +2108,62 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.invoices.refAria': 'Referencia de pago para factura {number}',
     'admin.approvals.title': 'Aprobaciones',
     'admin.approvals.pendingCount': '{count} pendientes',
+    // Admin customers (Fase 3)
+    'admin.customers.title': 'Clientes',
+    'admin.customers.count': '{count} organizaciones.',
+    'admin.customers.filter.all': 'Todos',
+    'admin.customers.filter.pending': 'Pendientes',
+    'admin.customers.filter.verified': 'Verificados',
+    'admin.customers.filter.rejected': 'Rechazados',
+    'admin.customers.col.org': 'Organización',
+    'admin.customers.col.slug': 'Slug',
+    'admin.customers.col.members': 'Miembros',
+    'admin.customers.col.addresses': 'Direcciones',
+    'admin.customers.col.submitted': 'Enviada',
+    'admin.customers.col.email': 'Email',
+    'admin.customers.col.role': 'Rol',
+    'admin.customers.col.since': 'Desde',
+    'admin.customers.managePrices': 'Gestionar precios',
+    'admin.customers.members': 'Miembros',
+    'admin.customers.addresses': 'Direcciones',
+    'admin.customers.noAddresses': 'Sin direcciones.',
+    'admin.customers.billing': 'Facturación',
+    'admin.customers.shipping': 'Envío',
+    'admin.customers.b2bVerification': 'Verificación B2B',
+    'admin.customers.taxExempt': 'Exento de impuestos',
+    'admin.customers.submittedAt': 'Enviada {date}',
+    'admin.customers.verifiedOn': 'Verificada el {date} · país {country}',
+    'admin.customers.rejectionReason': 'Motivo de rechazo:',
+    'admin.customers.documents': 'Documentos',
+    'admin.customers.docType': 'Tipo',
+    'admin.customers.docTypeUsResale': 'US Resale Cert',
+    'admin.customers.docTypeForeign': 'Equivalente extranjero',
+    'admin.customers.countryIso2': 'País (ISO-2)',
+    'admin.customers.certNumber': 'Número del certificado',
+    'admin.customers.jurisdiction': 'Jurisdicción',
+    'admin.customers.file': 'Archivo (PDF / imagen, máx 10 MB)',
+    'admin.customers.impersonation': 'Impersonation',
+    'admin.customers.reasonOptional': 'Motivo (opcional)',
+    'admin.customers.impersonationPlaceholder': 'Soporte ticket #...',
+    'admin.credit.title': '{org} · Crédito y catálogo',
+    'admin.credit.creditApprovals': 'Crédito y aprobaciones',
+    'admin.credit.limit': 'Límite de crédito',
+    'admin.credit.limitHint': 'vacío = sin crédito',
+    'admin.credit.terms': 'Términos de pago',
+    'admin.credit.termsPrepaid': 'Prepago',
+    'admin.credit.threshold': 'Umbral de aprobación',
+    'admin.credit.thresholdHint': 'vacío = sin aprobaciones',
+    'admin.credit.currentUsage': 'Uso actual:',
+    'admin.credit.catalogAccess': 'Acceso a catálogo privado',
+    'admin.credit.noGrants': 'Sin grants activos.',
+    'admin.credit.grantedProduct': 'Producto: {name} ({sku})',
+    'admin.credit.grantedCategory': 'Categoría: {name}',
+    'admin.credit.productOneOrOther': 'Producto (uno u otro)',
+    'admin.credit.category': 'Categoría',
+    'admin.prices.title': 'Precios · {org}',
+    'admin.prices.hint': 'Definí un precio override por producto. Vacío = aplica el precio base.',
+    'admin.prices.basePrice': 'Precio base',
+    'admin.prices.yourPrice': 'Tu precio',
     'admin.nav.dashboard': 'Dashboard',
     'admin.nav.products': 'Productos',
     'admin.nav.categories': 'Categorías',

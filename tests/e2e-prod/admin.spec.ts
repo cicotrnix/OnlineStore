@@ -252,3 +252,53 @@ test.describe('admin commerce (prod build) — Fase 2', () => {
     }
   })
 })
+
+test.describe('admin customers (prod build) — Fase 3', () => {
+  async function axeBlocking(page: import('@playwright/test').Page) {
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze()
+    return results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+  }
+
+  test('list + detalle PENDING (approve/reject) + credit + prices pasan axe', async ({
+    browser,
+  }) => {
+    const { user, token } = await seedUser(true)
+    // Org PENDING → ejercita los botones approve (lime) / reject (danger) + upload.
+    const org = await prisma.organization.create({
+      data: {
+        name: 'Pending Cust E2E',
+        slug: `pending-e2e-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        verificationStatus: 'PENDING',
+        verificationSubmittedAt: new Date(),
+        country: 'US',
+      },
+    })
+    try {
+      const ctx = await browser.newContext()
+      await withSession(ctx, token)
+      const page = await ctx.newPage()
+
+      await page.goto('/admin/customers', { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'Customers' })).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/customers').toEqual([])
+
+      await page.goto(`/admin/customers/${org.id}`, { waitUntil: 'networkidle' })
+      await expect(page.getByRole('heading', { name: 'B2B verification' })).toBeVisible()
+      expect(await axeBlocking(page), 'axe /admin/customers/[id]').toEqual([])
+
+      await page.goto(`/admin/customers/${org.id}/credit`, { waitUntil: 'networkidle' })
+      expect(await axeBlocking(page), 'axe /admin/customers/[id]/credit').toEqual([])
+
+      await page.goto(`/admin/customers/${org.id}/prices`, { waitUntil: 'networkidle' })
+      expect(await axeBlocking(page), 'axe /admin/customers/[id]/prices').toEqual([])
+
+      await ctx.close()
+    } finally {
+      await prisma.organization.delete({ where: { id: org.id } }).catch(() => {})
+      await prisma.session.deleteMany({ where: { userId: user.id } })
+      await prisma.user.delete({ where: { id: user.id } }).catch(() => {})
+    }
+  })
+})
