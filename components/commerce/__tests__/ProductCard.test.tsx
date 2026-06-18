@@ -83,6 +83,20 @@ describe('ProductCard — chips por atributo', () => {
     renderCard()
     expect(screen.getByText(/0-cycle/i)).toBeInTheDocument()
   })
+  it('plug & play → chip Genuine part + línea de instalación', () => {
+    renderCard({
+      stockQuantity: 0,
+      basePrice: new Decimal('0.00'),
+      attributes: { plug_and_play: true, coming_soon: true, genuine_part: true },
+      category: { slug: 'plug-and-play' },
+    })
+    expect(screen.getByText(/genuine part/i)).toBeInTheDocument()
+    expect(screen.getByText(/diagnostics wizard/i)).toBeInTheDocument()
+  })
+  it('no-P&P → sin línea de instalación', () => {
+    renderCard()
+    expect(screen.queryByText(/diagnostics wizard/i)).toBeNull()
+  })
 })
 
 describe('ProductCard — capacidad gated (FU-010)', () => {

@@ -31,7 +31,14 @@ export function isOrderable(state: StockState): boolean {
   return state === 'in_stock'
 }
 
-export type ChipKey = 'seal' | 'spotWeld' | 'plugAndPlay' | 'flexProgrammed' | 'tagOn' | 'capacity'
+export type ChipKey =
+  | 'seal'
+  | 'spotWeld'
+  | 'plugAndPlay'
+  | 'flexProgrammed'
+  | 'tagOn'
+  | 'capacity'
+  | 'genuine'
 export type Chip = { key: ChipKey; value?: string }
 
 /**
@@ -49,6 +56,7 @@ export function deriveChips(input: {
   const chips: Chip[] = [{ key: 'seal' }]
   if (a.spot_welding_required === true) chips.push({ key: 'spotWeld' })
   if (a.plug_and_play === true) chips.push({ key: 'plugAndPlay' })
+  if (a.genuine_part === true) chips.push({ key: 'genuine' })
   if (a.flex_programmed === true) chips.push({ key: 'flexProgrammed' })
   if (input.categorySlug === 'tag-on-flex') chips.push({ key: 'tagOn' })
   if (typeof a.capacity === 'string' && a.capacity.trim() !== '') {
@@ -85,6 +93,8 @@ export const CHIP_TONE: Record<ChipKey, string> = {
   seal: 'border-lime-200 bg-lime-50 text-lime-700',
   capacity: 'border-lime-200 bg-lime-50 text-lime-700',
   plugAndPlay: 'border-lime-200 bg-lime-50 text-lime-700',
+  // Genuine: destacado (lima más saturado) — es el diferencial clave del P&P.
+  genuine: 'border-lime-300 bg-lime-100 text-lime-800',
   flexProgrammed: 'border-lime-100 bg-lime-50/60 text-lime-700',
   tagOn: 'border-lime-100 bg-lime-50/60 text-lime-700',
   spotWeld: 'border-amber-200 bg-amber-50 text-amber-800',
@@ -102,7 +112,18 @@ export function chipLabel(chip: Chip, locale: Locale): string {
       return t(locale, 'catalog.chip.flexProgrammed')
     case 'tagOn':
       return t(locale, 'catalog.chip.tagOn')
+    case 'genuine':
+      return t(locale, 'catalog.chip.genuine')
     default:
       return `+${chip.value ?? ''}`
   }
+}
+
+/**
+ * Línea de instalación para Plug & Play (dirigida por DATOS): si el producto es
+ * `plug_and_play`, devuelve la copy i18n; si no, null. La renderizan el card
+ * (Vista A) y la fila densa (Vista B) como línea muted bajo los chips.
+ */
+export function pnpInstallLine(attributes: unknown, locale: Locale): string | null {
+  return asAttrs(attributes).plug_and_play === true ? t(locale, 'catalog.pnp.install') : null
 }

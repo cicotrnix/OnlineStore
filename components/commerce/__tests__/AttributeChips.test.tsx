@@ -15,4 +15,8 @@ describe('AttributeChips', () => {
     render(<AttributeChips attributes={null} categorySlug="tag-on-flex" locale="en-US" />)
     expect(screen.getByText(/tag-on/i)).toBeInTheDocument()
   })
+  it('genuine part por atributo', () => {
+    render(<AttributeChips attributes={{ genuine_part: true }} locale="en-US" />)
+    expect(screen.getByText(/genuine part/i)).toBeInTheDocument()
+  })
 })

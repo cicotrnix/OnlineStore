@@ -300,6 +300,8 @@ export type MessageKey =
   | 'catalog.chip.plugAndPlay'
   | 'catalog.chip.flexProgrammed'
   | 'catalog.chip.tagOn'
+  | 'catalog.chip.genuine'
+  | 'catalog.pnp.install'
   | 'catalog.loginForPrice'
   | 'catalog.viewCards'
   | 'catalog.viewList'
@@ -1102,6 +1104,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'catalog.chip.plugAndPlay': 'Plug & play',
     'catalog.chip.flexProgrammed': 'Flex programmed',
     'catalog.chip.tagOn': 'Tag-on',
+    'catalog.chip.genuine': 'Genuine part',
+    'catalog.pnp.install': 'Connect & run the diagnostics wizard — no soldering.',
     'catalog.loginForPrice': 'Sign in to see prices',
     'catalog.viewCards': 'Cards',
     'catalog.viewList': 'List',
@@ -1904,6 +1908,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'catalog.chip.plugAndPlay': 'Plug & play',
     'catalog.chip.flexProgrammed': 'Flex programado',
     'catalog.chip.tagOn': 'Tag-on',
+    'catalog.chip.genuine': 'Pieza genuina',
+    'catalog.pnp.install': 'Conecta y corre el asistente de diagnóstico — sin soldadura.',
     'catalog.loginForPrice': 'Iniciá sesión para ver precios',
     'catalog.viewCards': 'Tarjetas',
     'catalog.viewList': 'Lista',

@@ -7,7 +7,7 @@ import { AddToCartButton } from './AddToCartButton'
 import { AttributeChips } from './AttributeChips'
 import { NotifyButton } from './NotifyButton'
 import { PriceTag } from './PriceTag'
-import { STOCK_DOT, deriveStockState, stockLabel } from './product-display'
+import { STOCK_DOT, deriveStockState, pnpInstallLine, stockLabel } from './product-display'
 
 type Product = {
   id: string
@@ -55,6 +55,7 @@ export function ProductCard({
 }: Props) {
   const stockState = deriveStockState(product.stockQuantity, product.attributes)
   const needsNotify = stockState === 'incoming' || stockState === 'coming_soon'
+  const installLine = pnpInstallLine(product.attributes, locale)
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0">
@@ -81,6 +82,8 @@ export function ProductCard({
           categorySlug={product.category?.slug ?? null}
           locale={locale}
         />
+
+        {installLine && <p className="text-sm text-gray-600">{installLine}</p>}
 
         <div>
           <div className="font-mono text-[10px] uppercase tracking-wide text-gray-500">

@@ -166,7 +166,7 @@ const batteryCell: CatalogProduct[] = [
 
 // ── Plug & Play (9, coming soon) — rango iPhone 13 → 15 Pro Max. Sin soldadura.
 //    Precio 0.00 placeholder inerte (pendiente Herney; coming_soon no lo muestra).
-const PNP = { plug_and_play: true, coming_soon: true }
+const PNP = { plug_and_play: true, coming_soon: true, genuine_part: true }
 const pnpModels: { sku: string; slug: string; model: string; image: string }[] = [
   { sku: 'PP-PP-13', slug: 'iphone-13-plug-and-play', model: 'iPhone 13', image: 'iphone-13.png' },
   {

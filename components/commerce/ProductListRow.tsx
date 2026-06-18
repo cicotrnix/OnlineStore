@@ -11,6 +11,7 @@ import {
   chipLabel,
   deriveChips,
   deriveStockState,
+  pnpInstallLine,
   stockLabel,
 } from './product-display'
 
@@ -60,6 +61,7 @@ export function ProductListRow({
     categorySlug: product.category.slug,
   }).filter((c) => c.key !== 'seal')
   const needsNotify = stockState === 'incoming' || stockState === 'coming_soon'
+  const installLine = pnpInstallLine(product.attributes, locale)
 
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
@@ -83,6 +85,7 @@ export function ProductListRow({
             ))}
           </div>
         )}
+        {installLine && <p className="mt-1 text-xs text-gray-500">{installLine}</p>}
       </td>
       <td className="px-3 py-3 text-xs text-gray-500">{product.category.name}</td>
       <td className="px-3 py-3">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { deriveChips, deriveStockState, isOrderable } from '../product-display'
+import { deriveChips, deriveStockState, isOrderable, pnpInstallLine } from '../product-display'
 
 describe('deriveStockState', () => {
   it('stock>0 sin flags → in_stock', () => {
@@ -61,5 +61,24 @@ describe('deriveChips', () => {
     expect(
       deriveChips({ attributes: { spot_welding_required: true } }).map((c) => c.key)
     ).not.toContain('capacity')
+  })
+  it('genuine_part → chip genuine', () => {
+    expect(deriveChips({ attributes: { genuine_part: true } }).map((c) => c.key)).toContain(
+      'genuine'
+    )
+  })
+  it('sin genuine_part → no hay chip genuine', () => {
+    expect(deriveChips({}).map((c) => c.key)).not.toContain('genuine')
+  })
+})
+
+describe('pnpInstallLine', () => {
+  it('plug_and_play → línea de instalación i18n', () => {
+    const line = pnpInstallLine({ plug_and_play: true }, 'en-US')
+    expect(line).toMatch(/diagnostics wizard/i)
+  })
+  it('no plug_and_play → null', () => {
+    expect(pnpInstallLine({ genuine_part: true }, 'en-US')).toBeNull()
+    expect(pnpInstallLine(null, 'en-US')).toBeNull()
   })
 })
