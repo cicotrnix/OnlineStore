@@ -33,7 +33,7 @@ async function makeUser() {
   return u
 }
 
-function buildForm(opts: Partial<Record<string, string>> = {}, file?: File): FormData {
+function buildForm(opts: Partial<Record<string, string>> = {}): FormData {
   const fd = new FormData()
   fd.set('name', opts.name ?? 'Acme Repair Shop')
   fd.set('country', opts.country ?? 'US')
@@ -41,13 +41,7 @@ function buildForm(opts: Partial<Record<string, string>> = {}, file?: File): For
   fd.set('city', opts.city ?? 'Austin')
   fd.set('state', opts.state ?? 'TX')
   fd.set('postalCode', opts.postalCode ?? '78701')
-  fd.set('type', opts.type ?? 'US_RESALE_CERT')
   fd.set('number', opts.number ?? 'TX-1')
-  fd.set('jurisdiction', opts.jurisdiction ?? 'TX')
-  fd.set(
-    'file',
-    file ?? new File([new Uint8Array([1, 2, 3])], 'cert.pdf', { type: 'application/pdf' })
-  )
   return fd
 }
 

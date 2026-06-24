@@ -259,6 +259,12 @@ export type MessageKey =
   | 'onboarding.cert.number'
   | 'onboarding.cert.file'
   | 'onboarding.cert.fileHint'
+  // Onboarding declare-only (no file upload)
+  | 'onboarding.taxid.intro'
+  | 'onboarding.taxid.section'
+  | 'onboarding.taxid.subtitle'
+  | 'onboarding.taxid.number'
+  | 'onboarding.taxid.numberPlaceholder'
   | 'onboarding.submit'
   // Onboarding pending
   | 'onboarding.pending.cardTitle'
@@ -1060,6 +1066,14 @@ export const MESSAGES: Record<Locale, Dict> = {
     'onboarding.cert.number': 'Certificate number',
     'onboarding.cert.file': 'File',
     'onboarding.cert.fileHint': 'PDF or image, ≤ 10 MB',
+    // Onboarding declare-only form (no file upload)
+    'onboarding.taxid.intro':
+      'To access wholesale pricing and place orders, provide your basic business info and tax ID. An admin will verify your account and email you once approved.',
+    'onboarding.taxid.section': 'Business tax ID',
+    'onboarding.taxid.subtitle':
+      'Declare your business tax ID. An admin will verify it — no file upload needed at this step.',
+    'onboarding.taxid.number': 'Tax ID / RFC / NIT / CNPJ / CUIT / RUT / RUC',
+    'onboarding.taxid.numberPlaceholder': 'e.g. 12-3456789',
     'onboarding.submit': 'Submit for review',
     // Onboarding pending
     'onboarding.pending.cardTitle': 'Your business',
@@ -1864,6 +1878,14 @@ export const MESSAGES: Record<Locale, Dict> = {
     'onboarding.cert.number': 'Número del certificado',
     'onboarding.cert.file': 'Archivo',
     'onboarding.cert.fileHint': 'PDF o imagen, ≤ 10 MB',
+    // Onboarding declare-only form (sin subir archivo)
+    'onboarding.taxid.intro':
+      'Para acceder a precios mayoristas y comprar, ingresá los datos básicos de tu negocio y tu número de identificación fiscal. Un administrador verificará tu cuenta y te avisará por email cuando esté aprobada.',
+    'onboarding.taxid.section': 'Identificación fiscal del negocio',
+    'onboarding.taxid.subtitle':
+      'Declarás tu número de identificación fiscal. Un administrador lo verificará — no necesitás subir ningún archivo en este paso.',
+    'onboarding.taxid.number': 'Tax ID / RFC / NIT / CNPJ / CUIT / RUT / RUC',
+    'onboarding.taxid.numberPlaceholder': 'ej. ABC-123456-7',
     'onboarding.submit': 'Enviar para revisión',
     // Onboarding pending
     'onboarding.pending.cardTitle': 'Tu negocio',
