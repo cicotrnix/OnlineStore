@@ -132,6 +132,8 @@ model Organization {
   country                 String?
   taxExempt               Boolean            @default(false)
   verifiedAt              DateTime?
+  taxId                   String?
+  taxIdCountry            String?
   // Onboarding B2B: revisión manual del admin (no auto-aprobación).
   verificationSubmittedAt DateTime?
   rejectionReason         String?
@@ -767,6 +769,7 @@ enum VerificationStatus {
 enum TaxDocumentType {
   US_RESALE_CERT
   FOREIGN_EQUIV
+  BUSINESS_REGISTRY_PROOF
 }
 
 enum TaxDocumentStatus {
