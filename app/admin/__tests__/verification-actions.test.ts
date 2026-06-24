@@ -43,31 +43,30 @@ beforeEach(async () => {
   _resetFakeStorage()
 })
 
-describe('uploadTaxCertificateAction', () => {
-  it('admin sube cert válido → guarda en storage + marca org VERIFIED + emite customer.verified', async () => {
+describe('verifyOrganizationAction (legacy uploadTaxCertificateAction replaced)', () => {
+  it('admin sube screenshot de registro → VERIFIED + TaxDocument + emite customer.verified', async () => {
     const { orgId } = await makeAdminOrg()
+    await prisma.organization.update({
+      where: { id: orgId },
+      data: { taxId: 'TX-12345', taxIdCountry: 'US' },
+    })
     const fd = new FormData()
     fd.set('organizationId', orgId)
-    fd.set('type', 'US_RESALE_CERT')
-    fd.set('number', 'TX-12345')
-    fd.set('jurisdiction', 'TX')
-    fd.set('country', 'US')
-    const file = new File([new Uint8Array([1, 2, 3, 4])], 'cert.pdf', { type: 'application/pdf' })
+    fd.set('docType', 'BUSINESS_REGISTRY_PROOF')
+    const file = new File([new Uint8Array([1, 2, 3, 4])], 'registry.png', { type: 'image/png' })
     fd.set('file', file)
 
-    const { uploadTaxCertificateAction } = await import('../_actions')
-    await expect(uploadTaxCertificateAction(fd)).rejects.toThrow(
-      /REDIRECT:.+toast=success&msg=admin\.toast\.certUploaded/
+    const { verifyOrganizationAction } = await import('../_actions')
+    await expect(verifyOrganizationAction(fd)).rejects.toThrow(
+      /REDIRECT:.+toast=success&msg=admin\.toast\.verified/
     )
 
     const org = await prisma.organization.findUniqueOrThrow({ where: { id: orgId } })
     expect(org.verificationStatus).toBe('VERIFIED')
-    expect(org.taxExempt).toBe(true)
-    expect(org.country).toBe('US')
     expect(org.verifiedAt).not.toBeNull()
 
     const doc = await prisma.taxDocument.findFirstOrThrow({ where: { organizationId: orgId } })
-    expect(doc.type).toBe('US_RESALE_CERT')
+    expect(doc.type).toBe('BUSINESS_REGISTRY_PROOF')
     expect(doc.status).toBe('APPROVED')
 
     const stored = await getStorage().get(doc.fileKey)
@@ -79,21 +78,19 @@ describe('uploadTaxCertificateAction', () => {
     expect((ev?.payload as { organizationId: string }).organizationId).toBe(orgId)
   })
 
-  it('archivo vacío → throw', async () => {
+  it('archivo vacío → redirect error evidenceRequired', async () => {
     const { orgId } = await makeAdminOrg()
     const fd = new FormData()
     fd.set('organizationId', orgId)
-    fd.set('type', 'US_RESALE_CERT')
-    fd.set('number', 'TX-12345')
-    fd.set('jurisdiction', 'TX')
-    fd.set('file', new File([], 'empty.pdf'))
-    const { uploadTaxCertificateAction } = await import('../_actions')
-    await expect(uploadTaxCertificateAction(fd)).rejects.toThrow(
-      /REDIRECT:.+toast=error&msg=admin\.toast\.certFailed/
+    fd.set('docType', 'BUSINESS_REGISTRY_PROOF')
+    fd.set('file', new File([], 'empty.png'))
+    const { verifyOrganizationAction } = await import('../_actions')
+    await expect(verifyOrganizationAction(fd)).rejects.toThrow(
+      /REDIRECT:.+toast=error&msg=admin\.toast\.evidenceRequired/
     )
   })
 
-  it('non-admin no puede subir', async () => {
+  it('non-admin no puede verificar', async () => {
     const buyer = await prisma.user.create({
       data: { email: `b-${Date.now()}@t.com`, isPlatformAdmin: false },
     })
@@ -104,12 +101,10 @@ describe('uploadTaxCertificateAction', () => {
     })
     const fd = new FormData()
     fd.set('organizationId', org.id)
-    fd.set('type', 'US_RESALE_CERT')
-    fd.set('number', 'X')
-    fd.set('jurisdiction', 'X')
-    fd.set('file', new File([new Uint8Array([1])], 'a.pdf', { type: 'application/pdf' }))
-    const { uploadTaxCertificateAction } = await import('../_actions')
-    await expect(uploadTaxCertificateAction(fd)).rejects.toThrow(/Forbidden/)
+    fd.set('docType', 'BUSINESS_REGISTRY_PROOF')
+    fd.set('file', new File([new Uint8Array([1])], 'a.png', { type: 'image/png' }))
+    const { verifyOrganizationAction } = await import('../_actions')
+    await expect(verifyOrganizationAction(fd)).rejects.toThrow(/Forbidden/)
   })
 })
 
