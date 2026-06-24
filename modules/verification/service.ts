@@ -194,6 +194,84 @@ export async function submitBusinessForVerification(input: {
   })
 }
 
+/**
+ * Aprobación con evidencia: el admin verificó la existencia en el registro
+ * oficial y sube el screenshot. Requiere archivo (gate duro). Crea el
+ * TaxDocument APPROVED + marca VERIFIED en una sola transacción.
+ * taxExempt solo si es US_RESALE_CERT (B5).
+ *
+ * Idempotente: si la org ya está VERIFIED, retorna {changed:false}.
+ */
+export async function approveOrganizationWithEvidence(input: {
+  organizationId: string
+  byAdminId: string
+  evidence: {
+    fileName: string
+    fileBytes: Uint8Array
+    docType: TaxDocumentType
+    taxIdNumber: string
+    country: string
+  }
+}): Promise<{ changed: boolean }> {
+  if (!input.evidence.fileBytes || input.evidence.fileBytes.length === 0) {
+    throw new Error('approval requires evidence screenshot')
+  }
+  const storage = getStorage()
+  const fileKey = `verification/${input.organizationId}/${Date.now()}-${input.evidence.fileName}`
+  await storage.put(fileKey, input.evidence.fileBytes)
+
+  const taxExempt = input.evidence.docType === 'US_RESALE_CERT'
+
+  return prisma.$transaction(async (tx) => {
+    // Row lock para evitar race entre dos admins clickeando en paralelo.
+    await tx.$executeRawUnsafe(
+      `SELECT id FROM "Organization" WHERE id = $1 FOR UPDATE`,
+      input.organizationId
+    )
+    const current = await tx.organization.findUniqueOrThrow({
+      where: { id: input.organizationId },
+      select: { verificationStatus: true },
+    })
+    if (current.verificationStatus === 'VERIFIED') {
+      return { changed: false }
+    }
+
+    const org = await tx.organization.update({
+      where: { id: input.organizationId },
+      data: {
+        verificationStatus: 'VERIFIED',
+        verifiedAt: new Date(),
+        taxExempt,
+        rejectionReason: null,
+      },
+    })
+    await tx.taxDocument.create({
+      data: {
+        organizationId: org.id,
+        type: input.evidence.docType,
+        number: input.evidence.taxIdNumber,
+        jurisdiction: input.evidence.country,
+        fileKey,
+        status: 'APPROVED',
+        reviewedAt: new Date(),
+        reviewedById: input.byAdminId,
+      },
+    })
+    await emitEvent(tx, {
+      type: 'customer.verified',
+      aggregateType: 'Organization',
+      aggregateId: org.id,
+      payload: {
+        organizationId: org.id,
+        country: org.country,
+        verifiedAt: org.verifiedAt?.toISOString(),
+        byAdminId: input.byAdminId,
+      },
+    })
+    return { changed: true }
+  })
+}
+
 export async function isVerified(organizationId: string): Promise<boolean> {
   const org = await prisma.organization.findUnique({
     where: { id: organizationId },
