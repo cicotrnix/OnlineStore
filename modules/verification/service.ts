@@ -218,6 +218,9 @@ export async function approveOrganizationWithEvidence(input: {
   }
   const storage = getStorage()
   const fileKey = `verification/${input.organizationId}/${Date.now()}-${input.evidence.fileName}`
+  // storage.put corre antes de la tx: un re-call idempotente (org ya VERIFIED)
+  // sube el archivo y luego retorna {changed:false} → screenshot huérfano.
+  // Aceptable: barato + consistente con uploadCertificate (storage antes de tx).
   await storage.put(fileKey, input.evidence.fileBytes)
 
   const taxExempt = input.evidence.docType === 'US_RESALE_CERT'

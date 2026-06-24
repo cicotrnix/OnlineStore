@@ -258,6 +258,21 @@ describe('approveOrganizationWithEvidence', () => {
     const after = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
     expect(after.taxExempt).toBe(true)
   })
+
+  it('re-aprobar una org ya VERIFIED → {changed:false} sin segundo TaxDocument ni evento', async () => {
+    const org = await prisma.organization.create({
+      data: { name: 'Idem', slug: `idem-${Date.now()}`, verificationStatus: 'PENDING', taxId: 'NIT-2', taxIdCountry: 'CO' },
+    })
+    const evidence = { fileName: 'r.png', fileBytes: new Uint8Array([1]), docType: 'BUSINESS_REGISTRY_PROOF' as const, taxIdNumber: 'NIT-2', country: 'CO' }
+    const r1 = await approveOrganizationWithEvidence({ organizationId: org.id, byAdminId: 'admin1', evidence })
+    const r2 = await approveOrganizationWithEvidence({ organizationId: org.id, byAdminId: 'admin1', evidence })
+    expect(r1.changed).toBe(true)
+    expect(r2.changed).toBe(false)
+    const docs = await prisma.taxDocument.count({ where: { organizationId: org.id } })
+    expect(docs).toBe(1)
+    const events = await prisma.domainEvent.findMany({ where: { type: 'customer.verified', aggregateId: org.id } })
+    expect(events).toHaveLength(1)
+  })
 })
 
 describe('uploadAndAutoApprove (compat admin-direct upload)', () => {
