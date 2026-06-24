@@ -273,6 +273,20 @@ describe('approveOrganizationWithEvidence', () => {
     const events = await prisma.domainEvent.findMany({ where: { type: 'customer.verified', aggregateId: org.id } })
     expect(events).toHaveLength(1)
   })
+
+  it('sanea el fileName en el fileKey (sin path traversal fuera del prefijo de la org)', async () => {
+    const org = await prisma.organization.create({
+      data: { name: 'Trav', slug: `trav-${Date.now()}`, verificationStatus: 'PENDING', taxId: 'NIT-3', taxIdCountry: 'CO' },
+    })
+    await approveOrganizationWithEvidence({
+      organizationId: org.id, byAdminId: 'admin1',
+      evidence: { fileName: '../../etc/passwd.png', fileBytes: new Uint8Array([1]), docType: 'BUSINESS_REGISTRY_PROOF', taxIdNumber: 'NIT-3', country: 'CO' },
+    })
+    const doc = await prisma.taxDocument.findFirstOrThrow({ where: { organizationId: org.id } })
+    expect(doc.fileKey).toContain(`verification/${org.id}/`)
+    expect(doc.fileKey).not.toContain('..')
+    expect(doc.fileKey).not.toContain('/etc/')
+  })
 })
 
 describe('uploadAndAutoApprove (compat admin-direct upload)', () => {

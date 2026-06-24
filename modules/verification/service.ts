@@ -14,13 +14,22 @@ export interface UploadTaxDocInput {
 }
 
 /**
+ * Sanea un nombre de archivo antes de usarlo como key de storage: quita
+ * componentes de ruta (evita `../` key-injection fuera del prefijo de la org)
+ * y deja solo chars seguros. El nombre original lo controla el cliente/admin.
+ */
+function safeFileName(name: string): string {
+  return name.replace(/.*[\\/]/, '').replace(/[^a-zA-Z0-9._-]/g, '_') || 'file'
+}
+
+/**
  * Sube el certificado a R2 + crea TaxDocument UPLOADED + marca la org como
  * PENDING revisión. **No auto-aprueba** — esto lo hace el admin con
  * approveOrganization (Onboarding B2B 2026-06-02).
  */
 export async function uploadCertificate(input: UploadTaxDocInput): Promise<void> {
   const storage = getStorage()
-  const fileKey = `tax-docs/${input.organizationId}/${Date.now()}-${input.fileName}`
+  const fileKey = `tax-docs/${input.organizationId}/${Date.now()}-${safeFileName(input.fileName)}`
   await storage.put(fileKey, input.fileBytes)
 
   await prisma.$transaction(async (tx) => {
@@ -217,7 +226,7 @@ export async function approveOrganizationWithEvidence(input: {
     throw new Error('approval requires evidence screenshot')
   }
   const storage = getStorage()
-  const fileKey = `verification/${input.organizationId}/${Date.now()}-${input.evidence.fileName}`
+  const fileKey = `verification/${input.organizationId}/${Date.now()}-${safeFileName(input.evidence.fileName)}`
   // storage.put corre antes de la tx: un re-call idempotente (org ya VERIFIED)
   // sube el archivo y luego retorna {changed:false} → screenshot huérfano.
   // Aceptable: barato + consistente con uploadCertificate (storage antes de tx).
