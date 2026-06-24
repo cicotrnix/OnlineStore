@@ -153,6 +153,73 @@ describe('payments PSDD', () => {
     expect(p.status).toBe('NEEDS_REVIEW')
   })
 
+  it('TST-2: backfillea stripeIntentId vacío desde checkout.session.completed', async () => {
+    const { order } = await makeOrder({ totalCents: 5000 })
+    const payment = await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        method: 'STRIPE_CARD',
+        status: 'PENDING',
+        amountCents: 5000n,
+        currency: 'USD',
+        stripeSessionId: 'cs_tst2_ok',
+        stripeIntentId: '', // vacío al crear (caso Stripe real)
+        idempotencyKey: `idem-${order.id}`,
+      },
+    })
+    const event = {
+      id: 'evt_tst2_ok',
+      type: 'checkout.session.completed',
+      data: { object: { id: 'cs_tst2_ok', amount_total: 5000, currency: 'usd', payment_intent: 'pi_backfilled' } },
+    }
+    const { body, signature } = _getFakeStripe()._signPayload(event)
+    const r = await handleStripeWebhook(body, signature)
+    expect(r.ok).toBe(true)
+    const updated = await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })
+    expect(updated.stripeIntentId).toBe('pi_backfilled')
+    expect(updated.status).toBe('CAPTURED')
+  })
+
+  it('TST-2: no sobrescribe un stripeIntentId ya presente', async () => {
+    const { order } = await makeOrder({ totalCents: 5000 })
+    const payment = await prisma.payment.create({
+      data: {
+        orderId: order.id, method: 'STRIPE_CARD', status: 'PENDING',
+        amountCents: 5000n, currency: 'USD',
+        stripeSessionId: 'cs_tst2_keep', stripeIntentId: 'pi_original',
+        idempotencyKey: `idem-keep-${order.id}`,
+      },
+    })
+    const event = {
+      id: 'evt_tst2_keep', type: 'checkout.session.completed',
+      data: { object: { id: 'cs_tst2_keep', amount_total: 5000, currency: 'usd', payment_intent: 'pi_other' } },
+    }
+    const { body, signature } = _getFakeStripe()._signPayload(event)
+    await handleStripeWebhook(body, signature)
+    const updated = await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })
+    expect(updated.stripeIntentId).toBe('pi_original')
+  })
+
+  it('TST-2: con mismatch, backfillea el intent antes del auto-refund', async () => {
+    const { order } = await makeOrder({ totalCents: 5000 })
+    const payment = await prisma.payment.create({
+      data: {
+        orderId: order.id, method: 'STRIPE_CARD', status: 'PENDING',
+        amountCents: 5000n, currency: 'USD',
+        stripeSessionId: 'cs_tst2_mm', stripeIntentId: '',
+        idempotencyKey: `idem-mm-${order.id}`,
+      },
+    })
+    const event = {
+      id: 'evt_tst2_mm', type: 'checkout.session.completed',
+      data: { object: { id: 'cs_tst2_mm', amount_total: 9999, currency: 'usd', payment_intent: 'pi_mm' } },
+    }
+    const { body, signature } = _getFakeStripe()._signPayload(event)
+    await expect(handleStripeWebhook(body, signature)).rejects.toBeInstanceOf(PaymentMismatchError)
+    const updated = await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })
+    expect(updated.stripeIntentId).toBe('pi_mm') // backfilled antes del branch de mismatch
+  })
+
   it('reconcileWire idempotente (mismo wireReference no duplica)', async () => {
     const { order, product } = await makeOrder({ totalCents: 5000, stock: 3 })
     const u = await prisma.user.create({
