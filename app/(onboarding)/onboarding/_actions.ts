@@ -5,7 +5,7 @@ import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { toastUrl } from '@/lib/feedback/action-result'
 import { customersService } from '@/modules/customers'
-import { uploadCertificate } from '@/modules/verification'
+import { submitBusinessForVerification, uploadCertificate } from '@/modules/verification'
 import type { TaxDocumentType } from '@prisma/client'
 import { redirect } from 'next/navigation'
 
@@ -37,18 +37,9 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
   const state = String(formData.get('state') ?? '').trim() || undefined
   const postalCode = String(formData.get('postalCode')).trim()
 
-  const docType = String(formData.get('type')) as TaxDocumentType
   const docNumber = String(formData.get('number')).trim()
-  const jurisdiction = String(formData.get('jurisdiction')).trim()
-  const file = formData.get('file') as File | null
 
-  if (!name || !addressLine1 || !city || !postalCode || !docNumber || !jurisdiction) {
-    redirect(toastUrl('/onboarding', 'error', 'common.toast.error.unexpected'))
-  }
-  if (!file || file.size === 0) {
-    redirect(toastUrl('/onboarding', 'error', 'onboarding.toast.fileMissing'))
-  }
-  if (file.size > 10 * 1024 * 1024) {
+  if (!name || !addressLine1 || !city || !postalCode || !docNumber) {
     redirect(toastUrl('/onboarding', 'error', 'common.toast.error.unexpected'))
   }
 
@@ -66,15 +57,10 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
     },
   })
 
-  const fileBytes = new Uint8Array(await file.arrayBuffer())
-  await uploadCertificate({
+  await submitBusinessForVerification({
     organizationId: org.id,
-    type: docType,
-    number: docNumber,
-    jurisdiction,
-    fileName: file.name,
-    fileBytes,
-    country,
+    taxId: docNumber,
+    taxIdCountry: country,
   })
 
   // Setea la org recién creada como activa para que el usuario quede

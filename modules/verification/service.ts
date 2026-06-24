@@ -170,6 +170,29 @@ export async function uploadAndAutoApprove(
   })
 }
 
+/**
+ * Onboarding LATAM: el cliente declara su tax ID de negocio; la prueba de
+ * existencia (screenshot del registro oficial) la sube el admin al aprobar.
+ * No crea TaxDocument ni exige archivo del cliente.
+ */
+export async function submitBusinessForVerification(input: {
+  organizationId: string
+  taxId: string
+  taxIdCountry: string
+}): Promise<void> {
+  await prisma.organization.update({
+    where: { id: input.organizationId },
+    data: {
+      taxId: input.taxId,
+      taxIdCountry: input.taxIdCountry,
+      verificationStatus: 'PENDING',
+      verificationSubmittedAt: new Date(),
+      rejectionReason: null,
+      country: input.taxIdCountry,
+    },
+  })
+}
+
 export async function isVerified(organizationId: string): Promise<boolean> {
   const org = await prisma.organization.findUnique({
     where: { id: organizationId },

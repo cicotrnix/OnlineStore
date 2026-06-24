@@ -2,6 +2,7 @@ export {
   approveOrganization,
   isVerified,
   rejectOrganization,
+  submitBusinessForVerification,
   uploadAndAutoApprove,
   uploadCertificate,
 } from './service'

@@ -52,7 +52,7 @@ function buildForm(opts: Partial<Record<string, string>> = {}, file?: File): For
 }
 
 describe('submitOnboardingAction', () => {
-  it('happy path → crea org PENDING + OWNER + TaxDocument + redirect /onboarding/pending', async () => {
+  it('happy path → crea org PENDING + OWNER + taxId capturado + redirect /onboarding/pending', async () => {
     const u = await makeUser()
     const { submitOnboardingAction } = await import('../onboarding/_actions')
     await expect(submitOnboardingAction(buildForm())).rejects.toThrow(
@@ -64,14 +64,15 @@ describe('submitOnboardingAction', () => {
     expect(org.verificationStatus).toBe('PENDING')
     expect(org.verificationSubmittedAt).not.toBeNull()
     expect(org.country).toBe('US')
+    // LATAM flow: taxId capturado, sin TaxDocument (la evidencia la sube el admin).
+    expect(org.taxId).toBe('TX-1')
+    expect(org.taxIdCountry).toBe('US')
+    const docs = await prisma.taxDocument.count({ where: { organizationId: org.id } })
+    expect(docs).toBe(0)
     const member = await prisma.organizationMember.findFirstOrThrow({
       where: { organizationId: org.id },
     })
     expect(member.role).toBe('OWNER')
-    const doc = await prisma.taxDocument.findFirstOrThrow({
-      where: { organizationId: org.id },
-    })
-    expect(doc.status).toBe('UPLOADED')
     // B.3: la nueva org queda como activa (evita rebote por /select-org).
     expect(switchActiveOrgMock).toHaveBeenCalledWith(org.id)
   })
@@ -87,15 +88,6 @@ describe('submitOnboardingAction', () => {
     const { submitOnboardingAction } = await import('../onboarding/_actions')
     await expect(submitOnboardingAction(buildForm())).rejects.toThrow(
       /REDIRECT:\/onboarding\/pending\?toast=info&msg=onboarding\.toast\.alreadyHasOrg/
-    )
-  })
-
-  it('archivo vacío → redirect con toast fileMissing', async () => {
-    await makeUser()
-    const fd = buildForm({}, new File([], 'empty.pdf', { type: 'application/pdf' }))
-    const { submitOnboardingAction } = await import('../onboarding/_actions')
-    await expect(submitOnboardingAction(fd)).rejects.toThrow(
-      /REDIRECT:\/onboarding\?toast=error&msg=onboarding\.toast\.fileMissing/
     )
   })
 
