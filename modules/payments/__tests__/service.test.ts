@@ -170,7 +170,14 @@ describe('payments PSDD', () => {
     const event = {
       id: 'evt_tst2_ok',
       type: 'checkout.session.completed',
-      data: { object: { id: 'cs_tst2_ok', amount_total: 5000, currency: 'usd', payment_intent: 'pi_backfilled' } },
+      data: {
+        object: {
+          id: 'cs_tst2_ok',
+          amount_total: 5000,
+          currency: 'usd',
+          payment_intent: 'pi_backfilled',
+        },
+      },
     }
     const { body, signature } = _getFakeStripe()._signPayload(event)
     const r = await handleStripeWebhook(body, signature)
@@ -184,15 +191,27 @@ describe('payments PSDD', () => {
     const { order } = await makeOrder({ totalCents: 5000 })
     const payment = await prisma.payment.create({
       data: {
-        orderId: order.id, method: 'STRIPE_CARD', status: 'PENDING',
-        amountCents: 5000n, currency: 'USD',
-        stripeSessionId: 'cs_tst2_keep', stripeIntentId: 'pi_original',
+        orderId: order.id,
+        method: 'STRIPE_CARD',
+        status: 'PENDING',
+        amountCents: 5000n,
+        currency: 'USD',
+        stripeSessionId: 'cs_tst2_keep',
+        stripeIntentId: 'pi_original',
         idempotencyKey: `idem-keep-${order.id}`,
       },
     })
     const event = {
-      id: 'evt_tst2_keep', type: 'checkout.session.completed',
-      data: { object: { id: 'cs_tst2_keep', amount_total: 5000, currency: 'usd', payment_intent: 'pi_other' } },
+      id: 'evt_tst2_keep',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_tst2_keep',
+          amount_total: 5000,
+          currency: 'usd',
+          payment_intent: 'pi_other',
+        },
+      },
     }
     const { body, signature } = _getFakeStripe()._signPayload(event)
     await handleStripeWebhook(body, signature)
@@ -204,15 +223,22 @@ describe('payments PSDD', () => {
     const { order } = await makeOrder({ totalCents: 5000 })
     const payment = await prisma.payment.create({
       data: {
-        orderId: order.id, method: 'STRIPE_CARD', status: 'PENDING',
-        amountCents: 5000n, currency: 'USD',
-        stripeSessionId: 'cs_tst2_mm', stripeIntentId: '',
+        orderId: order.id,
+        method: 'STRIPE_CARD',
+        status: 'PENDING',
+        amountCents: 5000n,
+        currency: 'USD',
+        stripeSessionId: 'cs_tst2_mm',
+        stripeIntentId: '',
         idempotencyKey: `idem-mm-${order.id}`,
       },
     })
     const event = {
-      id: 'evt_tst2_mm', type: 'checkout.session.completed',
-      data: { object: { id: 'cs_tst2_mm', amount_total: 9999, currency: 'usd', payment_intent: 'pi_mm' } },
+      id: 'evt_tst2_mm',
+      type: 'checkout.session.completed',
+      data: {
+        object: { id: 'cs_tst2_mm', amount_total: 9999, currency: 'usd', payment_intent: 'pi_mm' },
+      },
     }
     const { body, signature } = _getFakeStripe()._signPayload(event)
     await expect(handleStripeWebhook(body, signature)).rejects.toBeInstanceOf(PaymentMismatchError)

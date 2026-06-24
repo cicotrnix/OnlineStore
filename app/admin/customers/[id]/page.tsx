@@ -266,9 +266,7 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
                 <option value="US_RESALE_CERT">
                   {t(locale, 'admin.customers.docTypeUsResale')}
                 </option>
-                <option value="FOREIGN_EQUIV">
-                  {t(locale, 'admin.customers.docTypeForeign')}
-                </option>
+                <option value="FOREIGN_EQUIV">{t(locale, 'admin.customers.docTypeForeign')}</option>
               </select>
             </div>
 
