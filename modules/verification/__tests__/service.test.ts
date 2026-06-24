@@ -204,6 +204,7 @@ describe('submitBusinessForVerification (LATAM — tax ID sin archivo)', () => {
     const updated = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
     expect(updated.taxId).toBe('RFC-ABC123')
     expect(updated.taxIdCountry).toBe('MX')
+    expect(updated.country).toBe('MX') // seed desde la jurisdicción del tax ID
     expect(updated.verificationStatus).toBe('PENDING')
     expect(updated.verificationSubmittedAt).not.toBeNull()
     const docs = await prisma.taxDocument.count({ where: { organizationId: org.id } })

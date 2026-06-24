@@ -188,6 +188,7 @@ export async function submitBusinessForVerification(input: {
       verificationStatus: 'PENDING',
       verificationSubmittedAt: new Date(),
       rejectionReason: null,
+      // Seed country from tax jurisdiction — admin puede corregir al aprobar si difieren.
       country: input.taxIdCountry,
     },
   })

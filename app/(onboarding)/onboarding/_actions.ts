@@ -11,7 +11,8 @@ import { redirect } from 'next/navigation'
 
 /**
  * Onboarding self-service: crea Organization PENDING + member OWNER + default
- * address + sube certificado. Tras submit, redirige a /onboarding/pending +
+ * address + declara tax ID (sin subir archivo; el admin sube la evidencia al
+ * aprobar). Tras submit, redirige a /onboarding/pending +
  * toast. Errores de validación: redirect a /onboarding con toast=error.
  */
 export async function submitOnboardingAction(formData: FormData): Promise<void> {

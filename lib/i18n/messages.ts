@@ -239,7 +239,6 @@ export type MessageKey =
   | 'selectOrg.empty.body'
   // Onboarding form
   | 'onboarding.title'
-  | 'onboarding.intro'
   | 'onboarding.section.business'
   | 'onboarding.business.name'
   | 'onboarding.business.namePlaceholder'
@@ -1044,8 +1043,6 @@ export const MESSAGES: Record<Locale, Dict> = {
     'selectOrg.empty.body': 'You do not belong to any organization. Ask an admin to invite you.',
     // Onboarding form
     'onboarding.title': 'Register your business',
-    'onboarding.intro':
-      'To access wholesale pricing and place orders, we need your basic business info and resale certificate (or foreign equivalent). We review it manually and email you once approved.',
     'onboarding.section.business': 'Business info',
     'onboarding.business.name': 'Legal name',
     'onboarding.business.namePlaceholder': 'Acme Repair Shop',
@@ -1856,8 +1853,6 @@ export const MESSAGES: Record<Locale, Dict> = {
       'No pertenecés a ninguna organización. Pedile a un admin que te invite.',
     // Onboarding form
     'onboarding.title': 'Registrá tu negocio',
-    'onboarding.intro':
-      'Para acceder a precios mayoristas y comprar, necesitamos los datos básicos de tu negocio y el certificado de reventa (o equivalente extranjero). Lo revisamos manualmente y te avisamos por email en cuanto esté aprobado.',
     'onboarding.section.business': 'Datos del negocio',
     'onboarding.business.name': 'Razón social',
     'onboarding.business.namePlaceholder': 'Acme Repair Shop',
