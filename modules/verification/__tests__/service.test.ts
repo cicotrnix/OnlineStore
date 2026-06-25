@@ -7,7 +7,6 @@ import {
   approveOrganizationWithEvidence,
   isVerified,
   rejectOrganization,
-  submitBusinessForVerification,
   uploadAndAutoApprove,
   uploadCertificate,
 } from '../service'
@@ -195,27 +194,6 @@ describe('idempotency (fix admin doble-clic)', () => {
     expect(events).toHaveLength(2)
     const updated = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
     expect(updated.rejectionReason).toBe('Documento ilegible')
-  })
-})
-
-describe('submitBusinessForVerification (LATAM — tax ID sin archivo)', () => {
-  it('guarda taxId/taxIdCountry y deja PENDING sin archivo', async () => {
-    const org = await prisma.organization.create({
-      data: { name: 'Reseller MX', slug: `mx-${Date.now()}`, verificationStatus: 'PENDING' },
-    })
-    await submitBusinessForVerification({
-      organizationId: org.id,
-      taxId: 'RFC-ABC123',
-      taxIdCountry: 'MX',
-    })
-    const updated = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
-    expect(updated.taxId).toBe('RFC-ABC123')
-    expect(updated.taxIdCountry).toBe('MX')
-    expect(updated.country).toBe('MX') // seed desde la jurisdicción del tax ID
-    expect(updated.verificationStatus).toBe('PENDING')
-    expect(updated.verificationSubmittedAt).not.toBeNull()
-    const docs = await prisma.taxDocument.count({ where: { organizationId: org.id } })
-    expect(docs).toBe(0) // sin archivo del cliente; la evidencia la sube el admin
   })
 })
 

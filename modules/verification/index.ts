@@ -3,7 +3,6 @@ export {
   approveOrganizationWithEvidence,
   isVerified,
   rejectOrganization,
-  submitBusinessForVerification,
   uploadAndAutoApprove,
   uploadCertificate,
 } from './service'
