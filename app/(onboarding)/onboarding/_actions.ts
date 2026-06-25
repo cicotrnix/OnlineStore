@@ -5,14 +5,13 @@ import { requireAuth } from '@/lib/auth/helpers'
 import { prisma } from '@/lib/db/client'
 import { toastUrl } from '@/lib/feedback/action-result'
 import { customersService } from '@/modules/customers'
-import { submitBusinessForVerification, uploadCertificate } from '@/modules/verification'
+import { uploadCertificate } from '@/modules/verification'
 import type { TaxDocumentType } from '@prisma/client'
 import { redirect } from 'next/navigation'
 
 /**
  * Onboarding self-service: crea Organization PENDING + member OWNER + default
- * address + declara tax ID (sin subir archivo; el admin sube la evidencia al
- * aprobar). Tras submit, redirige a /onboarding/pending +
+ * address + sube certificado. Tras submit, redirige a /onboarding/pending +
  * toast. Errores de validación: redirect a /onboarding con toast=error.
  */
 export async function submitOnboardingAction(formData: FormData): Promise<void> {
@@ -38,9 +37,18 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
   const state = String(formData.get('state') ?? '').trim() || undefined
   const postalCode = String(formData.get('postalCode')).trim()
 
+  const docType = String(formData.get('type')) as TaxDocumentType
   const docNumber = String(formData.get('number')).trim()
+  const jurisdiction = String(formData.get('jurisdiction')).trim()
+  const file = formData.get('file') as File | null
 
-  if (!name || !addressLine1 || !city || !postalCode || !docNumber) {
+  if (!name || !addressLine1 || !city || !postalCode || !docNumber || !jurisdiction) {
+    redirect(toastUrl('/onboarding', 'error', 'common.toast.error.unexpected'))
+  }
+  if (!file || file.size === 0) {
+    redirect(toastUrl('/onboarding', 'error', 'onboarding.toast.fileMissing'))
+  }
+  if (file.size > 10 * 1024 * 1024) {
     redirect(toastUrl('/onboarding', 'error', 'common.toast.error.unexpected'))
   }
 
@@ -58,10 +66,15 @@ export async function submitOnboardingAction(formData: FormData): Promise<void> 
     },
   })
 
-  await submitBusinessForVerification({
+  const fileBytes = new Uint8Array(await file.arrayBuffer())
+  await uploadCertificate({
     organizationId: org.id,
-    taxId: docNumber,
-    taxIdCountry: country,
+    type: docType,
+    number: docNumber,
+    jurisdiction,
+    fileName: file.name,
+    fileBytes,
+    country,
   })
 
   // Setea la org recién creada como activa para que el usuario quede

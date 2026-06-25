@@ -33,7 +33,7 @@ async function makeUser() {
   return u
 }
 
-function buildForm(opts: Partial<Record<string, string>> = {}): FormData {
+function buildForm(opts: Partial<Record<string, string>> = {}, file?: File): FormData {
   const fd = new FormData()
   fd.set('name', opts.name ?? 'Acme Repair Shop')
   fd.set('country', opts.country ?? 'US')
@@ -41,12 +41,18 @@ function buildForm(opts: Partial<Record<string, string>> = {}): FormData {
   fd.set('city', opts.city ?? 'Austin')
   fd.set('state', opts.state ?? 'TX')
   fd.set('postalCode', opts.postalCode ?? '78701')
+  fd.set('type', opts.type ?? 'US_RESALE_CERT')
   fd.set('number', opts.number ?? 'TX-1')
+  fd.set('jurisdiction', opts.jurisdiction ?? 'TX')
+  fd.set(
+    'file',
+    file ?? new File([new Uint8Array([1, 2, 3])], 'cert.pdf', { type: 'application/pdf' })
+  )
   return fd
 }
 
 describe('submitOnboardingAction', () => {
-  it('happy path → crea org PENDING + OWNER + taxId capturado + redirect /onboarding/pending', async () => {
+  it('happy path → crea org PENDING + OWNER + TaxDocument + redirect /onboarding/pending', async () => {
     const u = await makeUser()
     const { submitOnboardingAction } = await import('../onboarding/_actions')
     await expect(submitOnboardingAction(buildForm())).rejects.toThrow(
@@ -58,15 +64,14 @@ describe('submitOnboardingAction', () => {
     expect(org.verificationStatus).toBe('PENDING')
     expect(org.verificationSubmittedAt).not.toBeNull()
     expect(org.country).toBe('US')
-    // LATAM flow: taxId capturado, sin TaxDocument (la evidencia la sube el admin).
-    expect(org.taxId).toBe('TX-1')
-    expect(org.taxIdCountry).toBe('US')
-    const docs = await prisma.taxDocument.count({ where: { organizationId: org.id } })
-    expect(docs).toBe(0)
     const member = await prisma.organizationMember.findFirstOrThrow({
       where: { organizationId: org.id },
     })
     expect(member.role).toBe('OWNER')
+    const doc = await prisma.taxDocument.findFirstOrThrow({
+      where: { organizationId: org.id },
+    })
+    expect(doc.status).toBe('UPLOADED')
     // B.3: la nueva org queda como activa (evita rebote por /select-org).
     expect(switchActiveOrgMock).toHaveBeenCalledWith(org.id)
   })
@@ -82,6 +87,15 @@ describe('submitOnboardingAction', () => {
     const { submitOnboardingAction } = await import('../onboarding/_actions')
     await expect(submitOnboardingAction(buildForm())).rejects.toThrow(
       /REDIRECT:\/onboarding\/pending\?toast=info&msg=onboarding\.toast\.alreadyHasOrg/
+    )
+  })
+
+  it('archivo vacío → redirect con toast fileMissing', async () => {
+    await makeUser()
+    const fd = buildForm({}, new File([], 'empty.pdf', { type: 'application/pdf' }))
+    const { submitOnboardingAction } = await import('../onboarding/_actions')
+    await expect(submitOnboardingAction(fd)).rejects.toThrow(
+      /REDIRECT:\/onboarding\?toast=error&msg=onboarding\.toast\.fileMissing/
     )
   })
 

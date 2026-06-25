@@ -27,7 +27,7 @@ export default async function OnboardingPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
       <h1 className="text-2xl font-medium tracking-tight">{t(locale, 'onboarding.title')}</h1>
-      <p className="mt-2 text-sm text-gray-600">{t(locale, 'onboarding.taxid.intro')}</p>
+      <p className="mt-2 text-sm text-gray-600">{t(locale, 'onboarding.intro')}</p>
 
       <form action={submitOnboardingAction} className="mt-8 space-y-6">
         <Card>
@@ -94,19 +94,52 @@ export default async function OnboardingPage() {
 
         <Card>
           <CardHeader>
-            <h2 className="font-medium">{t(locale, 'onboarding.taxid.section')}</h2>
-            <p className="mt-1 text-xs text-gray-500">{t(locale, 'onboarding.taxid.subtitle')}</p>
+            <h2 className="font-medium">{t(locale, 'onboarding.section.cert')}</h2>
+            <p className="mt-1 text-xs text-gray-500">{t(locale, 'onboarding.cert.subtitle')}</p>
           </CardHeader>
           <CardBody className="grid sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2">
-              <label htmlFor="number" className="block text-xs text-gray-500 mb-1">
-                {t(locale, 'onboarding.taxid.number')}
+            <div>
+              <label htmlFor="type" className="block text-xs text-gray-500 mb-1">
+                {t(locale, 'onboarding.cert.type')}
+              </label>
+              <select
+                id="type"
+                name="type"
+                required
+                className="block w-full rounded border border-gray-300 px-3 py-2 text-sm"
+              >
+                <option value="US_RESALE_CERT">{t(locale, 'onboarding.cert.type.us')}</option>
+                <option value="FOREIGN_EQUIV">{t(locale, 'onboarding.cert.type.foreign')}</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="jurisdiction" className="block text-xs text-gray-500 mb-1">
+                {t(locale, 'onboarding.cert.jurisdiction')}
               </label>
               <Input
-                id="number"
-                name="number"
+                id="jurisdiction"
+                name="jurisdiction"
                 required
-                placeholder={t(locale, 'onboarding.taxid.numberPlaceholder')}
+                placeholder={t(locale, 'onboarding.cert.jurisdictionPlaceholder')}
+              />
+            </div>
+            <div>
+              <label htmlFor="number" className="block text-xs text-gray-500 mb-1">
+                {t(locale, 'onboarding.cert.number')}
+              </label>
+              <Input id="number" name="number" required />
+            </div>
+            <div>
+              <label htmlFor="file" className="block text-xs text-gray-500 mb-1">
+                {t(locale, 'onboarding.cert.file')}
+              </label>
+              <input
+                id="file"
+                name="file"
+                type="file"
+                required
+                accept="application/pdf,image/*"
+                className="block w-full text-sm"
               />
             </div>
           </CardBody>
