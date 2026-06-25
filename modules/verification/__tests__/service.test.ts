@@ -364,7 +364,13 @@ describe('approveOrganizationWithEvidence', () => {
     await approveOrganizationWithEvidence({
       organizationId: org.id,
       byAdminId: admin.id,
-      evidence: { fileName: 'screenshot.png', fileBytes: new Uint8Array([9]), docType: 'BUSINESS_REGISTRY_PROOF', taxIdNumber: 'NIT-7', country: 'CO' },
+      evidence: {
+        fileName: 'screenshot.png',
+        fileBytes: new Uint8Array([9]),
+        docType: 'BUSINESS_REGISTRY_PROOF',
+        taxIdNumber: 'NIT-7',
+        country: 'CO',
+      },
     })
     const docs = await prisma.taxDocument.findMany({ where: { organizationId: org.id } })
     expect(docs).toHaveLength(2) // doc del cliente + screenshot del admin
