@@ -155,6 +155,15 @@ test.describe('compra real con webhook FakeStripe', () => {
         orderBy: { occurredAt: 'desc' },
       })
       expect(captured).not.toBeNull()
+
+      // ── 8. Paridad card/wire (regresión Tarea 1): la captura LIQUIDA la
+      //       factura (PAID), no solo la crea. El gap que se escapó era que el
+      //       e2e solo miraba CONFIRMED + stock. Los efectos async (notif
+      //       PAYMENT_CAPTURED + asiento en ledger) los cubre el test de
+      //       integración post-payment-parity.test.ts (corre dispatchPending).
+      const invoice = await prisma.invoice.findUniqueOrThrow({ where: { orderId: order.id } })
+      expect(invoice.status).toBe('PAID')
+      expect(invoice.paidAt).not.toBeNull()
     } finally {
       await ctx.close()
       await prisma.session.deleteMany({ where: { sessionToken } })
