@@ -49,6 +49,8 @@ describe('uploadCertificate (no auto-approve, Onboarding B2B)', () => {
     expect(o.verificationStatus).toBe('PENDING')
     expect(o.verificationSubmittedAt).not.toBeNull()
     expect(o.taxExempt).toBe(false)
+    expect(o.taxId).toBe('TX-1')
+    expect(o.taxIdCountry).toBe('US')
     const doc = await prisma.taxDocument.findFirstOrThrow({ where: { organizationId: org.id } })
     expect(doc.status).toBe('UPLOADED')
     expect(doc.fileKey).toContain('tax-docs/')

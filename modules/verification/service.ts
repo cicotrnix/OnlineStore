@@ -51,6 +51,9 @@ export async function uploadCertificate(input: UploadTaxDocInput): Promise<void>
         verificationSubmittedAt: new Date(),
         rejectionReason: null,
         country: input.country ?? undefined,
+        // El doc del cliente declara el tax ID — lo lee approveOrganizationWithEvidence.
+        taxId: input.number,
+        taxIdCountry: input.country ?? input.jurisdiction,
       },
     })
   })
