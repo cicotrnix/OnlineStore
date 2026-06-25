@@ -246,6 +246,29 @@ describe('payments PSDD', () => {
     expect(updated.stripeIntentId).toBe('pi_mm') // backfilled antes del branch de mismatch
   })
 
+  it('captura con tarjeta liquida la factura (PAID), no solo la crea', async () => {
+    const { order } = await makeOrder({ totalCents: 5000 })
+    await createCardCheckout({ orderId: order.id, successUrl: 'http://s', cancelUrl: 'http://c' })
+    const payment = await prisma.payment.findFirstOrThrow({ where: { orderId: order.id } })
+    const event = {
+      id: `evt_settle_${Date.now()}`,
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: payment.stripeSessionId,
+          amount_total: 5000,
+          currency: 'usd',
+          payment_intent: 'pi_settle',
+        },
+      },
+    }
+    const { body, signature } = _getFakeStripe()._signPayload(event)
+    await handleStripeWebhook(body, signature)
+    const invoice = await prisma.invoice.findUniqueOrThrow({ where: { orderId: order.id } })
+    expect(invoice.status).toBe('PAID')
+    expect(invoice.paidAt).not.toBeNull()
+  })
+
   it('reconcileWire idempotente (mismo wireReference no duplica)', async () => {
     const { order, product } = await makeOrder({ totalCents: 5000, stock: 3 })
     const u = await prisma.user.create({

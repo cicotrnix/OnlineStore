@@ -35,6 +35,50 @@ describe('dispatchPending', () => {
     expect(del?.status).toBe('DONE')
   })
 
+  it('recupera un evento atascado en PROCESSING (occurredAt viejo) y lo re-procesa', async () => {
+    const stuck = await prisma.domainEvent.create({
+      data: {
+        type: 'order.placed',
+        aggregateType: 'Order',
+        aggregateId: 'o1',
+        payload: {},
+        status: 'PROCESSING',
+        occurredAt: new Date(Date.now() - 30 * 60 * 1000),
+      },
+    })
+    const sub: Subscriber = {
+      name: 'acct',
+      handles: ['order.placed'],
+      handle: vi.fn().mockResolvedValue(undefined),
+    }
+    await dispatchPending({ resolve: () => [sub] })
+    expect(sub.handle).toHaveBeenCalledOnce()
+    const ev = await prisma.domainEvent.findUniqueOrThrow({ where: { id: stuck.id } })
+    expect(ev.status).toBe('DONE')
+  })
+
+  it('NO recupera un PROCESSING reciente (worker activo, occurredAt nuevo)', async () => {
+    const fresh = await prisma.domainEvent.create({
+      data: {
+        type: 'order.placed',
+        aggregateType: 'Order',
+        aggregateId: 'o2',
+        payload: {},
+        status: 'PROCESSING',
+        occurredAt: new Date(),
+      },
+    })
+    const sub: Subscriber = {
+      name: 'acct',
+      handles: ['order.placed'],
+      handle: vi.fn().mockResolvedValue(undefined),
+    }
+    await dispatchPending({ resolve: () => [sub] })
+    expect(sub.handle).not.toHaveBeenCalled()
+    const ev = await prisma.domainEvent.findUniqueOrThrow({ where: { id: fresh.id } })
+    expect(ev.status).toBe('PROCESSING')
+  })
+
   it('es idempotente: re-correr no vuelve a invocar el handler', async () => {
     await seedEvent()
     const sub: Subscriber = {
