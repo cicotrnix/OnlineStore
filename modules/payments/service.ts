@@ -311,6 +311,15 @@ export async function handleStripeWebhook(
       organizationId: payment.order.organizationId,
     })
 
+    // Liquida la factura (PAID) igual que reconcileWire — paridad card/wire.
+    // Idempotente (no-op si ya PAID). Dynamic import evita el ciclo con accounts.
+    const { settleInvoiceForPaidOrder } = await import('@/modules/accounts')
+    await settleInvoiceForPaidOrder(tx, {
+      orderId: payment.orderId,
+      paidById: payment.order.placedByUserId,
+      reference: `stripe:${event.id}`,
+    })
+
     // COGS calculado desde Product.unitCostCents (0n si ningún producto tiene costo).
     const cogsCents = await calculateCogsCents(tx, payment.orderId)
 
