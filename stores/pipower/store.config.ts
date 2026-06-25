@@ -40,7 +40,7 @@ export default defineStoreConfig({
     semanticSearch: false,
   },
   payments: {
-    stripe: { enabled: false },
+    stripe: { enabled: true },
     mercadopago: { enabled: false },
     // TODO(Herney): completar cuando esté resuelta la cuenta bancaria (KonLLC dba PiPower).
     // Mientras enabled sea false o falten beneficiaryName/accountNumber, NO se muestran instrucciones.

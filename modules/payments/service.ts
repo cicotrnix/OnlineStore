@@ -171,6 +171,23 @@ export async function handleStripeWebhook(
     return { ok: false, eventId: event.id, reason: 'unknown payment' }
   }
 
+  // TST-2: con Stripe real, session.payment_intent suele venir null al crear la
+  // sesión → stripeIntentId pudo quedar vacío en createCardCheckout. Backfill desde
+  // el webhook ANTES del branch de mismatch: cubre el auto-refund de mismatch (que
+  // lee payment.stripeIntentId) y el lookup futuro de charge.refunded.
+  if (
+    event.type === 'checkout.session.completed' &&
+    !payment.stripeIntentId &&
+    typeof obj.payment_intent === 'string' &&
+    obj.payment_intent.length > 0
+  ) {
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { stripeIntentId: obj.payment_intent },
+    })
+    payment.stripeIntentId = obj.payment_intent
+  }
+
   if (event.type === 'charge.refunded') {
     await prisma.$transaction(async (tx) => {
       await tx.paymentEvent.create({

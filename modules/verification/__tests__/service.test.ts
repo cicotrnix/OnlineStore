@@ -4,6 +4,7 @@ import { cleanDb } from '@/tests/helpers/cleanDb'
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   approveOrganization,
+  approveOrganizationWithEvidence,
   isVerified,
   rejectOrganization,
   uploadAndAutoApprove,
@@ -47,6 +48,8 @@ describe('uploadCertificate (no auto-approve, Onboarding B2B)', () => {
     expect(o.verificationStatus).toBe('PENDING')
     expect(o.verificationSubmittedAt).not.toBeNull()
     expect(o.taxExempt).toBe(false)
+    expect(o.taxId).toBe('TX-1')
+    expect(o.taxIdCountry).toBe('US')
     const doc = await prisma.taxDocument.findFirstOrThrow({ where: { organizationId: org.id } })
     expect(doc.status).toBe('UPLOADED')
     expect(doc.fileKey).toContain('tax-docs/')
@@ -191,6 +194,189 @@ describe('idempotency (fix admin doble-clic)', () => {
     expect(events).toHaveLength(2)
     const updated = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
     expect(updated.rejectionReason).toBe('Documento ilegible')
+  })
+})
+
+describe('approveOrganizationWithEvidence', () => {
+  it('exige screenshot (rechaza si no hay archivo)', async () => {
+    const org = await prisma.organization.create({
+      data: {
+        name: 'NoEv',
+        slug: `noev-${Date.now()}`,
+        verificationStatus: 'PENDING',
+        taxId: 'NIT-1',
+        taxIdCountry: 'CO',
+      },
+    })
+    await expect(
+      approveOrganizationWithEvidence({
+        organizationId: org.id,
+        byAdminId: 'admin1',
+        evidence: {
+          fileName: 'x.png',
+          fileBytes: new Uint8Array(0),
+          docType: 'BUSINESS_REGISTRY_PROOF',
+          taxIdNumber: 'NIT-1',
+          country: 'CO',
+        },
+      })
+    ).rejects.toThrow(/evidence/i)
+    const after = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
+    expect(after.verificationStatus).toBe('PENDING')
+  })
+
+  it('crea TaxDocument BUSINESS_REGISTRY_PROOF + VERIFIED, taxExempt=false LATAM', async () => {
+    const org = await prisma.organization.create({
+      data: {
+        name: 'CO Biz',
+        slug: `co-${Date.now()}`,
+        verificationStatus: 'PENDING',
+        taxId: 'NIT-9',
+        taxIdCountry: 'CO',
+      },
+    })
+    const res = await approveOrganizationWithEvidence({
+      organizationId: org.id,
+      byAdminId: 'admin1',
+      evidence: {
+        fileName: 'registro.png',
+        fileBytes: new Uint8Array([1, 2, 3]),
+        docType: 'BUSINESS_REGISTRY_PROOF',
+        taxIdNumber: 'NIT-9',
+        country: 'CO',
+      },
+    })
+    expect(res.changed).toBe(true)
+    const after = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
+    expect(after.verificationStatus).toBe('VERIFIED')
+    expect(after.taxExempt).toBe(false) // LATAM: no exento (B5)
+    const doc = await prisma.taxDocument.findFirstOrThrow({ where: { organizationId: org.id } })
+    expect(doc.type).toBe('BUSINESS_REGISTRY_PROOF')
+    expect(doc.status).toBe('APPROVED')
+    expect(doc.number).toBe('NIT-9')
+    expect(doc.reviewedById).toBe('admin1')
+  })
+
+  it('con US_RESALE_CERT marca taxExempt=true (B5)', async () => {
+    const org = await prisma.organization.create({
+      data: {
+        name: 'US Biz',
+        slug: `us-${Date.now()}`,
+        verificationStatus: 'PENDING',
+        taxId: 'TX-7',
+        taxIdCountry: 'US',
+      },
+    })
+    await approveOrganizationWithEvidence({
+      organizationId: org.id,
+      byAdminId: 'admin1',
+      evidence: {
+        fileName: 'cert.png',
+        fileBytes: new Uint8Array([9]),
+        docType: 'US_RESALE_CERT',
+        taxIdNumber: 'TX-7',
+        country: 'US',
+      },
+    })
+    const after = await prisma.organization.findUniqueOrThrow({ where: { id: org.id } })
+    expect(after.taxExempt).toBe(true)
+  })
+
+  it('re-aprobar una org ya VERIFIED → {changed:false} sin segundo TaxDocument ni evento', async () => {
+    const org = await prisma.organization.create({
+      data: {
+        name: 'Idem',
+        slug: `idem-${Date.now()}`,
+        verificationStatus: 'PENDING',
+        taxId: 'NIT-2',
+        taxIdCountry: 'CO',
+      },
+    })
+    const evidence = {
+      fileName: 'r.png',
+      fileBytes: new Uint8Array([1]),
+      docType: 'BUSINESS_REGISTRY_PROOF' as const,
+      taxIdNumber: 'NIT-2',
+      country: 'CO',
+    }
+    const r1 = await approveOrganizationWithEvidence({
+      organizationId: org.id,
+      byAdminId: 'admin1',
+      evidence,
+    })
+    const r2 = await approveOrganizationWithEvidence({
+      organizationId: org.id,
+      byAdminId: 'admin1',
+      evidence,
+    })
+    expect(r1.changed).toBe(true)
+    expect(r2.changed).toBe(false)
+    const docs = await prisma.taxDocument.count({ where: { organizationId: org.id } })
+    expect(docs).toBe(1)
+    const events = await prisma.domainEvent.findMany({
+      where: { type: 'customer.verified', aggregateId: org.id },
+    })
+    expect(events).toHaveLength(1)
+  })
+
+  it('sanea el fileName en el fileKey (sin path traversal fuera del prefijo de la org)', async () => {
+    const org = await prisma.organization.create({
+      data: {
+        name: 'Trav',
+        slug: `trav-${Date.now()}`,
+        verificationStatus: 'PENDING',
+        taxId: 'NIT-3',
+        taxIdCountry: 'CO',
+      },
+    })
+    await approveOrganizationWithEvidence({
+      organizationId: org.id,
+      byAdminId: 'admin1',
+      evidence: {
+        fileName: '../../etc/passwd.png',
+        fileBytes: new Uint8Array([1]),
+        docType: 'BUSINESS_REGISTRY_PROOF',
+        taxIdNumber: 'NIT-3',
+        country: 'CO',
+      },
+    })
+    const doc = await prisma.taxDocument.findFirstOrThrow({ where: { organizationId: org.id } })
+    expect(doc.fileKey).toContain(`verification/${org.id}/`)
+    expect(doc.fileKey).not.toContain('..')
+    expect(doc.fileKey).not.toContain('/etc/')
+  })
+
+  it('también aprueba el documento UPLOADED del cliente (no solo el screenshot)', async () => {
+    const org = await prisma.organization.create({
+      data: { name: 'Dual', slug: `dual-${Date.now()}`, verificationStatus: 'PENDING' },
+    })
+    const admin = await makeAdmin()
+    // El cliente subió su doc en el alta → TaxDocument UPLOADED.
+    await uploadCertificate({
+      organizationId: org.id,
+      type: 'FOREIGN_EQUIV',
+      number: 'NIT-7',
+      jurisdiction: 'CO',
+      fileName: 'doc-cliente.pdf',
+      fileBytes: new Uint8Array([1, 2, 3]),
+      country: 'CO',
+    })
+    await approveOrganizationWithEvidence({
+      organizationId: org.id,
+      byAdminId: admin.id,
+      evidence: {
+        fileName: 'screenshot.png',
+        fileBytes: new Uint8Array([9]),
+        docType: 'BUSINESS_REGISTRY_PROOF',
+        taxIdNumber: 'NIT-7',
+        country: 'CO',
+      },
+    })
+    const docs = await prisma.taxDocument.findMany({ where: { organizationId: org.id } })
+    expect(docs).toHaveLength(2) // doc del cliente + screenshot del admin
+    expect(docs.every((d) => d.status === 'APPROVED')).toBe(true)
+    const clientDoc = docs.find((d) => d.type === 'FOREIGN_EQUIV')
+    expect(clientDoc?.reviewedById).toBe(admin.id)
   })
 })
 

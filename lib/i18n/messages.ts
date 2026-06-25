@@ -571,6 +571,8 @@ export type MessageKey =
   | 'admin.customers.docType'
   | 'admin.customers.docTypeUsResale'
   | 'admin.customers.docTypeForeign'
+  | 'admin.customers.docTypeBusinessRegistry'
+  | 'admin.customers.taxIdDeclared'
   | 'admin.customers.countryIso2'
   | 'admin.customers.certNumber'
   | 'admin.customers.jurisdiction'
@@ -679,9 +681,11 @@ export type MessageKey =
   // Admin reconcile wire
   | 'admin.toast.wireReconciled'
   | 'admin.toast.wireFailed'
-  // Admin upload cert
+  // Admin upload cert / verify with evidence
   | 'admin.toast.certUploaded'
   | 'admin.toast.certFailed'
+  | 'admin.toast.evidenceRequired'
+  | 'admin.toast.verified'
   // Admin generic toasts
   | 'admin.toast.saved'
   | 'admin.toast.created'
@@ -1382,6 +1386,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.customers.docType': 'Type',
     'admin.customers.docTypeUsResale': 'US Resale Cert',
     'admin.customers.docTypeForeign': 'Foreign equivalent',
+    'admin.customers.docTypeBusinessRegistry': 'Business registry proof',
+    'admin.customers.taxIdDeclared': 'Tax ID declared by business',
     'admin.customers.countryIso2': 'Country (ISO-2)',
     'admin.customers.certNumber': 'Certificate number',
     'admin.customers.jurisdiction': 'Jurisdiction',
@@ -1492,6 +1498,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.wireFailed': 'Wire reconciliation failed.',
     'admin.toast.certUploaded': 'Certificate uploaded and customer approved ✓',
     'admin.toast.certFailed': 'Certificate upload failed.',
+    'admin.toast.evidenceRequired': 'A registry screenshot is required to approve.',
+    'admin.toast.verified': 'Business verified ✓',
     'admin.toast.saved': 'Saved ✓',
     'admin.toast.created': 'Created ✓',
     'admin.toast.updated': 'Updated ✓',
@@ -2187,6 +2195,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.customers.docType': 'Tipo',
     'admin.customers.docTypeUsResale': 'US Resale Cert',
     'admin.customers.docTypeForeign': 'Equivalente extranjero',
+    'admin.customers.docTypeBusinessRegistry': 'Prueba de registro mercantil',
+    'admin.customers.taxIdDeclared': 'Tax ID declarado por el negocio',
     'admin.customers.countryIso2': 'País (ISO-2)',
     'admin.customers.certNumber': 'Número del certificado',
     'admin.customers.jurisdiction': 'Jurisdicción',
@@ -2300,6 +2310,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.wireFailed': 'Falló la conciliación del wire.',
     'admin.toast.certUploaded': 'Certificado subido y cliente aprobado ✓',
     'admin.toast.certFailed': 'Falló la subida del certificado.',
+    'admin.toast.evidenceRequired': 'Subí el screenshot del registro para aprobar.',
+    'admin.toast.verified': 'Negocio verificado ✓',
     'admin.toast.saved': 'Guardado ✓',
     'admin.toast.created': 'Creado ✓',
     'admin.toast.updated': 'Actualizado ✓',

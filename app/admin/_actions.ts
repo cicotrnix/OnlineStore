@@ -172,41 +172,44 @@ export async function rejectOrganizationAction(formData: FormData) {
   )
 }
 
-export async function uploadTaxCertificateAction(formData: FormData) {
-  await requirePlatformAdmin()
+export async function verifyOrganizationAction(formData: FormData) {
+  const admin = await requirePlatformAdmin()
   const organizationId = String(formData.get('organizationId'))
   const fallback = `/admin/customers/${organizationId}`
-  const type = String(formData.get('type')) as 'US_RESALE_CERT' | 'FOREIGN_EQUIV'
-  const number = String(formData.get('number')).trim()
-  const jurisdiction = String(formData.get('jurisdiction')).trim()
-  const country = String(formData.get('country') ?? '').trim() || undefined
-  if (!number || !jurisdiction) {
-    adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
-  }
+  const docType = String(formData.get('docType')) as
+    | 'US_RESALE_CERT'
+    | 'FOREIGN_EQUIV'
+    | 'BUSINESS_REGISTRY_PROOF'
   const file = formData.get('file') as File | null
   if (!file || file.size === 0) {
-    adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
+    adminToast(formData, fallback, 'error', 'admin.toast.evidenceRequired')
   }
   if (file!.size > 10 * 1024 * 1024) {
     adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
   }
+  const org = await prisma.organization.findUniqueOrThrow({
+    where: { id: organizationId },
+    select: { taxId: true, taxIdCountry: true },
+  })
   const fileBytes = new Uint8Array(await file!.arrayBuffer())
-  const { uploadAndAutoApprove } = await import('@/modules/verification')
+  const { approveOrganizationWithEvidence } = await import('@/modules/verification')
   try {
-    await uploadAndAutoApprove({
+    await approveOrganizationWithEvidence({
       organizationId,
-      type,
-      number,
-      jurisdiction,
-      fileName: file!.name,
-      fileBytes,
-      country,
+      byAdminId: admin.id,
+      evidence: {
+        fileName: file!.name,
+        fileBytes,
+        docType,
+        taxIdNumber: org.taxId ?? '',
+        country: org.taxIdCountry ?? '',
+      },
     })
   } catch {
     adminToast(formData, fallback, 'error', 'admin.toast.certFailed')
   }
   revalidatePath(fallback)
-  adminToast(formData, fallback, 'success', 'admin.toast.certUploaded')
+  adminToast(formData, fallback, 'success', 'admin.toast.verified')
 }
 
 export async function getTaxCertificateUrlAction(formData: FormData): Promise<string> {

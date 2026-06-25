@@ -4,7 +4,7 @@ import {
   getTaxCertificateUrlAction,
   rejectOrganizationAction,
   startImpersonationAction,
-  uploadTaxCertificateAction,
+  verifyOrganizationAction,
 } from '@/app/admin/_actions'
 import {
   AdminPageHeader,
@@ -232,40 +232,44 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
             </div>
           )}
 
-          <form action={uploadTaxCertificateAction} className="max-w-md space-y-3">
+          <form
+            action={verifyOrganizationAction}
+            encType="multipart/form-data"
+            className="max-w-md space-y-4"
+          >
             <input type="hidden" name="organizationId" value={org.id} />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="type"
-                  className="block text-xs font-medium uppercase tracking-wide text-ink-500"
-                >
-                  {t(locale, 'admin.customers.docType')}
-                </label>
-                <select id="type" name="type" required className={SELECT_CLS}>
-                  <option value="US_RESALE_CERT">
-                    {t(locale, 'admin.customers.docTypeUsResale')}
-                  </option>
-                  <option value="FOREIGN_EQUIV">
-                    {t(locale, 'admin.customers.docTypeForeign')}
-                  </option>
-                </select>
+
+            {/* Read-only: tax ID declared by the business — admin uses this to look up the registry */}
+            {(org.taxId ?? org.taxIdCountry) && (
+              <div className="rounded-card border border-line bg-muted p-3 text-sm">
+                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-ink-500">
+                  {t(locale, 'admin.customers.taxIdDeclared')}
+                </p>
+                <p className="font-mono text-ink-950">
+                  {org.taxIdCountry ? `[${org.taxIdCountry}] ` : ''}
+                  {org.taxId ?? '—'}
+                </p>
               </div>
-              <AuthField
-                name="country"
-                label={t(locale, 'admin.customers.countryIso2')}
-                maxLength={2}
-                placeholder="US"
-                defaultValue={org.country ?? 'US'}
-              />
-              <AuthField name="number" label={t(locale, 'admin.customers.certNumber')} required />
-              <AuthField
-                name="jurisdiction"
-                label={t(locale, 'admin.customers.jurisdiction')}
-                required
-                placeholder="TX, FL, ..."
-              />
+            )}
+
+            <div>
+              <label
+                htmlFor="docType"
+                className="block text-xs font-medium uppercase tracking-wide text-ink-500"
+              >
+                {t(locale, 'admin.customers.docType')}
+              </label>
+              <select id="docType" name="docType" required className={SELECT_CLS}>
+                <option value="BUSINESS_REGISTRY_PROOF">
+                  {t(locale, 'admin.customers.docTypeBusinessRegistry')}
+                </option>
+                <option value="US_RESALE_CERT">
+                  {t(locale, 'admin.customers.docTypeUsResale')}
+                </option>
+                <option value="FOREIGN_EQUIV">{t(locale, 'admin.customers.docTypeForeign')}</option>
+              </select>
             </div>
+
             <div>
               <label
                 htmlFor="file"
@@ -278,10 +282,11 @@ export default async function AdminCustomerDetailPage({ params }: Props) {
                 name="file"
                 type="file"
                 required
-                accept="application/pdf,image/*"
+                accept="image/*"
                 className="mt-1 block w-full text-sm text-ink-700"
               />
             </div>
+
             <SubmitButton variant="lime" pendingLabel={t(locale, 'admin.action.uploading')}>
               {t(locale, 'admin.action.uploadAndApprove')}
             </SubmitButton>

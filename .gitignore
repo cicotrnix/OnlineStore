@@ -1,6 +1,9 @@
 # dependencies
 /node_modules
 /.pnp
+# local agent skills tooling (installed via npx skills, not project source)
+/.agents/
+/skills-lock.json
 .pnp.*
 .yarn/*
 !.yarn/patches

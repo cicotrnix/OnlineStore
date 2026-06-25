@@ -1,5 +1,6 @@
 export {
   approveOrganization,
+  approveOrganizationWithEvidence,
   isVerified,
   rejectOrganization,
   uploadAndAutoApprove,
