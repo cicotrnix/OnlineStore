@@ -367,6 +367,33 @@ describe('approveOrganizationWithEvidence', () => {
     expect(doc.fileKey).not.toContain('..')
     expect(doc.fileKey).not.toContain('/etc/')
   })
+
+  it('también aprueba el documento UPLOADED del cliente (no solo el screenshot)', async () => {
+    const org = await prisma.organization.create({
+      data: { name: 'Dual', slug: `dual-${Date.now()}`, verificationStatus: 'PENDING' },
+    })
+    const admin = await makeAdmin()
+    // El cliente subió su doc en el alta → TaxDocument UPLOADED.
+    await uploadCertificate({
+      organizationId: org.id,
+      type: 'FOREIGN_EQUIV',
+      number: 'NIT-7',
+      jurisdiction: 'CO',
+      fileName: 'doc-cliente.pdf',
+      fileBytes: new Uint8Array([1, 2, 3]),
+      country: 'CO',
+    })
+    await approveOrganizationWithEvidence({
+      organizationId: org.id,
+      byAdminId: admin.id,
+      evidence: { fileName: 'screenshot.png', fileBytes: new Uint8Array([9]), docType: 'BUSINESS_REGISTRY_PROOF', taxIdNumber: 'NIT-7', country: 'CO' },
+    })
+    const docs = await prisma.taxDocument.findMany({ where: { organizationId: org.id } })
+    expect(docs).toHaveLength(2) // doc del cliente + screenshot del admin
+    expect(docs.every((d) => d.status === 'APPROVED')).toBe(true)
+    const clientDoc = docs.find((d) => d.type === 'FOREIGN_EQUIV')
+    expect(clientDoc?.reviewedById).toBe(admin.id)
+  })
 })
 
 describe('uploadAndAutoApprove (compat admin-direct upload)', () => {

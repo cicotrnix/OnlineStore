@@ -272,6 +272,11 @@ export async function approveOrganizationWithEvidence(input: {
         reviewedById: input.byAdminId,
       },
     })
+    // Aprueba también el documento que subió el cliente en el alta (UPLOADED).
+    await tx.taxDocument.updateMany({
+      where: { organizationId: org.id, status: 'UPLOADED' },
+      data: { status: 'APPROVED', reviewedAt: new Date(), reviewedById: input.byAdminId },
+    })
     await emitEvent(tx, {
       type: 'customer.verified',
       aggregateType: 'Organization',
