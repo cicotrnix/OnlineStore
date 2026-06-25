@@ -5,6 +5,7 @@ import { type Subscriber, getSubscribersFor } from './registry'
 
 const BATCH_SIZE = 20
 const MAX_ATTEMPTS = 5
+const STALE_PROCESSING_MS = 15 * 60 * 1000
 
 export interface DispatchResult {
   events: number
@@ -19,6 +20,20 @@ export async function dispatchPending(opts?: {
   const batchSize = opts?.batchSize ?? BATCH_SIZE
   const resolve = opts?.resolve ?? getSubscribersFor
   const result: DispatchResult = { events: 0, delivered: 0, failed: 0 }
+
+  // Recupera eventos atascados en PROCESSING: si un worker murió mid-batch (tras
+  // marcar PROCESSING pero antes de resetear a DONE/PENDING) el evento quedaba
+  // tildado para siempre — sin esto, p.ej. el payment.captured de una orden
+  // nunca dispara su email. occurredAt es proxy de antigüedad (no hay updatedAt);
+  // el umbral (15min) >> el tick del worker (~1min), así un evento realmente en
+  // proceso nunca se resetea por error. Re-procesar es seguro: las entregas son
+  // idempotentes por (eventId, subscriber).
+  // ponytail: occurredAt-as-proxy + umbral holgado; si hubiera multi-worker de
+  // alto throughput, agregar updatedAt y resetear por claim-time.
+  await prisma.domainEvent.updateMany({
+    where: { status: 'PROCESSING', occurredAt: { lt: new Date(Date.now() - STALE_PROCESSING_MS) } },
+    data: { status: 'PENDING' },
+  })
 
   // Reclama un lote de eventos PENDING (FOR UPDATE SKIP LOCKED).
   const batch = await prisma.$transaction(async (tx) => {
