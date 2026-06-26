@@ -52,3 +52,51 @@ describe('pipower-catalog — tag-on flex consolidation', () => {
     expect(new Set(slugs).size).toBe(slugs.length)
   })
 })
+
+describe('pipower-catalog — Extended Capacity (mAh documentado por modelo)', () => {
+  const bySku = (sku: string) => PIPOWER_PRODUCTS.find((p) => p.sku === sku)
+  const attrsOf = (sku: string) =>
+    (bySku(sku)?.attributes ?? {}) as { capacity?: unknown; rated_capacity_mah?: unknown }
+
+  // Solo modelos con mapeo inequívoco a una celda documentada (高容) en
+  // docs/sources/capacity-data.md: iPhone 13 / 14 / 15 base.
+  const MAPPED: Record<string, number> = {
+    'PP-BC-13': 3630,
+    'PP-BC-14': 3580,
+    'PP-BC-15': 3520,
+  }
+
+  it('los modelos documentados cargan capacity (string "<mAh> mAh") + rated_capacity_mah (número)', () => {
+    for (const [sku, mah] of Object.entries(MAPPED)) {
+      const a = attrsOf(sku)
+      expect(a.capacity, sku).toBe(`${mah} mAh`)
+      expect(a.rated_capacity_mah, sku).toBe(mah)
+      // El sistema solo rendea capacity si es string real (FU-010 / product-display).
+      expect(typeof a.capacity, sku).toBe('string')
+    }
+  })
+
+  it('NO publica % vs OEM en ningún copy de capacidad (solo mAh absoluto)', () => {
+    for (const sku of Object.keys(MAPPED)) {
+      expect(String(attrsOf(sku).capacity), sku).not.toContain('%')
+    }
+  })
+
+  it('los modelos SIN figura documentada (12/12 Pro, Pro, Pro Max) NO traen capacity inventada', () => {
+    const UNMAPPED = [
+      'PP-BC-1212P',
+      'PP-BC-12PM',
+      'PP-BC-13P',
+      'PP-BC-13PM',
+      'PP-BC-14P',
+      'PP-BC-14PM',
+      'PP-BC-15P',
+      'PP-BC-15PM',
+    ]
+    for (const sku of UNMAPPED) {
+      const a = attrsOf(sku)
+      expect(a.capacity, sku).toBeUndefined()
+      expect(a.rated_capacity_mah, sku).toBeUndefined()
+    }
+  })
+})
