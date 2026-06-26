@@ -32,6 +32,21 @@ async function recipientsForPayment(aggregateId: string): Promise<string[]> {
   return payment?.order ? [payment.order.placedByUserId] : []
 }
 
+/**
+ * Canal de pago: una orden con un Payment STRIPE_CARD se cobra por tarjeta
+ * (Stripe). En ese caso los emails escalonados del flujo wire (order.placed,
+ * invoice.issued "pay via wire") se SUPRIMEN — el cliente recibe un único email
+ * consolidado en payment.captured. Para wire (sin Payment de tarjeta) no cambia.
+ */
+async function orderPaidByCard(orderId: string): Promise<boolean> {
+  if (!orderId) return false
+  const card = await prisma.payment.findFirst({
+    where: { orderId, method: 'STRIPE_CARD' },
+    select: { id: true },
+  })
+  return card !== null
+}
+
 async function recipientsForShipment(aggregateId: string): Promise<string[]> {
   const sh = await prisma.shipment.findUnique({
     where: { id: aggregateId },
@@ -41,20 +56,33 @@ async function recipientsForShipment(aggregateId: string): Promise<string[]> {
 }
 
 const MAPPERS: Partial<Record<DomainEventType, MailMapper>> = {
-  'order.placed': async (e) => ({
-    type: 'ORDER_PLACED',
-    title: 'Orden recibida',
-    body: `Recibimos tu orden ${String(e.payload.orderNumber ?? e.aggregateId)}.`,
-    link: `/orders/${e.aggregateId}`,
-    recipients: await recipientsForOrderAggregate(e.aggregateId),
-  }),
-  'payment.captured': async (e) => ({
-    type: 'PAYMENT_CAPTURED',
-    title: 'Pago capturado',
-    body: 'Confirmamos el pago de tu orden.',
-    link: `/orders/${String(e.payload.orderId ?? '')}`,
-    recipients: await recipientsForPayment(e.aggregateId),
-  }),
+  'order.placed': async (e) => {
+    // Tarjeta → email consolidado en payment.captured; no este escalonado.
+    if (await orderPaidByCard(e.aggregateId)) return null
+    return {
+      type: 'ORDER_PLACED',
+      title: 'Orden recibida',
+      body: `Recibimos tu orden ${String(e.payload.orderNumber ?? e.aggregateId)}.`,
+      link: `/orders/${e.aggregateId}`,
+      recipients: await recipientsForOrderAggregate(e.aggregateId),
+    }
+  },
+  'payment.captured': async (e) => {
+    // Email consolidado (confirmación + recibo) del pago con tarjeta. El subject
+    // del inbox = title.
+    const orderId = String(e.payload.orderId ?? '')
+    const order = orderId
+      ? await prisma.order.findUnique({ where: { id: orderId }, select: { orderNumber: true } })
+      : null
+    const orderNumber = order?.orderNumber ?? orderId
+    return {
+      type: 'PAYMENT_CAPTURED',
+      title: `¡Gracias por tu compra! — Orden ${orderNumber}`,
+      body: `Recibimos tu pago. Tu orden ${orderNumber} está confirmada y en preparación.`,
+      link: `/orders/${orderId}`,
+      recipients: await recipientsForPayment(e.aggregateId),
+    }
+  },
   'payment.reconciled': async (e) => ({
     type: 'PAYMENT_RECONCILED',
     title: 'Wire recibido',
@@ -63,6 +91,8 @@ const MAPPERS: Partial<Record<DomainEventType, MailMapper>> = {
     recipients: await recipientsForPayment(e.aggregateId),
   }),
   'invoice.issued': async (e) => {
+    // Tarjeta → la factura "pay via wire" es incorrecta; va el consolidado.
+    if (await orderPaidByCard(String(e.payload.orderId ?? ''))) return null
     const invoiceId = e.aggregateId
     const inv = await prisma.invoice.findUnique({
       where: { id: invoiceId },

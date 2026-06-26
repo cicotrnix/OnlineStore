@@ -46,7 +46,9 @@ export async function createInvoiceFromOrder(
       where: { organizationId: org.id },
       select: { userId: true },
     })
-    if (orgMembers.length > 0) {
+    // PREPAID (days===0, p.ej. tarjeta Stripe) no tiene fecha de vencimiento →
+    // el email "vence en X días" no aplica. Solo se manda con términos a crédito.
+    if (days > 0 && orgMembers.length > 0) {
       await dispatch({
         userIds: orgMembers.map((m) => m.userId),
         type: 'INVOICE_DUE_SOON',
@@ -66,7 +68,7 @@ export async function createInvoiceFromOrder(
 
 export async function settleInvoiceForPaidOrder(
   tx: Prisma.TransactionClient,
-  input: { orderId: string; paidById: string; reference: string }
+  input: { orderId: string; paidById: string; reference: string; notify?: boolean }
 ): Promise<void> {
   const invoice = await tx.invoice.findUnique({ where: { orderId: input.orderId } })
   if (!invoice) return // no invoice yet — no-op
@@ -91,7 +93,9 @@ export async function settleInvoiceForPaidOrder(
     where: { organizationId: invoice.organizationId },
     select: { userId: true },
   })
-  if (members.length > 0) {
+  // notify=false: la captura con tarjeta manda 1 email consolidado (PAYMENT_CAPTURED),
+  // así que se suprime el INVOICE_PAID. Wire (default) lo mantiene.
+  if (input.notify !== false && members.length > 0) {
     // Notification dispatch is NOT part of the transaction; if the outer tx rolls back, the notification has already fired. Matches markPaid's behavior.
     await dispatch({
       userIds: members.map((m) => m.userId),
