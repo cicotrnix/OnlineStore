@@ -29,6 +29,7 @@ import {
 import type { BaseTemplateProps } from './templates/_base'
 
 export type RenderVars = BaseTemplateProps
+export type { ReceiptData } from './templates/_base'
 
 const TEMPLATES: Record<NotificationType, (p: BaseTemplateProps) => JSX.Element> = {
   QUOTE_SUBMITTED: QuoteSubmittedEmail,

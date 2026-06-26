@@ -46,7 +46,9 @@ describe('BaseTemplate — CTA href', () => {
   it('sin link no renderiza CTA', () => {
     vi.stubEnv('NEXTAUTH_URL', 'https://pipower.shop')
     const html = renderToStaticMarkup(BaseTemplate({ title: 't', body: 'b', userName: 'Buyer' }))
-    expect(html).not.toContain('https://pipower.shop')
+    // El CTA es el único <a> del template (el logo es <img>, el footer es texto).
+    // Sin link → sin ancla. (No se chequea el dominio: el logo de marca lo usa.)
+    expect(html).not.toContain('<a')
   })
 })
 
