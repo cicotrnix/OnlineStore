@@ -3,7 +3,7 @@ import { sendEmail } from '@/lib/email/resend'
 import { DEFAULT_LOCALE, isSupportedLocale } from '@/lib/i18n'
 import { logger } from '@/lib/observability/logger'
 import type { Notification, NotificationType } from '@prisma/client'
-import { renderEmailFor } from './email'
+import { type ReceiptData, renderEmailFor } from './email'
 
 export interface DispatchInput {
   userIds: string[]
@@ -41,6 +41,30 @@ export async function dispatch(input: DispatchInput): Promise<void> {
   )
 }
 
+/**
+ * Datos del recibo para el email consolidado PAYMENT_CAPTURED. Se arman en el
+ * render (la Notification solo guarda title/body/link). subjectId = payment.id.
+ */
+async function receiptVarsFor(notif: Notification): Promise<ReceiptData | undefined> {
+  if (notif.type !== 'PAYMENT_CAPTURED' || !notif.subjectId) return undefined
+  const payment = await prisma.payment.findUnique({
+    where: { id: notif.subjectId },
+    select: { method: true, orderId: true },
+  })
+  if (!payment) return undefined
+  const invoice = await prisma.invoice.findUnique({
+    where: { orderId: payment.orderId },
+    select: { number: true, amount: true, paidAt: true },
+  })
+  if (!invoice) return undefined
+  return {
+    invoiceNumber: invoice.number,
+    dateFormatted: (invoice.paidAt ?? new Date()).toISOString().slice(0, 10),
+    method: payment.method === 'STRIPE_CARD' ? 'Tarjeta' : 'Transferencia',
+    totalFormatted: `$${invoice.amount.toFixed(2)}`,
+  }
+}
+
 async function sendNotificationEmail(notif: Notification): Promise<void> {
   const user = await prisma.user.findUnique({ where: { id: notif.userId } })
   if (!user?.email) return
@@ -50,6 +74,7 @@ async function sendNotificationEmail(notif: Notification): Promise<void> {
       user.preferredLocale && isSupportedLocale(user.preferredLocale)
         ? user.preferredLocale
         : DEFAULT_LOCALE
+    const receipt = await receiptVarsFor(notif)
     const rendered = await renderEmailFor(
       notif.type,
       {
@@ -57,6 +82,7 @@ async function sendNotificationEmail(notif: Notification): Promise<void> {
         body: notif.body,
         link: notif.link,
         userName: user.name ?? 'there',
+        receipt,
       },
       locale
     )

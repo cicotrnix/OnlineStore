@@ -318,6 +318,7 @@ export async function handleStripeWebhook(
       orderId: payment.orderId,
       paidById: payment.order.placedByUserId,
       reference: `stripe:${event.id}`,
+      notify: false, // tarjeta: 1 email consolidado en payment.captured, sin INVOICE_PAID
     })
 
     // COGS calculado desde Product.unitCostCents (0n si ningún producto tiene costo).
