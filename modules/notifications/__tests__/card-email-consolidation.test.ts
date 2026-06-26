@@ -27,11 +27,18 @@ beforeEach(async () => {
   registerSubscriber(emailSubscriber) // solo email (accounting fuera → sin chart)
 })
 
-async function makeOrder(): Promise<{ userId: string; orderId: string; orderNumber: string }> {
+async function makeOrder(
+  opts: { paymentTerms?: 'PREPAID' | 'NET_30'; withCardPayment?: boolean } = {}
+): Promise<{ userId: string; orderId: string; orderNumber: string }> {
   const s = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   const user = await prisma.user.create({ data: { email: `b-${s}@t.com`, name: 'Buyer' } })
   const org = await prisma.organization.create({
-    data: { name: 'O', slug: `o-${s}`, verificationStatus: 'VERIFIED', paymentTerms: 'PREPAID' },
+    data: {
+      name: 'O',
+      slug: `o-${s}`,
+      verificationStatus: 'VERIFIED',
+      paymentTerms: opts.paymentTerms ?? 'PREPAID',
+    },
   })
   await prisma.organizationMember.create({
     data: { organizationId: org.id, userId: user.id, role: 'OWNER' },
@@ -84,6 +91,19 @@ async function makeOrder(): Promise<{ userId: string; orderId: string; orderNumb
       },
     },
   })
+  if (opts.withCardPayment) {
+    await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        method: 'STRIPE_CARD',
+        status: 'PENDING',
+        amountCents: 5000n,
+        currency: 'USD',
+        stripeSessionId: `cs_${s}`,
+        idempotencyKey: `idem-${s}`,
+      },
+    })
+  }
   return { userId: user.id, orderId: order.id, orderNumber: order.orderNumber }
 }
 
@@ -153,5 +173,19 @@ describe('consolidación de email para pago con tarjeta', () => {
     const types = (await prisma.notification.findMany({ where: { userId } })).map((n) => n.type)
     expect(types).toContain('ORDER_PLACED')
     expect(types).toContain('INVOICE_ISSUED')
+  })
+
+  it('orden NET pagada con tarjeta → INVOICE_DUE_SOON suprimido (cardPaid, no solo days)', async () => {
+    const { userId, orderId } = await makeOrder({ paymentTerms: 'NET_30', withCardPayment: true })
+    await createInvoiceFromOrder(orderId) // dispatch directo de INVOICE_DUE_SOON
+    const dueSoon = await prisma.notification.count({ where: { type: 'INVOICE_DUE_SOON', userId } })
+    expect(dueSoon).toBe(0)
+  })
+
+  it('orden NET por wire (sin tarjeta) → INVOICE_DUE_SOON SÍ se manda', async () => {
+    const { userId, orderId } = await makeOrder({ paymentTerms: 'NET_30' })
+    await createInvoiceFromOrder(orderId)
+    const dueSoon = await prisma.notification.count({ where: { type: 'INVOICE_DUE_SOON', userId } })
+    expect(dueSoon).toBe(1)
   })
 })
