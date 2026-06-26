@@ -40,6 +40,22 @@ async function main() {
   })
   const orderNumberById = new Map(orders.map((o) => [o.id, o.orderNumber]))
 
+  // Notification PAYMENT_CAPTURED del comprador (subjectId = payment.id =
+  // event.aggregateId). Muestra si el email se envió o por qué falló (delivery
+  // DONE no garantiza envío: dispatch traga el error de Resend).
+  const aggregateIds = events.map((e) => e.aggregateId)
+  const notifs = await prisma.notification.findMany({
+    where: { type: 'PAYMENT_CAPTURED', subjectId: { in: aggregateIds } },
+    include: { user: { select: { email: true } } },
+  })
+  const notifsBySubject = new Map<string, typeof notifs>()
+  for (const n of notifs) {
+    const key = n.subjectId ?? ''
+    const arr = notifsBySubject.get(key) ?? []
+    arr.push(n)
+    notifsBySubject.set(key, arr)
+  }
+
   console.log(`Últimos ${events.length} eventos payment.captured (más reciente primero):\n`)
   for (const e of events) {
     const orderId = String((e.payload as Record<string, unknown>).orderId ?? '')
@@ -50,12 +66,22 @@ async function main() {
     console.log(`EVENT.status : ${e.status}`)
     if (e.deliveries.length === 0) {
       console.log('deliveries   : (ninguna — el evento nunca se dispatchó)')
-      continue
+    } else {
+      for (const d of e.deliveries) {
+        console.log(
+          `  delivery[${d.subscriber}] status=${d.status} attempts=${d.attempts} lastError=${d.lastError ?? '-'}`
+        )
+      }
     }
-    for (const d of e.deliveries) {
-      console.log(
-        `  delivery[${d.subscriber}] status=${d.status} attempts=${d.attempts} lastError=${d.lastError ?? '-'}`
-      )
+    const ns = notifsBySubject.get(e.aggregateId) ?? []
+    if (ns.length === 0) {
+      console.log('notification : (ninguna PAYMENT_CAPTURED para este pago)')
+    } else {
+      for (const n of ns) {
+        console.log(
+          `  notif[${n.userId}] email=${n.user.email} emailSentAt=${n.emailSentAt?.toISOString() ?? 'NULL'} emailFailedReason=${n.emailFailedReason ?? '-'}`
+        )
+      }
     }
   }
 }
