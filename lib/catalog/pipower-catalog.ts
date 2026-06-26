@@ -34,6 +34,20 @@ export const PIPOWER_CATEGORIES: CatalogCategory[] = [
 ]
 
 const SPOT = { spot_welding_required: true }
+/**
+ * Capacidad alta (高容) documentada por modelo (mAh), fuente: MSDS del fabricante
+ * vía docs/sources/capacity-data.md. Solo el mAh ABSOLUTO es dato duro; el % vs
+ * OEM NO se publica (baselines sin verificar). Línea = "Extended Capacity" SIN %.
+ * Solo se cargan los modelos con mapeo inequívoco a una sola celda documentada:
+ *   - 12/12 Pro y los Pro/Pro Max NO están documentados como tal en la tabla →
+ *     se dejan SIN capacity (no se adivina).
+ *   - `capacity` = string que el card/PDP rendea (FU-010); `rated_capacity_mah`
+ *     = el número crudo para futuro consumo (specs/comparativas).
+ */
+const hiCap = (mah: number) => ({
+  capacity: `${mah} mAh`,
+  rated_capacity_mah: mah,
+})
 const cellDesc = (m: string) =>
   `Celda de alta capacidad para ${m}. 0 ciclos, 100% de salud de fábrica. Requiere soldadura por puntos (spot welding).`
 const flexDesc = (m: string) => `${cellDesc(m)} Incluye flex programado.`
@@ -72,7 +86,7 @@ const batteryCell: CatalogProduct[] = [
     stockQuantity: 120,
     imageUrl: '/products/iphone-13.png',
     categorySlug: 'battery-cell',
-    attributes: SPOT,
+    attributes: { ...SPOT, ...hiCap(3630) },
   },
   {
     sku: 'PP-BC-13P',
@@ -105,7 +119,7 @@ const batteryCell: CatalogProduct[] = [
     stockQuantity: 110,
     imageUrl: '/products/iphone-14.png',
     categorySlug: 'battery-cell',
-    attributes: SPOT,
+    attributes: { ...SPOT, ...hiCap(3580) },
   },
   {
     sku: 'PP-BC-14P',
@@ -138,7 +152,7 @@ const batteryCell: CatalogProduct[] = [
     stockQuantity: 80,
     imageUrl: '/products/iphone-15-flex.png',
     categorySlug: 'battery-cell',
-    attributes: { ...SPOT, flex_programmed: true },
+    attributes: { ...SPOT, flex_programmed: true, ...hiCap(3520) },
   },
   {
     sku: 'PP-BC-15P',
