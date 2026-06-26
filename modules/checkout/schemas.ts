@@ -12,6 +12,7 @@ export const confirmCheckoutSchema = z.object({
   shippingAddressId: z.string().cuid(),
   poNumber: z.string().max(50).optional().nullable(),
   notes: z.string().max(1000).optional().nullable(),
+  termsAccepted: z.boolean().optional(),
 })
 
 export type ReviewCheckoutInput = z.infer<typeof reviewCheckoutSchema>

@@ -367,6 +367,8 @@ model Order {
   deliveredAt       DateTime?
   cancelledAt       DateTime?
   cancelledByUserId String?
+  termsAcceptedAt   DateTime?
+  termsVersion      String?
 
   organization      Organization        @relation(fields: [organizationId], references: [id])
   placedBy          User                @relation("OrderPlacedBy", fields: [placedByUserId], references: [id])
