@@ -1,5 +1,10 @@
 import { type Locale, t } from '@/lib/i18n'
 import { Body, Container, Head, Heading, Html, Link, Section, Text } from '@react-email/components'
+// Runtime React binding: el JSX se transforma al runtime clásico
+// (React.createElement) en el contexto del cron (pnpm tsx/esbuild). Sin este
+// import → "React is not defined" al renderizar. import type no alcanza.
+// biome-ignore lint/correctness/noUnusedImports: binding de runtime del transform clásico — el render lo usa aunque no se referencie explícito (biome asume runtime automático).
+import * as React from 'react'
 import type { JSX } from 'react'
 
 export interface BaseTemplateProps {
