@@ -61,6 +61,11 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Render de emails en el transform de prod (tsx/esbuild), que vitest NO
+      # reproduce. Agarra "React is not defined" y cualquier template roto.
+      - name: Email render smoke (tsx)
+        run: pnpm tsx scripts/smoke-email-render.ts
+
       - name: Unit tests
         env:
           RUN_INTEGRATION: '1'
