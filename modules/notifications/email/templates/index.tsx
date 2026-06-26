@@ -1,3 +1,7 @@
+// Runtime React binding (ver _base.tsx): sin esto el render del cron tsx tira
+// "React is not defined" porque el JSX usa el transform clásico.
+// biome-ignore lint/correctness/noUnusedImports: binding de runtime del transform clásico — el render lo usa aunque no se referencie explícito (biome asume runtime automático).
+import * as React from 'react'
 import type { JSX } from 'react'
 import { BaseTemplate, type BaseTemplateProps } from './_base'
 
