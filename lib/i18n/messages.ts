@@ -318,6 +318,8 @@ export type MessageKey =
   | 'pdp.tierMinQty'
   | 'pdp.tierUnitPrice'
   | 'pdp.requestQuote'
+  | 'pdp.batteryHealth.title'
+  | 'pdp.batteryHealth.body'
   // Cart
   | 'cart.title'
   | 'cart.empty.title'
@@ -1126,6 +1128,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'pdp.tierMinQty': 'Min. quantity',
     'pdp.tierUnitPrice': 'Unit price',
     'pdp.requestQuote': 'Request a quote',
+    'pdp.batteryHealth.title': 'Battery health stays visible',
+    'pdp.batteryHealth.body':
+      'It\'s a cell plus a tag-on flex, so the iPhone\'s original Apple circuit is reused. When a technician installs it on that original circuit, iOS keeps reading and displaying the battery health percentage — no "Unknown Part" notice for the battery. Back to 100%, with the health readout intact.',
     // Cart
     'cart.title': 'Cart',
     'cart.empty.title': 'Your cart is empty',
@@ -1934,6 +1939,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'pdp.tierMinQty': 'Cantidad mínima',
     'pdp.tierUnitPrice': 'Precio unitario',
     'pdp.requestQuote': 'Solicitar cotización',
+    'pdp.batteryHealth.title': 'La salud de la batería se sigue mostrando',
+    'pdp.batteryHealth.body':
+      'Es una celda más un flex tag-on, así que se reutiliza el circuito Apple original del iPhone. Cuando el técnico la instala sobre ese circuito original, iOS sigue leyendo y mostrando el porcentaje de salud de la batería — sin aviso de "Pieza desconocida" para la batería. Back to 100%, con la lectura de salud intacta.',
     // Cart
     'cart.title': 'Carrito',
     'cart.empty.title': 'Tu carrito está vacío',

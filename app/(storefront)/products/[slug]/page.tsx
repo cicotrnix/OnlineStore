@@ -140,6 +140,19 @@ export default async function ProductPage({ params }: Props) {
               <Badge variant="info">{t(locale, 'pdp.privateBadge')}</Badge>
             </div>
           )}
+          {/* Selling point "Back to 100%": la celda + tag-on flex reusa el
+              circuito Apple original → iOS sigue mostrando la salud, sin aviso
+              de "Pieza desconocida" (matiz: para una celda BIEN instalada). */}
+          {product.category.slug === 'battery-cell' && (
+            <div className="mt-6 rounded-xl border border-lime-200 bg-lime-50/60 p-4">
+              <p className="text-sm font-semibold text-gray-900">
+                {t(locale, 'pdp.batteryHealth.title')}
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
+                {t(locale, 'pdp.batteryHealth.body')}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
