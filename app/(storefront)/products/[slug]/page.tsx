@@ -140,6 +140,12 @@ export default async function ProductPage({ params }: Props) {
               <Badge variant="info">{t(locale, 'pdp.privateBadge')}</Badge>
             </div>
           )}
+          {/* Disclaimers de punto de venta (bajo el botón de compra): aftermarket/
+              no-Apple, instalación por técnico, Extended Capacity sin %, garantía
+              12 meses. NO incluye el aviso iOS "Pieza desconocida" (no aplica a celdas). */}
+          <p className="mt-6 border-t border-gray-100 pt-4 text-xs leading-relaxed text-gray-500">
+            {t(locale, 'pdp.disclaimers')}
+          </p>
         </div>
       </div>
 

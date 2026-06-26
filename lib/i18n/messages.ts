@@ -807,6 +807,7 @@ export type MessageKey =
   // Checkout — acknowledgment obligatorio (checkbox antes de pagar)
   | 'checkout.terms.label'
   | 'checkout.terms.required'
+  | 'checkout.toast.termsRequired'
   // PDP — bloque de disclaimers bajo el botón de compra
   | 'pdp.disclaimers'
 
@@ -1636,6 +1637,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.terms.label':
       "I'm purchasing as a business (for resale or repair) and confirm I've read and accept the Terms of Sale, Warranty, Shipping (lithium/hazmat) and Refund policies. I understand these are aftermarket parts and that I'm the importer of record for shipments outside the US.",
     'checkout.terms.required': 'You must accept the terms to place the order.',
+    'checkout.toast.termsRequired': 'Please accept the terms to place your order.',
     // PDP disclaimers (below the buy button)
     'pdp.disclaimers':
       "Aftermarket replacement cell — not affiliated with Apple. For installation by qualified technicians only (reuses the device's original battery circuit; the tag-on flex enables battery-health reporting). 'Extended Capacity' means higher capacity than the equivalent OEM battery per manufacturer specs; real runtime varies. 12-month limited warranty (manufacturing defects only). See Terms, Warranty & Shipping.",
@@ -2471,6 +2473,7 @@ export const MESSAGES: Record<Locale, Dict> = {
     'checkout.terms.label':
       'Compro como negocio (para reventa o reparación) y confirmo que leí y acepto los Términos de venta, Garantía, Envíos (litio/hazmat) y Devoluciones. Entiendo que son piezas aftermarket y que soy el importador de registro para envíos fuera de USA.',
     'checkout.terms.required': 'Debes aceptar los términos para colocar la orden.',
+    'checkout.toast.termsRequired': 'Acepta los términos para colocar tu orden.',
     // PDP — disclaimers bajo el botón de compra
     'pdp.disclaimers':
       "Celda de reemplazo aftermarket — no afiliada a Apple. Solo para instalación por técnicos calificados (reutiliza el circuito original del equipo; el tag-on flex habilita la lectura de salud de batería). 'Extended Capacity' = mayor capacidad que la batería OEM equivalente según el fabricante; la autonomía real varía. Garantía limitada de 12 meses (solo defectos de fabricación). Ver Términos, Garantía y Envíos.",

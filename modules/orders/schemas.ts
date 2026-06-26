@@ -18,5 +18,7 @@ export const transitionStatusSchema = z.object({
   newStatus: z.enum(['CONFIRMED', 'SHIPPED', 'DELIVERED']),
 })
 
-export type PlaceOrderInput = z.infer<typeof placeOrderSchema>
+// `z.input` para que `termsVersion` sea opcional al llamar (tiene `.default`);
+// la salida parseada siempre lo tiene definido y se persiste en la orden.
+export type PlaceOrderInput = z.input<typeof placeOrderSchema>
 export type TransitionStatusInput = z.infer<typeof transitionStatusSchema>
