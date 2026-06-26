@@ -73,7 +73,7 @@ async function cancelOrderInTx(
 
 export const ordersService = {
   async placeOrder(input: PlaceOrderInput) {
-    const { userId, orgId, billingAddressId, shippingAddressId, poNumber, notes } =
+    const { userId, orgId, billingAddressId, shippingAddressId, poNumber, notes, termsVersion } =
       placeOrderSchema.parse(input)
 
     return prisma.$transaction(async (tx) => {
@@ -129,6 +129,8 @@ export const ordersService = {
           paymentDueAt: new Date(Date.now() + PAYMENT_DUE_MS),
           poNumber: poNumber ?? null,
           notes: notes ?? null,
+          termsAcceptedAt: new Date(),
+          termsVersion,
           billingAddressId,
           shippingAddressId,
           subtotal,

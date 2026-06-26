@@ -104,6 +104,7 @@ export async function placeOrderAction(formData: FormData) {
   const shippingAddressId = String(formData.get('shippingAddressId'))
   const poNumber = formData.get('poNumber')?.toString().trim() || null
   const notes = formData.get('notes')?.toString().trim() || null
+  const termsAccepted = formData.get('termsAccepted') === 'yes'
 
   let order: { id: string }
   try {
@@ -114,6 +115,7 @@ export async function placeOrderAction(formData: FormData) {
       shippingAddressId,
       poNumber,
       notes,
+      termsAccepted,
     })
   } catch (err) {
     logger.error({ err, userId: user.id, orgId, action: 'placeOrder' }, 'checkout action failed')

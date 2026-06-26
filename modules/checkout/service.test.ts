@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/client'
+import { TERMS_VERSION } from '@/lib/legal'
 import { cartService } from '@/modules/cart'
 import { catalogService } from '@/modules/catalog'
 import { customersService } from '@/modules/customers'
@@ -130,8 +131,50 @@ describe('checkoutService.confirm', () => {
       orgId: org.id,
       billingAddressId: billing.id,
       shippingAddressId: shipping.id,
+      termsAccepted: true,
     })
     expect(order.orderNumber).toMatch(/^ORD-\d{4}-\d{6}$/)
+  })
+
+  it('rejects when terms are not accepted (server-side hard gate)', async () => {
+    const { user, org, product, billing, shipping } = await seed()
+    await cartService.addItem({
+      userId: user.id,
+      productId: product.id,
+      quantity: 1,
+      orgId: org.id,
+    })
+    await expect(
+      checkoutService.confirm({
+        userId: user.id,
+        orgId: org.id,
+        billingAddressId: billing.id,
+        shippingAddressId: shipping.id,
+        // termsAccepted omitted → must be rejected
+      })
+    ).rejects.toThrow('TERMS_NOT_ACCEPTED')
+    // No order should have been created.
+    expect(await prisma.order.count({ where: { organizationId: org.id } })).toBe(0)
+  })
+
+  it('persists termsAcceptedAt + termsVersion when accepted', async () => {
+    const { user, org, product, billing, shipping } = await seed()
+    await cartService.addItem({
+      userId: user.id,
+      productId: product.id,
+      quantity: 1,
+      orgId: org.id,
+    })
+    const order = await checkoutService.confirm({
+      userId: user.id,
+      orgId: org.id,
+      billingAddressId: billing.id,
+      shippingAddressId: shipping.id,
+      termsAccepted: true,
+    })
+    const persisted = await prisma.order.findUnique({ where: { id: order.id } })
+    expect(persisted?.termsAcceptedAt).toBeInstanceOf(Date)
+    expect(persisted?.termsVersion).toBe(TERMS_VERSION)
   })
 
   it('propagates InsufficientStockError', async () => {
@@ -148,6 +191,7 @@ describe('checkoutService.confirm', () => {
         orgId: org.id,
         billingAddressId: billing.id,
         shippingAddressId: shipping.id,
+        termsAccepted: true,
       })
     ).rejects.toBeInstanceOf(InsufficientStockError)
   })
@@ -167,6 +211,7 @@ describe('checkoutService.confirm', () => {
         orgId: org.id,
         billingAddressId: billing.id,
         shippingAddressId: shipping.id,
+        termsAccepted: true,
       })
     ).rejects.toBeInstanceOf(ProductInactiveError)
   })
@@ -179,6 +224,7 @@ describe('checkoutService.confirm', () => {
         orgId: org.id,
         billingAddressId: billing.id,
         shippingAddressId: shipping.id,
+        termsAccepted: true,
       })
     ).rejects.toBeInstanceOf(EmptyCartError)
   })

@@ -7,10 +7,15 @@ function isOrgNotVerified(err: unknown): boolean {
   return err instanceof Error && err.message === 'ORG_NOT_VERIFIED'
 }
 
+function isTermsNotAccepted(err: unknown): boolean {
+  return err instanceof Error && err.message === 'TERMS_NOT_ACCEPTED'
+}
+
 export function checkoutErrorKey(err: unknown): MessageKey {
   if (err instanceof InsufficientStockError) return 'checkout.toast.insufficientStock'
   if (err instanceof ProductInactiveError) return 'checkout.toast.inactive'
   if (err instanceof EmptyCartError) return 'checkout.toast.empty'
+  if (isTermsNotAccepted(err)) return 'checkout.toast.termsRequired'
   if (isOrgNotVerified(err)) return 'checkout.toast.notVerified'
   return 'checkout.toast.failed'
 }

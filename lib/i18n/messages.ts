@@ -793,6 +793,25 @@ export type MessageKey =
   | 'reorder.toast.notFound'
   | 'reorder.toast.notVerified'
   | 'reorder.toast.failed'
+  // Legal pages (4 rutas: terms, privacy, returns, shipping)
+  | 'legal.terms.title'
+  | 'legal.privacy.title'
+  | 'legal.returns.title'
+  | 'legal.shipping.title'
+  | 'legal.draftNotice'
+  // Footer storefront (links legales + disclaimer de marca)
+  | 'footer.legalHeading'
+  | 'footer.terms'
+  | 'footer.privacy'
+  | 'footer.returns'
+  | 'footer.shipping'
+  | 'footer.brandDisclaimer'
+  // Checkout — acknowledgment obligatorio (checkbox antes de pagar)
+  | 'checkout.terms.label'
+  | 'checkout.terms.required'
+  | 'checkout.toast.termsRequired'
+  // PDP — bloque de disclaimers bajo el botón de compra
+  | 'pdp.disclaimers'
 
 type Dict = Record<MessageKey, string>
 
@@ -1604,6 +1623,29 @@ export const MESSAGES: Record<Locale, Dict> = {
     'reorder.toast.notFound': 'Order not found.',
     'reorder.toast.notVerified': 'Your account must be verified to reorder.',
     'reorder.toast.failed': 'Could not reorder.',
+    // Legal pages
+    'legal.terms.title': 'Terms of Sale',
+    'legal.privacy.title': 'Privacy Policy',
+    'legal.returns.title': 'Refund & Return Policy',
+    'legal.shipping.title': 'Shipping Policy',
+    'legal.draftNotice':
+      'Draft pending legal review. The final text replaces this version before publication.',
+    // Footer
+    'footer.legalHeading': 'Legal',
+    'footer.terms': 'Terms of Sale',
+    'footer.privacy': 'Privacy Policy',
+    'footer.returns': 'Refund & Return Policy',
+    'footer.shipping': 'Shipping Policy',
+    'footer.brandDisclaimer':
+      'Aftermarket product. Not affiliated with, authorized or endorsed by Apple Inc.',
+    // Checkout acknowledgment (required before paying)
+    'checkout.terms.label':
+      "I'm purchasing as a business (for resale or repair) and confirm I've read and accept the Terms of Sale, Warranty, Shipping (lithium/hazmat) and Refund policies. I understand these are aftermarket parts and that I'm the importer of record for shipments outside the US.",
+    'checkout.terms.required': 'You must accept the terms to place the order.',
+    'checkout.toast.termsRequired': 'Please accept the terms to place your order.',
+    // PDP disclaimers (below the buy button)
+    'pdp.disclaimers':
+      "Aftermarket replacement cell — not affiliated with Apple. For installation by qualified technicians only (reuses the device's original battery circuit; the tag-on flex enables battery-health reporting). 'Extended Capacity' means higher capacity than the equivalent OEM battery per manufacturer specs; real runtime varies. 12-month limited warranty (manufacturing defects only). See Terms, Warranty & Shipping.",
   },
   'es-419': {
     'localeSwitch.label': 'Idioma',
@@ -2420,6 +2462,29 @@ export const MESSAGES: Record<Locale, Dict> = {
     'reorder.toast.notFound': 'Pedido no encontrado.',
     'reorder.toast.notVerified': 'Tu cuenta debe estar verificada para re-pedir.',
     'reorder.toast.failed': 'No pudimos re-pedir.',
+    // Páginas legales
+    'legal.terms.title': 'Términos de venta',
+    'legal.privacy.title': 'Política de privacidad',
+    'legal.returns.title': 'Política de reembolsos y devoluciones',
+    'legal.shipping.title': 'Política de envíos',
+    'legal.draftNotice':
+      'Borrador pendiente de revisión legal. El texto final reemplaza esta versión antes de publicar.',
+    // Footer
+    'footer.legalHeading': 'Legal',
+    'footer.terms': 'Términos de venta',
+    'footer.privacy': 'Política de privacidad',
+    'footer.returns': 'Reembolsos y devoluciones',
+    'footer.shipping': 'Política de envíos',
+    'footer.brandDisclaimer':
+      'Producto aftermarket. No afiliado, autorizado ni respaldado por Apple Inc.',
+    // Checkout — acknowledgment (obligatorio antes de pagar)
+    'checkout.terms.label':
+      'Compro como negocio (para reventa o reparación) y confirmo que leí y acepto los Términos de venta, Garantía, Envíos (litio/hazmat) y Devoluciones. Entiendo que son piezas aftermarket y que soy el importador de registro para envíos fuera de USA.',
+    'checkout.terms.required': 'Debes aceptar los términos para colocar la orden.',
+    'checkout.toast.termsRequired': 'Acepta los términos para colocar tu orden.',
+    // PDP — disclaimers bajo el botón de compra
+    'pdp.disclaimers':
+      "Celda de reemplazo aftermarket — no afiliada a Apple. Solo para instalación por técnicos calificados (reutiliza el circuito original del equipo; el tag-on flex habilita la lectura de salud de batería). 'Extended Capacity' = mayor capacidad que la batería OEM equivalente según el fabricante; la autonomía real varía. Garantía limitada de 12 meses (solo defectos de fabricación). Ver Términos, Garantía y Envíos.",
   },
 }
 

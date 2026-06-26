@@ -183,6 +183,23 @@ export default async function CheckoutPage() {
             )}
           </section>
 
+          {/* Acknowledgment legal — checkbox obligatorio antes de pagar. */}
+          <section className={section}>
+            <div className="flex items-start gap-3">
+              <input
+                id="termsAccepted"
+                name="termsAccepted"
+                type="checkbox"
+                value="yes"
+                required
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+              />
+              <label htmlFor="termsAccepted" className="text-sm leading-relaxed text-gray-700">
+                {t(locale, 'checkout.terms.label')}
+              </label>
+            </div>
+          </section>
+
           {/* Step 3: PO + notes */}
           <section className={section}>
             <h2 className={heading}>{t(locale, 'checkout.step3')}</h2>

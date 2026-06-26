@@ -65,6 +65,7 @@ describe('checkout verification gate (Fase 5)', () => {
         orgId: org.id,
         billingAddressId: addr.id,
         shippingAddressId: addr.id,
+        termsAccepted: true,
       })
     ).rejects.toThrow('ORG_NOT_VERIFIED')
   })
@@ -76,6 +77,7 @@ describe('checkout verification gate (Fase 5)', () => {
       orgId: org.id,
       billingAddressId: addr.id,
       shippingAddressId: addr.id,
+      termsAccepted: true,
     })
     expect(order.id).toBeTruthy()
   })

@@ -82,11 +82,18 @@ export const checkoutService = {
 
   async confirm(input: ConfirmCheckoutInput) {
     const parsed = confirmCheckoutSchema.parse(input)
+    // Hard gate (legal): el comprador debe aceptar los términos antes de pagar.
+    // Server-side — no confiar en `required` del cliente. Sin aceptación, la
+    // orden no se coloca (no proof, no order). Se persiste la prueba en la orden.
+    if (!parsed.termsAccepted) {
+      throw new Error('TERMS_NOT_ACCEPTED')
+    }
     // Fase 5: gate de verificación B2B. Sólo orgs VERIFIED pueden cerrar checkout.
     const { isVerified } = await import('@/modules/verification')
     if (!(await isVerified(parsed.orgId))) {
       throw new Error('ORG_NOT_VERIFIED')
     }
+    const { TERMS_VERSION } = await import('@/lib/legal')
     return ordersService.placeOrder({
       userId: parsed.userId,
       orgId: parsed.orgId,
@@ -94,6 +101,7 @@ export const checkoutService = {
       shippingAddressId: parsed.shippingAddressId,
       poNumber: parsed.poNumber,
       notes: parsed.notes,
+      termsVersion: TERMS_VERSION,
     })
   },
 }
