@@ -47,6 +47,7 @@ export type MessageKey =
   | 'landing.stats.cycles.label'
   | 'landing.stats.health.label'
   | 'landing.stats.capacity.label'
+  | 'landing.stats.capacity.value'
   | 'landing.stats.shipping.label'
   | 'landing.featured.eyebrow'
   | 'landing.featured.title'
@@ -863,7 +864,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.hero.chip2Label': 'capacity vs OEM',
     'landing.stats.cycles.label': 'charge cycles on arrival',
     'landing.stats.health.label': 'factory battery health',
-    'landing.stats.capacity.label': 'capacity over original',
+    'landing.stats.capacity.value': 'Higher capacity',
+    'landing.stats.capacity.label': 'over the original',
     'landing.stats.shipping.label': 'shipping from Miami',
     'landing.featured.eyebrow': 'Catalog',
     'landing.featured.title': 'Most requested',
@@ -1699,7 +1701,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'landing.hero.chip2Label': 'capacidad vs OEM',
     'landing.stats.cycles.label': 'ciclos de carga al recibirla',
     'landing.stats.health.label': 'salud de batería de fábrica',
-    'landing.stats.capacity.label': 'capacidad sobre la original',
+    'landing.stats.capacity.value': 'Capacidad superior',
+    'landing.stats.capacity.label': 'sobre la original',
     'landing.stats.shipping.label': 'despacho desde Miami',
     'landing.featured.eyebrow': 'Catálogo',
     'landing.featured.title': 'Las más pedidas',

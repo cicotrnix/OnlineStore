@@ -1,23 +1,26 @@
-// CAL/UX (auditoría 2026-06-12 · revisado 2026-06-26): la tira de stats de la
-// home no debe contener claims inventados. El "+10%" de capacidad se RETIRA: el
-// delta real vs OEM va de +4.7% a +32.7% según modelo, así que un porcentaje
-// único es inexacto (ver docs/sources/capacity-data.md). Se usa "Extended
-// Capacity" sin número + mAh por modelo como spec. El +12% era inventado; la
-// ventana 24–48h sigue fuera hasta tener fuente formal del fabricante.
+// CAL/UX (auditoría 2026-06-12 · revisado 2026-06-27): la tira de stats de la
+// home no inventa claims. El "+10%" de capacidad se retiró (un % único es
+// inexacto: el delta real va de +4.7% a +32.7% por modelo) y vuelve como lectura
+// CUALITATIVA sin número — "Capacidad superior" / "Higher capacity". El dato duro
+// (mAh por modelo) vive en el PDP. El +12% era inventado; la ventana 24–48h sigue
+// fuera hasta tener fuente formal del fabricante.
 import { describe, expect, it } from 'vitest'
-import { HERO_STATS } from '../_home-stats'
+import { HERO_STATS, heroCapacityClaim } from '../_home-stats'
 
 describe('HERO_STATS', () => {
-  it('NO incluye el "+10%" de capacidad (retirado) ni el inventado +12% ni la ventana de envío sin fuente', () => {
-    const labels = HERO_STATS.map((s) => s.labelKey)
+  it('incluye el stat de capacidad CUALITATIVO (texto i18n, sin número como "+10"/"+12")', () => {
+    const cap = HERO_STATS.find((s) => s.labelKey === 'landing.stats.capacity.label')
+    expect(cap).toBeDefined()
+    // Cualitativo: valor por i18n, sin número/unidad numérica.
+    expect(cap?.valueKey).toBe('landing.stats.capacity.value')
+    expect(cap?.number).toBeUndefined()
+
     const numbers = HERO_STATS.map((s) => s.number)
-    // "+10%" retirado → un % único es inexacto (rango +4.7% a +32.7% por modelo).
-    expect(labels).not.toContain('landing.stats.capacity.label')
+    // El "+10%" no vuelve como número; el inventado "+12%" tampoco.
     expect(numbers).not.toContain('+10')
-    // +12% era inventado → no vuelve.
     expect(numbers).not.toContain('+12')
-    // 24–48h sin fuente formal → sigue fuera por ahora.
-    expect(labels).not.toContain('landing.stats.shipping.label')
+    // 24–48h sin fuente formal → sigue fuera.
+    expect(HERO_STATS.map((s) => s.labelKey)).not.toContain('landing.stats.shipping.label')
     expect(numbers).not.toContain('24–48')
   })
 
@@ -25,5 +28,9 @@ describe('HERO_STATS', () => {
     const labels = HERO_STATS.map((s) => s.labelKey)
     expect(labels).toContain('landing.stats.cycles.label')
     expect(labels).toContain('landing.stats.health.label')
+  })
+
+  it('el chip del HeroGauge queda OFF para el stat cualitativo (no hay % derivado)', () => {
+    expect(heroCapacityClaim()).toBeUndefined()
   })
 })
