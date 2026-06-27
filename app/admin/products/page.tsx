@@ -1,5 +1,9 @@
 import { AuthField } from '@/app/(auth)/AuthField'
-import { createProductAction, toggleProductActiveAction } from '@/app/admin/_actions'
+import {
+  createProductAction,
+  toggleProductActiveAction,
+  updateProductStockAction,
+} from '@/app/admin/_actions'
 import { toggleProductPrivateAction, upsertProductTierAction } from '@/app/admin/_actions-fase2'
 import { enqueueBulkContentGenAction } from '@/app/admin/products/_ai-actions'
 import { AdminPageHeader, type Column, DataTable, StatusBadge } from '@/components/admin'
@@ -67,6 +71,27 @@ export default async function AdminProductsPage({ searchParams }: Props) {
       key: 'stock',
       header: t(locale, 'admin.products.col.stock'),
       cell: (p) => <StockBadge stockQuantity={p.stockQuantity} />,
+    },
+    {
+      key: 'stockEdit',
+      header: t(locale, 'admin.products.col.stockEdit'),
+      cell: (p) => (
+        <form action={updateProductStockAction} className="flex items-center gap-1.5">
+          <input type="hidden" name="id" value={p.id} />
+          <input
+            type="number"
+            name="stockQuantity"
+            min={0}
+            step={1}
+            defaultValue={p.stockQuantity}
+            aria-label={t(locale, 'admin.products.stockEdit.label')}
+            className="w-20 rounded-button border border-ink-100 bg-surface px-2 py-1.5 text-sm tabular-nums text-ink-950 focus:outline-none focus:ring-2 focus:ring-accent"
+          />
+          <SubmitButton variant="outline" size="sm" pendingLabel={t(locale, 'common.pending')}>
+            {t(locale, 'admin.products.stockEdit.set')}
+          </SubmitButton>
+        </form>
+      ),
     },
     {
       key: 'status',

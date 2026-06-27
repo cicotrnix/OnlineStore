@@ -470,6 +470,9 @@ export type MessageKey =
   | 'admin.products.col.status'
   | 'admin.products.col.private'
   | 'admin.products.col.action'
+  | 'admin.products.col.stockEdit'
+  | 'admin.products.stockEdit.set'
+  | 'admin.products.stockEdit.label'
   | 'admin.products.active'
   | 'admin.products.inactive'
   | 'admin.products.tiers.title'
@@ -699,6 +702,8 @@ export type MessageKey =
   | 'admin.toast.productEnabled'
   | 'admin.toast.productDisabled'
   | 'admin.toast.productPrivacyToggled'
+  | 'admin.toast.stockUpdated'
+  | 'admin.toast.invalidStock'
   | 'admin.toast.categoryCreated'
   | 'admin.toast.categoryPrivacyToggled'
   | 'admin.toast.tierUpserted'
@@ -1304,6 +1309,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.products.col.status': 'Status',
     'admin.products.col.private': 'Private',
     'admin.products.col.action': 'Action',
+    'admin.products.col.stockEdit': 'Edit stock',
+    'admin.products.stockEdit.set': 'Set',
+    'admin.products.stockEdit.label': 'New stock quantity',
     'admin.products.active': 'Active',
     'admin.products.inactive': 'Inactive',
     'admin.products.tiers.title': 'Volume discounts',
@@ -1533,6 +1541,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.productEnabled': 'Product enabled ✓',
     'admin.toast.productDisabled': 'Product disabled ✓',
     'admin.toast.productPrivacyToggled': 'Product privacy updated ✓',
+    'admin.toast.stockUpdated': 'Stock updated ✓',
+    'admin.toast.invalidStock': 'Stock must be a whole number ≥ 0.',
     'admin.toast.categoryCreated': 'Category created ✓',
     'admin.toast.categoryPrivacyToggled': 'Category privacy updated ✓',
     'admin.toast.tierUpserted': 'Price tier saved ✓',
@@ -2139,6 +2149,9 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.products.col.status': 'Estado',
     'admin.products.col.private': 'Privado',
     'admin.products.col.action': 'Acción',
+    'admin.products.col.stockEdit': 'Editar stock',
+    'admin.products.stockEdit.set': 'Fijar',
+    'admin.products.stockEdit.label': 'Nueva cantidad de stock',
     'admin.products.active': 'Activo',
     'admin.products.inactive': 'Inactivo',
     'admin.products.tiers.title': 'Descuentos por volumen',
@@ -2371,6 +2384,8 @@ export const MESSAGES: Record<Locale, Dict> = {
     'admin.toast.productEnabled': 'Producto activado ✓',
     'admin.toast.productDisabled': 'Producto desactivado ✓',
     'admin.toast.productPrivacyToggled': 'Privacidad del producto actualizada ✓',
+    'admin.toast.stockUpdated': 'Stock actualizado ✓',
+    'admin.toast.invalidStock': 'El stock debe ser un número entero ≥ 0.',
     'admin.toast.categoryCreated': 'Categoría creada ✓',
     'admin.toast.categoryPrivacyToggled': 'Privacidad de la categoría actualizada ✓',
     'admin.toast.tierUpserted': 'Tier de precio guardado ✓',

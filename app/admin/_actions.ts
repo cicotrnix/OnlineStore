@@ -78,6 +78,37 @@ export async function toggleProductActiveAction(formData: FormData) {
   )
 }
 
+export async function updateProductStockAction(formData: FormData) {
+  await requirePlatformAdmin()
+  const id = String(formData.get('id'))
+  const deltaRaw = formData.get('delta')
+
+  let nextStock: number
+  if (deltaRaw !== null && String(deltaRaw).trim() !== '') {
+    // Ajuste relativo: stock actual + delta, con clamp ≥ 0.
+    const delta = Number(deltaRaw)
+    if (!Number.isInteger(delta)) {
+      adminToast(formData, '/admin/products', 'error', 'admin.toast.invalidStock')
+    }
+    const product = await catalogService.findProductById(id)
+    if (!product) {
+      adminToast(formData, '/admin/products', 'error', 'admin.toast.invalidStock')
+    }
+    nextStock = Math.max(0, (product?.stockQuantity ?? 0) + delta)
+  } else {
+    // Set absoluto: entero ≥ 0.
+    nextStock = Number(formData.get('stockQuantity'))
+    if (!Number.isInteger(nextStock) || nextStock < 0) {
+      adminToast(formData, '/admin/products', 'error', 'admin.toast.invalidStock')
+    }
+  }
+
+  await catalogService.updateProduct({ id, stockQuantity: nextStock })
+  await enqueueIndex(id, 'UPSERT')
+  revalidatePath('/admin/products')
+  adminToast(formData, '/admin/products', 'success', 'admin.toast.stockUpdated')
+}
+
 export async function createCategoryAction(formData: FormData) {
   await requirePlatformAdmin()
   const slug = String(formData.get('slug')).toLowerCase()
